@@ -17,6 +17,8 @@ A self-contained study guide for **Harness²: Recursive Agent Harnessing for an 
 - How to apply the method to a Claude Code harness.
 - A 16-question self-test.
 
+The **Theory** tab describes Harness² with theoretical computer science: a formal model (harness space, the step Φ as a Markov kernel, the two recursion levels as a fold), verification limits (indistinguishability, identifiability, the optimizer's curse), the logic of enforcement (safety and liveness, execution monitors, edit automata), learning without labels (regret, the adaptivity gap), and a cost model for the eight components. Every statement carries a tag: Paper, Code, Literature or Model.
+
 Three animated figures step through the recursion: the two loops over a task stream (Fig. B), the JobBench example (Fig. C), and the run plan for k = 1–5 in parallel or sequential mode (Fig. D).
 
 ## Resources
@@ -32,4 +34,4 @@ Every number on the page cites a table, figure or prompt in the paper, or a file
 
 ## View it locally
 
-Open `harness2-learn.html` in a browser. The page is one file with no external dependencies.
+Open `harness2-learn.html` in a browser. The page is one file. The Theory tab loads MathJax 3.2.2 from the jsDelivr CDN, so its math needs network access; the Tutorial tab works offline.

@@ -5,6 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="dark">
 <title>Learn Harness²</title>
+<script>
+window.MathJax={tex:{inlineMath:[['\\(','\\)']],displayMath:[['\\[','\\]']]},svg:{fontCache:'global'}};
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-svg.js" async></script>
 <style>
 :root{--bg:#0f172a;--card:#1e293b;--text:#e2e8f0;--text2:#cbd5e1;--muted:#94a3b8;--orange:#fb923c;--teal:#2dd4bf;--b1:#1e293b;--b2:#334155;--red:#f87171;--green:#4ade80}
 *{box-sizing:border-box}
@@ -75,12 +79,24 @@ details[open] summary{margin-bottom:6px}
 .gr{fill:none;stroke:#94a3b8;stroke-dasharray:5 4}
 .score{font:600 14px system-ui,sans-serif;fill:#fde68a}
 @media (prefers-reduced-motion:reduce){.ed.now{animation:none}.anim *{transition:none!important}}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--b2);margin:0 0 8px}
+.tabs a{padding:8px 18px;color:var(--muted);text-decoration:none;border:1px solid transparent;border-bottom:0;border-radius:8px 8px 0 0;font-weight:600}
+.tabs a:hover{color:var(--teal)}
+.tabs a[aria-selected=true]{color:var(--orange);background:var(--card);border-color:var(--b2)}
+.def,.prop,.thm{background:#172033;border:1px solid var(--b2);border-radius:8px;padding:4px 16px;margin:16px 0}
+.def>p:first-child b,.prop>p:first-child b,.thm>p:first-child b{color:var(--orange)}
+.proof{border-left:2px solid var(--b2);padding:0 0 0 14px;margin:8px 0 18px}
+.qed{float:right;color:var(--muted)}
+.lab{display:inline-block;font-size:11px;font-weight:600;padding:0 7px;border-radius:99px;margin-left:4px;vertical-align:2px;border:1px solid}
+.lab.p{color:#2dd4bf;border-color:#2dd4bf66}.lab.c{color:#a5b4fc;border-color:#a5b4fc66}.lab.l{color:#fde68a;border-color:#fde68a66}.lab.m{color:#fb923c;border-color:#fb923c66}
+mjx-container[display="true"]{overflow-x:auto;overflow-y:hidden;max-width:100%}
 @media (max-width:860px){.wrap{grid-template-columns:1fr}nav{position:static;max-height:none;border-right:0;border-bottom:1px solid var(--b2);padding:0 0 12px}}
 </style>
 </head>
 <body>
 <div class="wrap">
 <nav>
+<div id="nav-tutorial">
 <div class="grp">Start</div>
 <a href="#plan">0. Study plan</a>
 <a href="#core">1. The 15-minute core</a>
@@ -101,11 +117,27 @@ details[open] summary{margin-bottom:6px}
 <a href="#apply">13. Apply it to Claude Code</a>
 <a href="#quiz">14. Self-test</a>
 <a href="#sources">15. Sources</a>
+</div>
+<div id="nav-theory" hidden>
+<div class="grp">Theory</div>
+<a href="#th-guide">T0. How to read this tab</a>
+<a href="#th-model">T1. The formal model</a>
+<a href="#th-rec">T2. The "²" as a fold</a>
+<a href="#th-verify">T3. Verification limits</a>
+<a href="#th-enforce">T4. Logic of enforcement</a>
+<a href="#th-learn">T5. Learning without labels</a>
+<a href="#th-cost">T6. Cost model</a>
+<a href="#th-map">T7. Summary map</a>
+<a href="#th-quiz">T8. Exercises</a>
+<a href="#th-refs">T9. References</a>
+</div>
 </nav>
 <main>
 <h1>Learn Harness²</h1>
 <p class="sub">Recursive agent harnessing for an open world. Xu, Chen, CuiZhu, Dalvi Mishra, Ming, Yu, Han, Lee, Pfister (Northwestern University, Google Cloud AI Research). arXiv:2610.14224v1, 9 Oct 2026. Every number on this page cites its table or figure in the paper.</p>
 
+<div class="tabs" role="tablist"><a href="#tutorial" data-tab="tutorial" role="tab">Tutorial</a><a href="#theory" data-tab="theory" role="tab">Theory</a></div>
+<div class="pane" id="tutorial">
 <h2 id="plan">0. Study plan</h2>
 <p>This page has four parts. Read them in order. The total time is about 2 hours. Stop after part 1 if you need only the idea.</p>
 <div class="tw"><table>
@@ -261,7 +293,7 @@ details[open] summary{margin-bottom:6px}
 <p>After the deliverable is returned, the second level runs.</p>
 <ol>
 <li><b>Reflect.</b> An Experience Reflector (Prompt 6) reads the full record 𝓓_t. It diffs every candidate against the base and writes one row per changed component: component, candidates, change, observed difference, verdict. Verdicts are <code>helped</code>, <code>hurt</code>, <code>no observed effect</code> and <code>confounded</code>. The prompt says to prefer <code>confounded</code> when one candidate changed several components at once, or when one run is all the evidence: "an invented attribution poisons the library for every later task."</li>
-<li><b>Write at most one lesson.</b> A lesson has a <code>cue</code> (the shape of situation), a <code>lesson</code> (the operation on a named component), <code>evidence</code> and <code>confidence</code>. If no concrete, reusable contrast exists, the reflector writes <code>NO_ENTRY</code>. Being selected is never evidence that an edit helped.</li>
+<li><b>Write at most one lesson.</b> A lesson has a <code>cue</code> (the shape of situation), a <code>lesson</code> (the operation on a named component), <code>evidence</code> and <code>confidence</code>. If no concrete, reusable contrast exists, the reflector writes <code>NO_ENTRY</code>. Adoption alone never establishes that an edit helped or will transfer (Prompt 6).</li>
 <li><b>Update the library.</b> Each entry is the full adopted file tree plus its <code>EXPERIENCE.md</code>. An index lists all entries. Executable components stay as files, not as prose summaries. Each benchmark domain has its own library, and it starts empty (Appendix D.2).</li>
 <li><b>Reuse.</b> The next task starts from H₀ again. The editors may copy a component from <code>context/library/</code> into the harness, but they must re-check its workspace facts: "an earlier task's mapping or threshold is a hypothesis here, not a fact."</li>
 </ol>
@@ -476,6 +508,230 @@ harness2-report --bench lab --k 1 --mode parallel</code></pre>
 <li>Video explainer: <a href="https://www.youtube.com/watch?v=pW2ktrJlsyE">youtube.com/watch?v=pW2ktrJlsyE</a>; transcript in <code>transcript.txt</code>. Checked in <a href="#video">§11</a>.</li>
 </ul>
 <p class="src">Not covered: exact data points in Fig. 5, 6, 8, 12 and 13 that are only in chart form. The text quotes only the values that the paper states in prose, tables, or printed figure labels.</p>
+</div>
+<div class="pane" id="theory" hidden>
+<h2 id="th-guide">T0. How to read this tab</h2>
+<p>This tab describes Harness² with the tools of theoretical computer science: a formal model, logic, probability and learning theory. The paper itself states no theorems. So every formal statement here comes from one of four sources, and each box carries a tag for its source:</p>
+<div class="tw"><table>
+<tr><th>Tag</th><th>Meaning</th></tr>
+<tr><td><span class="lab p">Paper</span></td><td>The paper states it. The location is given.</td></tr>
+<tr><td><span class="lab c">Code</span></td><td>The code release states it. The file is given.</td></tr>
+<tr><td><span class="lab l">Literature</span></td><td>A standard result from the cited literature, stated as its authors state it.</td></tr>
+<tr><td><span class="lab m">Model</span></td><td>My formalisation of the paper. The paper does not make this claim. Read it as an interpretation that you can check.</td></tr>
+</table></div>
+<p>The tab has six chapters. T1 defines the objects. T2 shows what the "²" is, as a fold over tasks. T3 shows what a pipeline without a grader can and cannot know. T4 explains why a hook can enforce a rule that a prompt can only request. T5 explains why learning works at all with no labels. T6 gives a cost model that explains the editor's placement order. All numbers come from the paper's tables, figures and prompts, as in the Tutorial tab. Numbers marked "illustrative" are mine and show how a formula behaves.</p>
+<p>Notation. \(\mathbb{E}\) is expectation. \(\Pr\) is probability. \(\mathbf{1}[\cdot]\) is 1 when the condition holds and 0 otherwise. \(X \sim P\) means "\(X\) is drawn from the distribution \(P\)". Paper equations keep the paper's numbers (Eq. 1 to Eq. 4). My statements use the prefix T.</p>
+
+<h2 id="th-model">T1. The formal model</h2>
+<p>Harness² chooses files for a fixed model to read, then judges the choice without a score. To reason about it, we need four objects: the space of harnesses, a random execution, a hidden utility, and the step operator Φ.</p>
+
+<div class="def"><p><b>Definition T1.1 (harness space).</b> <span class="lab m">Model</span></p>
+<p>Let \(\Sigma\) be the finite alphabet of bytes. A harness is a tuple \(H = (c_1,\dots,c_8) \in \mathcal{H} = (\Sigma^*)^8\), where \(c_i\) is the content of component \(C_i\) of the paper's Table 5 (a folder is flattened into one string). An <i>edit</i> is a map \(\delta : \mathcal{H} \to \mathcal{H}\) that changes a finite set of components, written \(\operatorname{supp}(\delta) \subseteq \{1,\dots,8\}\).</p></div>
+<p>\(\mathcal{H}\) is countably infinite. Because every component is a file, every edit is a diff, which is the property the paper uses to make edits inspectable (paper §2.1). The editor never searches \(\mathcal{H}\) by enumeration. It proposes a few edits that a trajectory motivates.</p>
+
+<div class="def"><p><b>Definition T1.2 (execution).</b> <span class="lab m">Model</span> of <span class="lab p">Paper §2.2.1</span></p>
+<p>Fix the executor model \(\mathcal{M}\) and the environment. For a task \(q\) and a harness \(H\), an execution \(e = (\tau, y)\) is a random variable with law \(P_{q,H}\). The trajectory \(\tau\) is a finite sequence of events (model turns, tool calls, tool results), and \(y\) is the deliverable. Each run has at most 200 model turns and 3,600 seconds (Appendix D.1).</p></div>
+<p>The agent is a <i>stochastic program</i>: the same \(q\) and \(H\) give different trajectories, because the model samples its tokens. This fact matters in T3, where one run per arm gives no estimate of the noise.</p>
+
+<div class="def"><p><b>Definition T1.3 (hidden utility).</b> <span class="lab m">Model</span></p>
+<p>The benchmark grader is a function \(U_q : \mathcal{Y} \to [0,100]\). The value of a harness on task \(q\) is
+\[ J_q(H) = \mathbb{E}_{e \sim P_{q,H}}\big[\,U_q(y)\,\big]. \]
+Test-time harnessing is the problem: given \(q\) and the ability to sample from \(P_{q,\cdot}\), output a deliverable with high \(U_q\). No step of the pipeline receives \(U_q\) as an input.</p></div>
+<p>This is the formal content of the paper's phrase "no ground-truth verifier". It is a harder problem than zeroth-order optimisation. A zeroth-order method observes noisy values of the objective. Here the pipeline observes no value of \(J_q\) at all. It observes only executions, and the executions do not depend on \(U_q\).</p>
+
+<div class="def"><p><b>Definition T1.4 (the contrastive step Φ as a Markov kernel).</b> <span class="lab m">Model</span> of <span class="lab p">Paper Eq. 1</span></p>
+<p>Let \(L\) be the library and \(\mathcal{E}\) the task-local history. One step \((H', e', \xi) = \Phi(q, H, \mathcal{E}; \mathcal{R}_t)\) is the composition of three random maps:</p>
+<ol>
+<li><b>Propose.</b> Draw a reference \(e_0 \sim P_{q,H}\). Draw \(H_{\mathrm{I}} \sim \pi_{\mathrm{INV}}(\cdot \mid q, H, e_0, L)\) and \(H_{\mathrm{D}} \sim \pi_{\mathrm{DOM}}(\cdot \mid q, H, e_0, L)\).</li>
+<li><b>Probe.</b> Draw \(e_{\mathrm{I}} \sim P_{q,H_{\mathrm{I}}}\) and \(e_{\mathrm{D}} \sim P_{q,H_{\mathrm{D}}}\).</li>
+<li><b>Compose.</b> Draw \(H' \sim \kappa(\cdot \mid q, H, H_{\mathrm{I}}, H_{\mathrm{D}}, e_0, e_{\mathrm{I}}, e_{\mathrm{D}})\), then \(e' \sim P_{q,H'}\).</li>
+</ol>
+<p>The step record \(\xi\) collects every object drawn. The editor policies \(\pi_{\mathrm{INV}}, \pi_{\mathrm{DOM}}\) and the composer \(\kappa\) are LLM sessions (Claude Opus 4.8 in the paper), so each one is a probability distribution, not a function.</p></div>
+<p>The point of writing Φ this way is to see its inputs. Every kernel reads only observable data: the task, files, trajectories and the library. None reads \(U_q\). T3 proves that this restriction alone forbids any worst-case guarantee.</p>
+
+<h3>Composition is a search over subsets</h3>
+<div class="prop"><p><b>Proposition T1.5 (composition contains selection).</b> <span class="lab m">Model</span></p>
+<p>Let \(E = E_{\mathrm{I}} \cup E_{\mathrm{D}}\) be the set of edits in the two candidates. Assume that any subset \(S \subseteq E\) applies to \(H\) without conflict, and write \(H_S\) for the result. Let \(\mathcal{C} = \{H_S : S \subseteq E\}\), and let \(\mathcal{C}_{\mathrm{sel}} = \{H, H_{E_{\mathrm{I}}}, H_{E_{\mathrm{D}}}\}\) be the outputs of the "w/o composition" ablation, which returns one whole candidate or keeps the current harness. Then \(\mathcal{C}_{\mathrm{sel}} \subseteq \mathcal{C}\), \(|\mathcal{C}| \le 2^{|E|}\), and
+\[ \max_{G \in \mathcal{C}} J_q(G) \;\ge\; \max_{G \in \mathcal{C}_{\mathrm{sel}}} J_q(G). \]</p></div>
+<div class="proof"><p><i>Proof.</i> \(H = H_{\emptyset}\), \(H_{E_{\mathrm{I}}}\) and \(H_{E_{\mathrm{D}}}\) are the cases \(S = \emptyset\), \(S = E_{\mathrm{I}}\) and \(S = E_{\mathrm{D}}\). So every element of \(\mathcal{C}_{\mathrm{sel}}\) is in \(\mathcal{C}\). There are \(2^{|E|}\) subsets, and two subsets can give the same harness, so \(|\mathcal{C}| \le 2^{|E|}\). A maximum over a set is at least the maximum over any subset of it. <span class="qed">∎</span></p></div>
+<p>The inequality is an <i>oracle bound</i>: it compares the best harness each method can reach, not the harness each method picks. The real composer picks with noisy behavioural evidence, so a larger space also gives more ways to pick wrong. Whether the larger space helps on average is an empirical question. The paper answers it: removing composition costs 1.6 points on WorkBuddy-Bench and 1.9 on JobBench (Table 3). In the Fig. 9 example, \(|E| = 4\), so the composer chose among at most \(2^4 = 16\) subsets, and it chose \(S = E\) (all four edits).</p>
+
+<h3>Parallel and sequential recursion</h3>
+<div class="def"><p><b>Definition T1.6 (width and depth).</b> <span class="lab m">Model</span> of <span class="lab p">Paper Eq. 2, Eq. 3</span></p>
+<p><i>Parallel</i> with budget \(k\): draw \(k\) references, propose \(k\) INV and \(k\) DOM candidates, probe all \(2k\), then run \(k\) composers. Each composer maps the whole pool \((\mathcal{B}, \mathcal{P})\) to one successor. This is one generation of a population method: width \(k\), depth 1 (paper §2.2.2: "\(k\) controls its width rather than its depth").</p>
+<p><i>Sequential</i> with budget \(k\): \(H^{(r)} \sim \Phi(q, H^{(r-1)}, \mathcal{E}^{(r-1)})\) for \(r = 1,\dots,k\), with \(H^{(0)} = H_0\). This is an iterated random map. Because the history \(\mathcal{E}^{(r)}\) grows at each step, the chain on harnesses alone is not time-homogeneous; the chain on (harness, history) pairs is.</p></div>
+
+<div class="prop"><p><b>Proposition T1.7 (run budget).</b> <span class="lab c">Code</span> <code>harness2/core/ledger.py</code></p>
+<p>In both modes, one task uses \(R(k) = 4k\) executor runs and \(P(k) = 3k\) counted improver sessions. A stream of \(N\) tasks uses \(4kN\) executor runs.</p></div>
+<div class="proof"><p><i>Proof.</i> Parallel: \(k\) base runs, \(2k\) probe runs, \(k\) final runs, so \(4k\). Sequential (<code>run_sequential</code> in <code>harness2/core/recursion.py</code>): \(k\) shared base runs, then in each of \(k\) rounds two probe runs and one checkpoint run, so \(k + 3k = 4k\). Each unit of budget has one INV session, one DOM session and one composer session, so \(3k\). The selector and the reflector are recorded outside this ledger. Summing over \(N\) tasks gives \(4kN\). <span class="qed">∎</span></p></div>
+<p>The cost is linear in \(k\). The return is not: on WB-code, parallel recursion goes from 76.5 at \(k = 1\) to 80.8 at \(k = 5\) (Fig. 5), so 5 times the runs bought 4.3 points there.</p>
+
+<div class="prop"><p><b>Proposition T1.8 (the blind selector is label-invariant).</b> <span class="lab m">Model</span> of <span class="lab p">Prompt 5</span></p>
+<p>Let the selector see \((q, W, y_{\pi(1)}, \dots, y_{\pi(m)})\), where \(W\) is the workspace and \(\pi\) is a uniformly random permutation that hides which harness made which output. Then the probability that the selector returns the output of harness \(h\) is a function of the outputs \((y_1,\dots,y_m)\) only. It does not depend on the identity of \(h\) (for example "base" or "composed").</p></div>
+<div class="proof"><p><i>Proof.</i> The selector's input contains no harness label. Fix the outputs. Swap the labels of any two harnesses whose outputs are equal: the input distribution does not change, so the probability of picking each of them does not change. More generally, the pick is a random function of the shown list, and the list depends on the harnesses only through their outputs. <span class="qed">∎</span></p></div>
+<p>The selector therefore cannot favour "the harness the pipeline built" except through what that harness produced. Prompt 5 also says that returning an output of the unmodified harness is valid, so the base output stays among the options. This does not make the selector correct. The paper's Fig. 14 shows one case where it picked a 55-point output over a 95-point one.</p>
+
+<h2 id="th-rec">T2. The "²": two recursions as a fold</h2>
+<p>The paper's definition couples two updates: task-level recursion refines the <i>execution</i> harness, and harnessing-level recursion updates the <i>improvement</i> harness that guides the refinement (paper §2, "Definition: Recursive Agent Harnessing"). Functional programming gives an exact shape for this coupling: a fold.</p>
+
+<div class="def"><p><b>Definition T2.1 (improver state, Solve, Update).</b> <span class="lab m">Model</span> of <span class="lab p">Paper §2, Eq. 4</span></p>
+<p>Write the improvement harness as \(\mathcal{R}_t = (\Pi, \mathcal{M}_{\mathrm{ed}}, L_t)\): the editor, composer, selector and reflector prompts \(\Pi\), the editor model \(\mathcal{M}_{\mathrm{ed}}\), and the library \(L_t\). Define</p>
+<ul>
+<li>\(\mathrm{Solve}_{\mathcal{R}}(q, H_0)\): task-level recursion with budget \(k\), plus selection when \(k > 1\). It returns the adopted harness \(H^\star\), the deliverable \(y\), and the record \(\mathcal{D}\).</li>
+<li>\(\mathrm{Update}(\mathcal{R}, H^\star, \mathcal{D})\): the reflector writes \(H^\star\) and an <code>EXPERIENCE.md</code> into the library (Eq. 4).</li>
+</ul></div>
+<p>The paper says that \(\mathcal{R}_t\) "remains fixed during task-level recursion and is updated afterward through its harness improvement library" (paper §2). So in the implementation the paper describes, \(\Pi\) and \(\mathcal{M}_{\mathrm{ed}}\) stay the same and only \(L\) changes: \(L_{t+1} = L_t \cup \{(H^\star_t, X_t)\}\), where \(X_t\) is the experience file (edit rows plus one lesson or <code>NO_ENTRY</code>).</p>
+<p>With these definitions, a domain's whole stream of \(N\) tasks is one left fold:</p>
+\[ \mathcal{R}_{N+1} \;=\; \mathrm{foldl}\Big(\lambda\,\mathcal{R}\;q.\;\; \mathrm{Update}\big(\mathcal{R},\, \mathrm{Solve}_{\mathcal{R}}(q, H_0)\big),\;\; \mathcal{R}_1,\;\; [q_1,\dots,q_N]\Big) \]
+<p>Here \(\mathcal{R}_1\) has an empty library, because each domain's library starts empty (Appendix D.2). The fold also makes the "²" precise. The inner recursion (Φ, iterated or widened) acts on harnesses. The outer recursion acts on \(\mathcal{R}\), the object that parameterises the inner one. So the outer level is higher-order: \(\mathrm{Solve}\) has type \(\mathcal{R} \to (\text{Task} \times \mathcal{H} \to \mathcal{H} \times \mathcal{Y} \times \text{Record})\), and \(\mathrm{Update}\) maps \(\mathcal{R}\) to \(\mathcal{R}\).</p>
+
+<div class="prop"><p><b>Proposition T2.2 (the harness restarts; only the improver is threaded).</b> <span class="lab m">Model</span></p>
+<p>In Harness², \(H^\star_t\) is conditionally independent of \(H^\star_{1},\dots,H^\star_{t-1}\) given \((q_t, \mathcal{R}_t)\). In a carry-over design \(H_t \sim \mathrm{Solve}(q_t, H^\star_{t-1})\), this independence fails in general.</p></div>
+<div class="proof"><p><i>Proof.</i> In the fold, the harness argument of \(\mathrm{Solve}\) is the constant \(H_0\) for every task. The only arguments that change between tasks are \(q_t\) and \(\mathcal{R}_t\). The earlier harnesses reach task \(t\) only as library entries, which are part of \(\mathcal{R}_t\). So, given \((q_t, \mathcal{R}_t)\), the distribution of \(H^\star_t\) is fixed. In the carry-over design, \(H^\star_{t-1}\) is a direct argument, so a change in it changes the distribution of \(H_t\) even with \(q_t\) and \(\mathcal{R}_t\) fixed. <span class="qed">∎</span></p></div>
+<p>This is the formal answer to the paper's second problem (task-specific edits do not transfer). In a carry-over design, task 1's edits stay in the harness unless a later editor deletes them, and the always-on part can grow from task to task. In Harness², an earlier edit enters a later harness only if an editor copies it from the library. Prompt 1 then makes the copied facts conditional: "an earlier task's mapping or threshold is a hypothesis here, not a fact." In Bayesian terms, the library acts as a prior that the evidence of the current task can overrule, not as state that the current task inherits.</p>
+
+<div class="card"><p><b>How much "self" is in this self-improvement?</b> <span class="lab m">Model</span> The paper places Harness² next to systems that edit model weights, improvement programs (STOP) or agent code (Darwin Gödel Machine) (paper §2). A Gödel machine (Schmidhuber, 2003) may rewrite its own source code once it proves the rewrite useful. In Harness² as described, Update does not edit \(\Pi\) or \(\mathcal{M}_{\mathrm{ed}}\). In computability terms, \(\mathcal{R}_t\) is one fixed program applied to a growing input \(L_t\). It is a learner whose memory shapes its later improvements. It is not a program that rewrites its own improvement code. The paper lists library management (merging overlapping components, revising outdated experience) as future work (Appendix G), so the library only grows: after task \(t\) it holds \(t\) entries.</p></div>
+
+<h2 id="th-verify">T3. Verification limits: what a pipeline without a grader can know</h2>
+<h3>Rice's theorem, and why it is not the real obstacle</h3>
+<div class="thm"><p><b>Theorem (Rice, 1953).</b> <span class="lab l">Literature</span></p>
+<p>Every non-trivial semantic property of partial computable functions is undecidable.</p></div>
+<p>A harness with its model defines a program. "The deliverable is correct for every task of this kind" is a semantic, non-trivial property of that program, so no algorithm decides it in general. But Harness² does not need that general property. It runs one task, with at most 200 turns and 3,600 seconds per run, and a finite object like that can, in principle, be inspected completely. So Rice's theorem is not what stops the pipeline. What stops it is that the correctness criterion \(U_q\) is not an input to any step. The next proposition states this with no computability theory at all.</p>
+
+<div class="prop"><p><b>Proposition T3.1 (indistinguishability).</b> <span class="lab m">Model</span></p>
+<p>Let \(O\) be everything the pipeline observes: \(q\), the workspace, the library and all executions. Let \(f\) be any rule, deterministic or random, that maps \(O\) to a choice between harnesses \(H_a\) and \(H_b\). Suppose two graders \(U\) and \(U'\) are both possible, with \(J^{U}_q(H_a) > J^{U}_q(H_b)\) and \(J^{U'}_q(H_a) < J^{U'}_q(H_b)\). Then \(\Pr[f \text{ picks the worse harness}] \ge \tfrac12\) under \(U\) or under \(U'\).</p></div>
+<div class="proof"><p><i>Proof.</i> The executions are drawn from \(P_{q,H}\), which does not depend on the grader. So \(O\) has the same distribution under \(U\) and under \(U'\), and so does the output of \(f\). Let \(p = \Pr[f \text{ picks } H_a]\). Under \(U\), the wrong pick is \(H_b\), with probability \(1-p\). Under \(U'\), the wrong pick is \(H_a\), with probability \(p\). One of \(p\) and \(1-p\) is at least \(\tfrac12\). <span class="qed">∎</span></p></div>
+<p>So a guarantee needs an assumption that links what the pipeline sees to what the grader rewards. Harness² makes one, implicitly: a behavioural difference that an editor can name (figures reconciled, outputs reopened, fewer tool errors) tends to come with a higher grader score. Call it the <i>behavioural-proxy assumption</i>. The paper states the limit itself: behavioural contrasts "do not guarantee correctness or establish that an adopted change will transfer to a different task" (Appendix F). The mean gains in Tables 1 and 2 are evidence that the proxy holds on average on these benchmarks. They are not a per-task guarantee.</p>
+
+<h3>A checker written by the same model</h3>
+<p>Let \(W\) be the event "the output is wrong" and \(A\) the event "the checker script accepts". By Bayes' rule,
+\[ \Pr[W \mid A] = \frac{\Pr[A \mid W]\,\Pr[W]}{\Pr[A \mid W]\,\Pr[W] + \Pr[A \mid \neg W]\,\Pr[\neg W]}. \]
+A PASS carries information only if \(\Pr[A \mid W] \lt \Pr[A \mid \neg W]\). Illustrative numbers: let \(\Pr[W] = 0.3\) and \(\Pr[A \mid \neg W] = 0.95\). An independent checker with \(\Pr[A \mid W] = 0.1\) gives \(\Pr[W \mid A] = 0.03/0.695 \approx 0.043\). A checker that shares the executor's misreading, with \(\Pr[A \mid W] = 0.9\), gives \(\Pr[W \mid A] = 0.27/0.935 \approx 0.289\), almost the prior 0.3. The second PASS is almost worthless. The paper's Fig. 14 has the real case: a checker the editor wrote reported PASS three times while the real tests failed, and the score fell 75 → 64. The paper's comment: "A checker written by the editor cannot catch the editor's assumption."</p>
+
+<h3>Why "confounded" is the correct verdict</h3>
+<div class="prop"><p><b>Proposition T3.2 (non-identifiability of bundled edits).</b> <span class="lab m">Model</span></p>
+<p>Model an outcome (a score or a behavioural measure) as \(Z = \beta_0 + \beta_A x_A + \beta_B x_B + \varepsilon\), where \(x_A, x_B \in \{0,1\}\) say whether components \(A\) and \(B\) changed, and \(\mathbb{E}\varepsilon = 0\). If the only observed arms are the reference \((0,0)\) and one probe \((1,1)\), then \(\beta_A\) and \(\beta_B\) are not identifiable; only \(\beta_A + \beta_B\) is.</p></div>
+<div class="proof"><p><i>Proof.</i> The expected outcomes of the two arms are \(\beta_0\) and \(\beta_0 + \beta_A + \beta_B\). The parameters \((\beta_0, \beta_A, \beta_B)\) and \((\beta_0, \beta_A + c, \beta_B - c)\) give the same two expectations for every \(c\), so no data from these arms can separate them. (Equivalently, the design matrix \(\begin{pmatrix}1&0&0\\1&1&1\end{pmatrix}\) has rank 2, less than the 3 parameters.) <span class="qed">∎</span></p></div>
+<p>With one run per arm, there is a second problem: the difference of two single runs has variance \(2\sigma^2\), and no estimate of \(\sigma\) is possible from one sample per arm. Prompt 6 tells the reflector to prefer <code>confounded</code> "whenever a candidate changed several components at once and no execution isolates one of them, or when a single rollout is all that stands behind the difference". Proposition T3.2 and the variance argument show that this is the statistically correct answer, not caution for its own sake.</p>
+
+<h3>Being selected is not evidence of being better</h3>
+<div class="prop"><p><b>Proposition T3.3 (the optimizer's curse).</b> <span class="lab l">Literature</span> Smith and Winkler (2006)</p>
+<p>Let \(X_1,\dots,X_m\) be noisy estimates with \(\mathbb{E}X_j = \mu_j\), and let \(j^\star = \arg\max_j X_j\). Then \(\mathbb{E}[X_{j^\star}] \ge \mathbb{E}[\mu_{j^\star}]\): the chosen estimate overstates the chosen option's true value on average.</p></div>
+<div class="proof"><p><i>Proof.</i> \[ \mathbb{E}[X_{j^\star}] = \mathbb{E}[\max_j X_j] \ge \max_j \mathbb{E}[X_j] = \max_j \mu_j \ge \mathbb{E}[\mu_{j^\star}]. \] The first inequality is Jensen's inequality, because \(\max\) is convex. The second holds because \(\mu_{j^\star}\) is one of the \(\mu_j\) for every outcome. <span class="qed">∎</span></p></div>
+<p>Prompt 6 states the consequence as a rule: "Adoption alone never establishes that an edit helped or will transfer." An adoption is a maximum over noisy evidence, so the adopted harness looks better than it is. This is a different failure from a plain selector error such as Fig. 14's "picked 55 over 95", where the selector chose the worse output outright.</p>
+
+<h3>When the grader leaks</h3>
+<p>Proposition T3.1 assumes that \(U_q\) does not reach \(O\). The repository records a case where that failed: during a validation run with open internet access, the agent found and downloaded the benchmark's grading rubric (<code>docs/EXPERIMENTS.md</code>). In the model, this opens a channel from \(U_q\) into \(O\). The pipeline then optimises the grader directly, which is Goodhart's law in its plainest form, and its scores stop measuring open-world performance. The defence is to keep the channel closed: restrict network access during evaluation.</p>
+
+<h2 id="th-enforce">T4. The logic of enforcement: instruct versus enforce</h2>
+<p>Table 5 says the plugin C8 "enforces a behavior rather than instructs it". Temporal logic and runtime verification make this distinction exact.</p>
+
+<div class="def"><p><b>Definition T4.1 (trace, safety, liveness).</b> <span class="lab l">Literature</span> Lamport (1977); Alpern and Schneider (1985)</p>
+<p>A <i>trace</i> is a sequence of events. A <i>property</i> \(P\) is a set of traces. \(P\) is a <i>safety</i> property if every trace outside \(P\) has a finite prefix that no extension can bring back into \(P\): "nothing bad happens", and a bad event is visible at a finite point. \(P\) is a <i>liveness</i> property if every finite prefix can be extended to a trace in \(P\): "something good eventually happens".</p></div>
+<div class="thm"><p><b>Theorem (Alpern and Schneider, 1985).</b> <span class="lab l">Literature</span></p>
+<p>Every property is the intersection of a safety property and a liveness property.</p></div>
+<div class="thm"><p><b>Theorem (Schneider, 2000).</b> <span class="lab l">Literature</span></p>
+<p>A policy that an execution monitor can enforce, where the monitor observes the events of a run and may only halt the run, must be a safety property.</p></div>
+<p>Ligatti, Bauer and Walker (2005) extended this with <i>edit automata</i>, which may also insert and suppress events. Edit automata can enforce more than safety properties (they enforce a class the authors call renewal properties). They also defined <i>transparency</i>: an enforcer is transparent if it leaves every trace that already satisfies the policy unchanged in meaning.</p>
+
+<h3>A prompt rule and a hook, compared</h3>
+<p>A rule written in the system prompt changes the distribution \(P_{q,H}\) over traces. It can make a violation less likely, but \(\Pr[\text{trace} \notin P]\) can stay above zero, and the paper's editor prompt names this case: "repeated evidence that clear prose is skipped" (Prompt 1). A plugin sits inside the tool loop and sees each event before the next one happens. It is a monitor in the sense above. It can block a tool call (halt-like), trim a tool result (suppress), or append a hint (insert). So a plugin is an edit automaton, and on every property it can enforce, it gives a guarantee that a prompt cannot give. The table maps the plugin uses that Prompt 1 lists to their class. The LTL operators are \(\mathbf{G}\) (always), \(\mathbf{F}\) (eventually) and \(\mathbf{X}\) (next).</p>
+<div class="tw"><table>
+<tr><th>Hook from Prompt 1</th><th>Property (LTL)</th><th>Class</th><th>How a monitor enforces it</th></tr>
+<tr><td>Cap a runaway tool</td><td>\(\mathbf{G}(\#\mathit{calls}_x \le n)\)</td><td>Safety</td><td>Block call \(n+1\) (halt-like)</td></tr>
+<tr><td>Verify a write right after it happens</td><td>\(\mathbf{G}(\mathit{write}(f) \to \mathbf{X}\,\mathit{verify}(f))\)</td><td>Safety</td><td>Insert the verify step after each write</td></tr>
+<tr><td>Trim oversized tool output</td><td>\(\mathbf{G}(|\mathit{obs}| \le b)\)</td><td>Safety</td><td>Suppress the part of the output above \(b\)</td></tr>
+<tr><td>Hint after a repeated error signature</td><td>(changes the next prompt; no property is guaranteed)</td><td>—</td><td>Insert; it raises a probability, like prose, but at the right moment</td></tr>
+<tr><td>Deliver a file (no deadline)</td><td>\(\mathbf{F}\,\mathit{deliver}\)</td><td>Liveness</td><td>Not by halting: halting can only make it false</td></tr>
+<tr><td>Deliver within \(n\) turns</td><td>\(\mathbf{F}_{\le n}\,\mathit{deliver}\)</td><td>Safety (T4.2)</td><td>Insert "stop and write" before turn \(n\); the model must still comply</td></tr>
+</table></div>
+
+<div class="prop"><p><b>Proposition T4.2 (bounded liveness is safety).</b> <span class="lab l">Literature</span> (standard)</p>
+<p>For a fixed horizon \(n\), the property
+\[ P_n = \{\sigma : \text{a deliver event occurs at some position} \le n \text{ in } \sigma\} \]
+is a safety property.</p></div>
+<div class="proof"><p><i>Proof.</i> Take \(\sigma \notin P_n\). Then the prefix \(\sigma[1..n]\) has no deliver event. Every extension of that prefix has the same first \(n\) events, so it also has no deliver event at a position \(\le n\), and it is not in \(P_n\). So \(\sigma[1..n]\) is a bad prefix, which is the definition of safety. <span class="qed">∎</span></p></div>
+<p>This is the formal reading of the paper's costliest failure, "a run that reasons until the budget is gone and produces nothing". Without a turn cap, "eventually deliver" is liveness, and a monitor that may only halt cannot enforce it. With the cap of 200 turns, "deliver by turn 200" is a safety property: a monitor can see, at a finite point, that the run is heading for a violation, and it can insert an instruction to stop researching and write. The guarantee is partial, because the model must still produce the file after the insertion.</p>
+<p>Prompt 1 adds a constraint on defensive hooks: a hook "must not block valid completion". This is the transparency condition: a hook that blocks "finish" with no condition breaks traces that would already deliver correctly. Read together, Prompt 1 asks for an edit automaton that is transparent, used only where prose has demonstrably failed.</p>
+
+<h2 id="th-learn">T5. Learning without labels</h2>
+<div class="def"><p><b>Definition T5.1 (online harnessing with no feedback).</b> <span class="lab m">Model</span></p>
+<p>Take a finite set of \(m\) harnesses. In each round \(t = 1,\dots,N\), a task \(q_t\) arrives, the learner draws a harness \(h_t\) from a distribution \(p_t\), and suffers the loss \(\ell_t(h_t) \in [0,1]\) (for example \(1 - U_{q_t}/100\)). The learner never observes any loss. Its <i>regret</i> is \(\mathrm{Reg}_N = \mathbb{E}\sum_t \ell_t(h_t) - \min_h \sum_t \ell_t(h)\).</p></div>
+<div class="prop"><p><b>Proposition T5.2 (no feedback gives linear regret).</b> <span class="lab m">Model</span></p>
+<p>For every learner in Definition T5.1 there is a loss sequence with \(\mathrm{Reg}_N \ge N(1 - 1/m)\).</p></div>
+<div class="proof"><p><i>Proof.</i> The learner observes nothing that depends on the losses. Its distributions \(p_t\) may depend on what it does observe (tasks, executions), but their averages \(\bar p_t = \mathbb{E}[p_t]\) do not depend on the losses. Fix those averages; below, \(p_t\) means \(\bar p_t\). Since \(\sum_h \sum_t p_t(h) = N\), some harness \(h^\star\) has \(\sum_t p_t(h^\star) \le N/m\). Set \(\ell_t(h^\star) = 0\) and \(\ell_t(h) = 1\) for every \(h \ne h^\star\), in every round. The learner's expected loss is \(\sum_t (1 - p_t(h^\star)) \ge N - N/m\). The best fixed harness, \(h^\star\), has loss 0. <span class="qed">∎</span></p></div>
+<p>Online learning theory (Cesa-Bianchi and Lugosi, 2006) gets sublinear regret only from feedback: full loss vectors or, for bandits, the loss of the chosen action. With none, the worst case is hopeless. Harness² is in the no-feedback setting, so it cannot have a worst-case guarantee. It works because real graders are not adversaries: they reward behaviour that trajectories show, which is the behavioural-proxy assumption from T3. The positive results in Tables 1 to 3 measure how well that assumption holds on these benchmarks.</p>
+
+<h3>Why adapt per task at all</h3>
+<div class="prop"><p><b>Proposition T5.3 (the adaptivity gap).</b> <span class="lab m">Model</span></p>
+<p>Let \(D\) be a distribution over tasks and \(\mathcal{F}\) a finite set of harnesses. Then
+\[ \max_{H \in \mathcal{F}} \mathbb{E}_{q \sim D}\, J_q(H) \;\le\; \mathbb{E}_{q \sim D} \max_{H \in \mathcal{F}} J_q(H), \]
+with equality exactly when one harness is optimal for \(D\)-almost every task.</p></div>
+<div class="proof"><p><i>Proof.</i> For each \(H\) and each \(q\), \(J_q(H) \le \max_{H'} J_q(H')\). Take the expectation over \(q\), then the maximum over \(H\) on the left. For equality: let \(H^\star\) attain the left side. Then \(\mathbb{E}_q[\max_{H'} J_q(H') - J_q(H^\star)] = 0\), and the integrand is non-negative, so it is zero almost surely: \(H^\star\) is optimal for almost every task. The converse is direct. <span class="qed">∎</span></p></div>
+<p>The left side is the best fixed harness. The right side is a per-task oracle. The paper's Fig. 13 shows that the gap is real for production harnesses: no fixed harness wins in every domain (Claude Code is best on Code and Office, Codex on Web). Harness² closes part of the gap. From OpenCode at \(k = 5\), it beats the best fixed harness by 4.6, 5.8 and 4.9 points on Code, Web and Office.</p>
+
+<h3>The library as a prior, and the cost of a false lesson</h3>
+<div class="prop"><p><b>Proposition T5.4 (a false lesson costs in proportion to the remaining stream).</b> <span class="lab m">Model</span></p>
+<p>Suppose a lesson written after task \(t\) is wrong, and in each later task of the same domain it is applied with probability \(p\) and then costs \(\delta \gt 0\) points. The expected total cost over the remaining \(N - t\) tasks is \(p\,\delta\,(N - t)\).</p></div>
+<div class="proof"><p><i>Proof.</i> Let \(Y_s = \delta\cdot\mathbf{1}[\text{applied in task } s]\). Then \(\mathbb{E}Y_s = p\delta\), and by linearity of expectation \(\mathbb{E}\sum_{s=t+1}^{N} Y_s = p\,\delta\,(N-t)\). No independence is needed. <span class="qed">∎</span></p></div>
+<p>An early lesson has the largest reach, in both directions. This explains why Prompt 6 trades recall for precision: a lesson must rest on a concrete contrast, otherwise <code>NO_ENTRY</code>, because "an invented attribution poisons the library for every later task". The same linearity explains the value of a good library. Fig. 7 (left) shows that direct editing, with no probes, gains +0.9, +4.4 and +5.1 points over the base when its library was built at \(k = 5\). Exploration paid for on earlier tasks is reused on later tasks with fewer runs.</p>
+
+<h2 id="th-cost">T6. A cost model for the eight components</h2>
+<p>Prompt 1 orders the places for a fix: skill, script, subagent, plugin, and always-on text last. A token-cost model explains most of this order. Let a run make \(T\) model calls, and let a component's text be \(\ell\) tokens.</p>
+<ul>
+<li><b>Always-on text</b> is in context at every call: \(\ell\,T\) context tokens per run. Prompt caching lowers the price of these tokens, but not the context they occupy. The paper's argument is about occupancy: always-on prose is "competing with the agent's own output budget" (Prompt 1).</li>
+<li><b>A skill</b> has a short description of \(d\) tokens that is always visible, and a body of \(\ell\) tokens loaded at call \(t_0\) when the task needs it, which happens with probability \(\pi\): \(d\,T + \pi\,\ell\,(T - t_0)\) tokens. Table 5 says a skill "costs nothing on tasks that do not need it". That is the case \(d \to 0\).</li>
+</ul>
+<div class="prop"><p><b>Proposition T6.1 (when a skill beats always-on text).</b> <span class="lab m">Model</span></p>
+<p>If \(\pi \lt 1 - d/\ell\), then the skill costs fewer context tokens than the same text always on.</p></div>
+<div class="proof"><p><i>Proof.</i> Since \(T - t_0 \le T\), the skill costs at most \(d\,T + \pi\,\ell\,T = (d + \pi\ell)\,T\). This is less than \(\ell\,T\) exactly when \(d + \pi\ell \lt \ell\), that is, when \(\pi \lt 1 - d/\ell\). <span class="qed">∎</span></p></div>
+<p>Illustrative numbers: the Fig. 9 skill is 4,942 B, about 1,200 tokens at an assumed 4 bytes per token. With a 50-token description, the skill wins unless more than about 96% of tasks need it (\(1 - 50/1200 \approx 0.958\)). That is why the skill is the default home for new instruction.</p>
+<ul>
+<li><b>A subagent</b> reads an input of \(I\) tokens in its own context and returns a result of \(r\) tokens. Reading the input in the main context would keep \(I\) tokens there for the remaining \(T_r\) calls. The subagent keeps \(r\), at an overhead \(o\) for its own calls. It saves context when \((I - r)\,T_r \gt o\). When \(r \approx I\), the left side is near zero, which is Prompt 1's rule: a subagent is "a bad trade when the output is as big as the input".</li>
+<li><b>A script</b> replaces many reasoned checks with one deterministic program. If a model checks \(n\) items with an independent error rate \(\varepsilon\) per item, the chance of no error is \((1-\varepsilon)^n \le e^{-\varepsilon n}\). Illustrative: \(\varepsilon = 0.01\) and \(n = 500\) give \(0.99^{500} \approx 0.0066\). A correct script has no per-item error. The risk moves into the script's own code, where a bug is systematic (it hits every item) and is checked once, not 500 times.</li>
+<li><b>A plugin</b> costs few tokens, but it can block valid behaviour (T4). Its cost is a risk to correct runs, not tokens, which is why Prompt 1 requires repeated evidence before adding one.</li>
+</ul>
+<p>The paper's component ablation agrees with the model's ranking of what carries value. Removing skills from the finished \(k = 5\) harness costs 5.3 points, scripts 3.7, and the always-on prompt group 1.5 (Table 6). Skills and scripts take about half of all edits on each benchmark (Fig. 10).</p>
+
+<h2 id="th-map">T7. Summary map</h2>
+<div class="tw"><table>
+<tr><th>Mechanism in the paper</th><th>Theory lens</th><th>Formal statement here</th><th>Evidence in the paper</th></tr>
+<tr><td>No ground-truth verifier</td><td>Indistinguishability</td><td>T3.1: no rule on observables beats ½ on both of two graders</td><td>Appendix F: contrasts "do not guarantee correctness"</td></tr>
+<tr><td>Compose (merge edits)</td><td>Search over subsets</td><td>T1.5: oracle bound, \(2^{|E|}\) options</td><td>Table 3: −1.6 / −1.9 without it</td></tr>
+<tr><td>Budget \(k\)</td><td>Width vs depth; linear cost</td><td>T1.6, T1.7: \(R = 4k\), \(P = 3k\)</td><td>Fig. 5: WB-code 76.5 → 80.8</td></tr>
+<tr><td>Blind selector</td><td>Permutation invariance</td><td>T1.8</td><td>Fig. 14: picked 55 over 95 (still fallible)</td></tr>
+<tr><td>"²": two recursions</td><td>Fold over tasks; higher-order</td><td>T2.1, T2.2: only \(\mathcal{R}\) is threaded</td><td>Table 3: −3.1 / −1.8 without library</td></tr>
+<tr><td>Reflector verdicts</td><td>Identifiability; optimizer's curse</td><td>T3.2, T3.3</td><td>Prompt 6 rules</td></tr>
+<tr><td>Self-written checker</td><td>Bayes with correlated errors</td><td>T3 (checker section)</td><td>Fig. 14: PASS ×3, 75 → 64</td></tr>
+<tr><td>Plugin C8</td><td>Safety/liveness; edit automata</td><td>T4.1, T4.2</td><td>Prompt 1 hook list and constraints</td></tr>
+<tr><td>Open-world stream</td><td>Online learning, no feedback</td><td>T5.2: linear regret in the worst case</td><td>Tables 1–2: gains hold on average</td></tr>
+<tr><td>Per-task adaptation</td><td>Adaptivity gap</td><td>T5.3</td><td>Fig. 13: +4.6 / +5.8 / +4.9 over best fixed</td></tr>
+<tr><td>Library lessons</td><td>Prior; error propagation</td><td>T5.4</td><td>Fig. 7: +0.9 / +4.4 / +5.1 direct editing at k = 5</td></tr>
+<tr><td>Placement order</td><td>Token and reliability cost</td><td>T6.1 and the cost terms</td><td>Table 6: −5.3 / −3.7 / −1.5</td></tr>
+</table></div>
+
+<h2 id="th-quiz">T8. Exercises</h2>
+<details><summary>1. How many executor runs and counted sessions does sequential recursion use at k = 4?</summary><p>\(R = 4k = 16\) runs (4 base, 8 probes, 4 checkpoints) and \(P = 3k = 12\) sessions (4 INV, 4 DOM, 4 composers), by Proposition T1.7. The selector and reflector are extra and are not in the ledger.</p></details>
+<details><summary>2. Proposition T1.5 shows that composition can reach every harness that selection can reach. Why does this not prove that composition helps?</summary><p>It is an oracle bound on the best reachable harness. The composer chooses with noisy behavioural evidence and no grader, so it may choose a worse subset. Only the ablation in Table 3 shows that composition helps on average.</p></details>
+<details><summary>3. A candidate changed C2 and C7 together, and its probe behaved better than the reference. Which verdict should the reflector give for C2?</summary><p><code>confounded</code>. With only the arms \((0,0)\) and \((1,1)\), only the sum of the two effects is identifiable (Proposition T3.2), and one run per arm gives no noise estimate.</p></details>
+<details><summary>4. Why can a hook enforce "deliver within 200 turns" but not "deliver eventually" by blocking?</summary><p>"Within 200 turns" is a safety property (Proposition T4.2): a violation is visible at a finite prefix, so a monitor can act before turn 200. "Eventually" is liveness: no finite prefix shows a violation, and halting a run can only make the property false (Schneider, 2000). Even for the bounded version, the hook can only insert an instruction; the model must still write the file.</p></details>
+<details><summary>5. With m = 2 harnesses and N = 100 tasks and no feedback, what regret can an adversary force?</summary><p>At least \(N(1 - 1/m) = 50\) (Proposition T5.2).</p></details>
+<details><summary>6. A skill has a 40-token description and a 400-token body. Above which trigger probability is always-on text cheaper by the bound of Proposition T6.1?</summary><p>The bound guarantees the skill is cheaper when \(\pi \lt 1 - 40/400 = 0.9\). Above 0.9 the bound says nothing, and always-on text can be cheaper; the exact answer also depends on \(t_0\).</p></details>
+<details><summary>7. Is Harness² a Gödel machine?</summary><p>No, as described. A Gödel machine rewrites its own code after it proves the rewrite useful. Harness² keeps its prompts and editor model fixed and updates only the library (paper §2; Appendix G lists library management as future work). It is a fixed improver with a growing memory.</p></details>
+
+<h2 id="th-refs">T9. References for this tab</h2>
+<ul>
+<li>B. Alpern and F. B. Schneider. Defining liveness. <i>Information Processing Letters</i> 21(4), 1985.</li>
+<li>N. Cesa-Bianchi and G. Lugosi. <i>Prediction, Learning, and Games</i>. Cambridge University Press, 2006.</li>
+<li>L. Lamport. Proving the correctness of multiprocess programs. <i>IEEE Transactions on Software Engineering</i> SE-3(2), 1977.</li>
+<li>J. Ligatti, L. Bauer and D. Walker. Edit automata: enforcement mechanisms for run-time security policies. <i>International Journal of Information Security</i> 4(1–2), 2005.</li>
+<li>H. G. Rice. Classes of recursively enumerable sets and their decision problems. <i>Transactions of the AMS</i> 74(2), 1953.</li>
+<li>J. Schmidhuber. Gödel machines: self-referential universal problem solvers making provably optimal self-improvements. arXiv:cs/0309048, 2003.</li>
+<li>F. B. Schneider. Enforceable security policies. <i>ACM Transactions on Information and System Security</i> 3(1), 2000.</li>
+<li>J. E. Smith and R. L. Winkler. The optimizer's curse: skepticism and postdecision surprise in decision analysis. <i>Management Science</i> 52(3), 2006.</li>
+<li>Xu et al. Harness²: Recursive Agent Harnessing for an Open World. arXiv:2610.14224v1, 2026 (Eq. 1–4, §2, Tables 1–6, Figs. 5, 7, 9, 10, 13, 14, Prompts 1, 5, 6, Appendices D, F, G).</li>
+</ul>
+</div>
 </main>
 </div>
 <script>
@@ -506,6 +762,18 @@ function stepper(root,n,render){
   });
   go(0);
 }
+
+/* Tabs: Tutorial | Theory */
+(function(){
+  var P={tutorial:document.getElementById('tutorial'),theory:document.getElementById('theory')};
+  function show(n){for(var k in P){P[k].hidden=k!==n;document.getElementById('nav-'+k).hidden=k!==n;document.querySelector('[data-tab='+k+']').setAttribute('aria-selected',k===n)}}
+  function route(){
+    var h=decodeURIComponent(location.hash.slice(1)),el=h&&document.getElementById(h);
+    show(el&&P.theory.contains(el)?'theory':'tutorial');
+    if(el)el.scrollIntoView();
+  }
+  window.addEventListener('hashchange',route);route();
+})();
 
 /* Fig. B: two recursion levels over three tasks */
 (function(){
