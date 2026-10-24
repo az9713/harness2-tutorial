@@ -1,0 +1,656 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>Learn Harness²</title>
+<style>
+:root{--bg:#0f172a;--card:#1e293b;--text:#e2e8f0;--text2:#cbd5e1;--muted:#94a3b8;--orange:#fb923c;--teal:#2dd4bf;--b1:#1e293b;--b2:#334155;--red:#f87171;--green:#4ade80}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 system-ui,-apple-system,"Segoe UI",sans-serif}
+.wrap{display:grid;grid-template-columns:240px minmax(0,1fr);gap:32px;max-width:1240px;margin:0 auto;padding:24px 16px}
+nav{position:sticky;top:16px;align-self:start;max-height:calc(100vh - 32px);overflow:auto;font-size:14px;border-right:1px solid var(--b2);padding-right:16px}
+nav a{display:block;color:var(--muted);text-decoration:none;padding:3px 0}
+nav a:hover{color:var(--teal)}
+nav .grp{color:var(--orange);font-weight:600;margin-top:12px;font-size:12px;text-transform:uppercase;letter-spacing:.06em}
+main{min-width:0;max-width:860px}
+h1{font-size:2rem;margin:0 0 4px}
+h2{font-size:1.45rem;margin:48px 0 12px;padding-top:12px;border-top:1px solid var(--b2);color:var(--text)}
+h3{font-size:1.1rem;margin:28px 0 8px;color:var(--teal)}
+p,li{color:var(--text2)}
+a{color:var(--teal)}
+.sub{color:var(--muted);margin:0 0 24px}
+.card{background:var(--card);border:1px solid var(--b2);border-radius:10px;padding:16px 20px;margin:16px 0}
+.key{border-color:#fb923c66}
+.warn{border-color:#f8717166}
+.ok{border-color:#4ade8066}
+.tag{display:inline-block;font-size:12px;padding:1px 8px;border-radius:99px;border:1px solid var(--b2);color:var(--muted);margin-right:4px}
+code,kbd{font-family:ui-monospace,Consolas,monospace;font-size:.88em;background:#0b1222;border:1px solid var(--b2);border-radius:4px;padding:1px 5px;color:#fde68a}
+pre{background:#0b1222;border:1px solid var(--b2);border-radius:8px;padding:12px 14px;overflow:auto;font-size:13px;line-height:1.45;color:#e2e8f0}
+pre code{background:none;border:0;padding:0;color:inherit}
+.tw{overflow-x:auto;margin:12px 0}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{border:1px solid var(--b2);padding:6px 9px;text-align:left;vertical-align:top}
+th{background:#172033;color:var(--text)}
+td{color:var(--text2)}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
+tr.us td{background:#13263a;color:var(--text)}
+.flow{display:flex;flex-wrap:wrap;align-items:stretch;gap:8px;margin:12px 0}
+.flow .s{flex:1 1 120px;background:var(--card);border:1px solid var(--b2);border-radius:8px;padding:10px;font-size:14px}
+.flow .s b{display:block;color:var(--orange)}
+.flow .ar{align-self:center;color:var(--muted);font-size:20px}
+details{background:var(--card);border:1px solid var(--b2);border-radius:8px;padding:10px 14px;margin:8px 0}
+summary{cursor:pointer;color:var(--text);font-weight:600}
+details[open] summary{margin-bottom:6px}
+.src{color:var(--muted);font-size:13px}
+.time{float:right;color:var(--muted);font-size:13px;font-weight:400}
+.anim{background:var(--card);border:1px solid var(--b2);border-radius:10px;padding:12px 14px;margin:16px 0}
+.anim .sv{overflow-x:auto}
+.anim svg{display:block;width:100%;min-width:640px;height:auto}
+.anim .pt{fill:#fb923c;font:600 12px system-ui,sans-serif;letter-spacing:.04em}
+.anim .pn{fill:none;stroke:#334155;stroke-dasharray:4 4}
+.anim g,.anim path,.anim text{transition:opacity .35s}
+.anim .hid{opacity:0}
+.nd rect{fill:#0b1222;stroke:#334155;stroke-width:1.5;transition:stroke .35s,fill .35s}
+.nd text{fill:#64748b;font:12.5px system-ui,sans-serif;transition:fill .35s}
+.nd text.b{font-weight:600}
+.nd.on rect{stroke:#2dd4bf}.nd.on text{fill:#cbd5e1}.nd.on text.b{fill:#e2e8f0}
+.nd.now rect{stroke:#fb923c;stroke-width:2.5;fill:#26324a}.nd.now text{fill:#e2e8f0}
+.nd.done rect{stroke:#4ade80}.nd.done text{fill:#cbd5e1}
+.ed{fill:none;stroke:#334155;stroke-width:1.6;transition:stroke .35s,opacity .35s}
+.ed.on{stroke:#2dd4bf}.ed.now{stroke:#fb923c;stroke-dasharray:6 4;animation:flow .8s linear infinite}
+@keyframes flow{to{stroke-dashoffset:-20}}
+.lbl{fill:#94a3b8;font:11.5px system-ui,sans-serif}
+.ctrl{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:10px}
+.ctrl button{background:#0b1222;color:var(--text);border:1px solid var(--b2);border-radius:6px;padding:4px 12px;font:inherit;font-size:14px;cursor:pointer}
+.ctrl button:hover,.ctrl button:focus-visible{border-color:var(--teal);outline:none}
+.ctrl button[aria-pressed=true]{border-color:var(--orange);color:var(--orange)}
+.ctrl .ct{margin-left:auto;color:var(--muted);font-size:13px}
+.cap{min-height:4.8em;margin:10px 0 0;color:var(--text2)}
+.ch rect{fill:#0b1222;stroke-width:1.6}.ch text{font:11px system-ui,sans-serif;fill:#e2e8f0}
+.ch.run rect{stroke:#2dd4bf}.ch.ses rect{stroke:#fb923c}.ch.x rect{stroke-dasharray:4 3}
+.pool{fill:#2dd4bf22;stroke:#2dd4bf66}
+.gr{fill:none;stroke:#94a3b8;stroke-dasharray:5 4}
+.score{font:600 14px system-ui,sans-serif;fill:#fde68a}
+@media (prefers-reduced-motion:reduce){.ed.now{animation:none}.anim *{transition:none!important}}
+@media (max-width:860px){.wrap{grid-template-columns:1fr}nav{position:static;max-height:none;border-right:0;border-bottom:1px solid var(--b2);padding:0 0 12px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<nav>
+<div class="grp">Start</div>
+<a href="#plan">0. Study plan</a>
+<a href="#core">1. The 15-minute core</a>
+<div class="grp">Lesson</div>
+<a href="#problem">2. The problem</a>
+<a href="#terms">3. Terms and notation</a>
+<a href="#components">4. The eight components</a>
+<a href="#task">5. Task-level recursion</a>
+<a href="#scale">6. Parallel and sequential</a>
+<a href="#library">7. Harnessing-level recursion</a>
+<div class="grp">Evidence</div>
+<a href="#results">8. Main results</a>
+<a href="#analysis">9. What the analyses show</a>
+<a href="#failures">10. Failures and limits</a>
+<a href="#video">11. Video claims, checked</a>
+<a href="#repo">12. The code release</a>
+<div class="grp">Use it</div>
+<a href="#apply">13. Apply it to Claude Code</a>
+<a href="#quiz">14. Self-test</a>
+<a href="#sources">15. Sources</a>
+</nav>
+<main>
+<h1>Learn Harness²</h1>
+<p class="sub">Recursive agent harnessing for an open world. Xu, Chen, CuiZhu, Dalvi Mishra, Ming, Yu, Han, Lee, Pfister (Northwestern University, Google Cloud AI Research). arXiv:2610.14224v1, 9 Oct 2026. Every number on this page cites its table or figure in the paper.</p>
+
+<h2 id="plan">0. Study plan</h2>
+<p>This page has four parts. Read them in order. The total time is about 2 hours. Stop after part 1 if you need only the idea.</p>
+<div class="tw"><table>
+<tr><th>Step</th><th>Read</th><th class="n">Time</th><th>You can then…</th></tr>
+<tr><td>1</td><td><a href="#core">§1 The 15-minute core</a></td><td class="n">15 min</td><td>explain Harness² in five sentences.</td></tr>
+<tr><td>2</td><td><a href="#problem">§2</a>–<a href="#library">§7</a> the lesson</td><td class="n">40 min</td><td>trace one task through the full pipeline, and count the runs.</td></tr>
+<tr><td>3</td><td><a href="#results">§8</a>–<a href="#video">§11</a> the evidence</td><td class="n">25 min</td><td>say which claims the data supports, and which claims the video overstates.</td></tr>
+<tr><td>4</td><td><a href="#quiz">§14 Self-test</a>, then <a href="#apply">§13</a></td><td class="n">40 min</td><td>run one Propose–Probe–Compose step by hand on your own Claude Code task.</td></tr>
+</table></div>
+
+<h2 id="core">1. The 15-minute core <span class="time">15 min</span></h2>
+<div class="card key">
+<p><b>Idea 1 — Agent = Model + Harness.</b> The model weights stay frozen. The harness is everything around the model: prompts, rules, memory, skills, tool guidance, scripts, subagents and hooks. Harness² changes only the harness.</p>
+<p><b>Idea 2 — The harness is eight files.</b> Four files are always in context (system prompt, guardrails, memory, tool guidance). Four are on demand or outside the model (skills, scripts, subagents, a plugin that hooks the tool loop). Always-on text costs tokens on every call. That is why "add another rule to the prompt" is the expensive fix.</p>
+<p><b>Idea 3 — No answer key, so compare behaviour.</b> On a new real-world task, nobody has the correct answer. Harness² runs the task once with the current harness (the <i>reference</i>), proposes two edited harnesses, runs each one on the same task (the <i>probes</i>), and then composes a final harness from the edits that changed behaviour in a way the trajectories show. This is the contrastive <b>Propose–Probe–Compose</b> step.</p>
+<p><b>Idea 4 — Two editors with different jobs.</b> The <i>invariant</i> (INV) editor fixes how the agent works: tool use, procedure, verification. The <i>domain</i> (DOM) editor adds what a practitioner knows: the deliverable's anatomy, decision rules, checks. Removing this split costs 2.9 points on WorkBuddy-Bench and 3.7 on JobBench (Table 3).</p>
+<p><b>Idea 5 — Two levels of recursion. That is the "²".</b> Level 1 (task-level) improves the harness for the task in front of it. Level 2 (harnessing-level) improves the <i>improver</i>: after each task, a reflector writes the adopted harness and a lesson (<code>EXPERIENCE.md</code>) into a library. The next task starts again from the clean base harness H₀, but its editors can read and copy from the library.</p>
+<p><b>Idea 6 — The headline numbers.</b> One step (k = 1) improves every model–harness configuration on all three benchmarks: up to +11.5 points on WorkBuddy-Bench (GLM-5 under OpenCode, 64.2 → 75.7, Table 1), +4.5 on JobBench, +11.8 percentage points on LAB Partial (Table 2). Parallel recursion at k = 5 adds 2.9 to 3.9 more points on WorkBuddy-Bench. With one step, GLM-5 (75.7) passes the base Gemini 3.5 Flash (72.4) on WorkBuddy-Bench.</p>
+<p><b>Idea 7 — The cost and the risk.</b> One step at k = 1 needs 4 executor runs of the same task; k = 5 needs 20 (derived in <a href="#scale">§6</a>). The evidence is the model judging its own runs, so shared model biases can pass through: in one failure, the editor's own checker script reported PASS three times while the real tests failed (Fig. 14).</p>
+</div>
+<div class="flow">
+<div class="s"><b>Task t arrives</b>start from H₀</div><div class="ar">→</div>
+<div class="s"><b>Reference</b>run H₀ once; log trajectory</div><div class="ar">→</div>
+<div class="s"><b>Propose</b>INV edit + DOM edit (read library)</div><div class="ar">→</div>
+<div class="s"><b>Probe</b>run each candidate on the same task</div><div class="ar">→</div>
+<div class="s"><b>Compose</b>keep edits the contrast supports; run H′</div><div class="ar">→</div>
+<div class="s"><b>Reflect + Update</b>harness + EXPERIENCE.md → library</div>
+</div>
+<p class="src">Fig. A — One task through the pipeline. The first five boxes are task-level recursion. The last box is harnessing-level recursion. Source: paper Fig. 3 and paper §2.</p>
+<p>Fig. B animates the same pipeline over three tasks. Watch two things. First, the middle panel goes dark when each new task starts: the tuned harness of the earlier task is not carried forward. Second, the library on the right grows by one entry per task, and from task 2 the editors read it.</p>
+<div class="anim" id="figB">
+<div class="sv"><svg viewBox="0 0 860 340" role="img" aria-label="Animated diagram of the two recursion levels over three tasks"></svg></div>
+<div class="ctrl"><button data-a="reset">⟲ Reset</button><button data-a="prev">◀ Back</button><button data-a="play">▶ Play</button><button data-a="next">Next ▶</button><span class="ct"></span></div>
+<p class="cap" aria-live="polite"></p>
+</div>
+<p class="src">Fig. B — The two recursion levels over a stream of three tasks. Orange = the current stage; teal = done in this task. The tasks are illustrative; the NO_ENTRY lesson on task 2 shows a case that Prompt 6 allows, not a logged run. Source: paper §2, Eq. 1 and Eq. 4, Prompt 6, Appendix D.2.</p>
+
+<h2 id="problem">2. The problem</h2>
+<p>The same model performs differently under different harnesses. The paper's own comparison (Fig. 13, Gemini 3.5 Flash on WorkBuddy-Bench) shows that no fixed production harness wins everywhere. Claude Code is best on Code and Office. Codex is best on Web. So a harness tuned to the task matters, and hand-tuning a harness for each new kind of work costs engineering time.</p>
+<p>Earlier automatic methods (for example Meta-Harness) search for a good harness <i>offline</i>, against a training set with scores, and then deploy that fixed harness. That fails in the "open world", where tasks arrive one at a time and are new. The paper names two connected problems:</p>
+<ol>
+<li><b>No ground-truth verifier at test time.</b> A new task has no answer key, no hidden tests and no rubric. So you cannot score a harness edit before you use it.</li>
+<li><b>Task-specific edits do not transfer.</b> If you carry task 1's tuned harness into task 2, the rules that were specific to task 1 become noise. But the <i>process</i> of fixing task 1 (how the weakness was found, which edit was tried, what the run showed) can transfer.</li>
+</ol>
+<p>The central question of the paper: <i>can recursive self-improvement improve both the current harness and how future harnesses are improved?</i></p>
+<div class="card warn"><p><b>Why "just add rules to the prompt" is a bad fix.</b> The editor prompt (Appendix H, Prompt 1) states the reason: always-on prose is in context on every run and competes with the agent's output budget. The paper calls the costliest failure "a run that reasons until the budget is gone and produces nothing". Adding always-on prose makes that failure more likely.</p></div>
+
+<h2 id="terms">3. Terms and notation</h2>
+<p>The paper uses a small notation. You need it only to read Section 2 of the paper. Each symbol below has a plain meaning.</p>
+<div class="tw"><table>
+<tr><th>Symbol / term</th><th>Plain meaning</th></tr>
+<tr><td>𝓜</td><td>The executor model, with frozen weights (Gemini 3.5 Flash or GLM-5 in the main tables).</td></tr>
+<tr><td>𝓗 = (c₁, …, c_K)</td><td>The execution harness: K editable components. Here K = 8, and each component is a file.</td></tr>
+<tr><td>𝓐(·; 𝓜, 𝓗)</td><td>The agent: model plus harness.</td></tr>
+<tr><td>H₀</td><td>The common base harness. Every task starts from H₀.</td></tr>
+<tr><td>q₁ … q_N</td><td>The stream of N tasks. No labels. Completed tasks are never replayed.</td></tr>
+<tr><td>e = (τ, y)</td><td>An execution record: trajectory τ (every step the agent took) and deliverable y (the output files).</td></tr>
+<tr><td>e₀</td><td>The reference execution: the current harness run once on the task.</td></tr>
+<tr><td>Φ</td><td>One contrastive improvement step (Propose–Probe–Compose).</td></tr>
+<tr><td>ξ</td><td>The step record: references, candidates, probes, composition decisions, successor run.</td></tr>
+<tr><td>𝓔</td><td>Task-local history: all earlier executions and step records for this task.</td></tr>
+<tr><td>𝓡_t</td><td>The improvement harness (the improver, with its library) when task t runs. It stays fixed during task t.</td></tr>
+<tr><td>H′</td><td>The successor harness that a Compose step returns.</td></tr>
+<tr><td>H★_t</td><td>The adopted harness for task t. The star means "adopted", not "verified optimal".</td></tr>
+<tr><td>𝓓_t</td><td>The complete improvement record for task t. The reflector reads it.</td></tr>
+<tr><td>k</td><td>The exploration budget: k candidates per scope (parallel) or k chained steps (sequential).</td></tr>
+<tr><td>INV / DOM</td><td>Invariant scope (how the agent works) / domain scope (what a practitioner knows).</td></tr>
+<tr><td>Behavioural contrast</td><td>The difference between a probe's trajectory and deliverable and the reference's. It is evidence, not a verdict of correctness.</td></tr>
+</table></div>
+<p>The four equations, in words:</p>
+<ul>
+<li><b>Eq. 1</b> (H′, e′, ξ) = Φ(q_t, 𝓗, 𝓔; 𝓡_t). One step takes the task, the current harness and the history, and returns a new harness, its run and a record. The improver 𝓡_t is read-only here.</li>
+<li><b>Eq. 2</b> H′_j = Compose_j(q_t, 𝓗, 𝓑, 𝓟; 𝓡_t), j = 1…k. Parallel: k composers each see all k reference runs (𝓑) and the full pool of candidates with their runs (𝓟), and each writes one successor.</li>
+<li><b>Eq. 3</b> (H⁽ʳ⁾, e⁽ʳ⁾, ξ⁽ʳ⁾) = Φ(q_t, H⁽ʳ⁻¹⁾, 𝓔⁽ʳ⁻¹⁾; 𝓡_t), r = 1…k. Sequential: chain k steps; each step starts from the previous harness and all earlier evidence.</li>
+<li><b>Eq. 4</b> 𝓡_{t+1} = Update(𝓡_t, H★_t, 𝓓_t). After the task, the library gains the adopted harness and the supported lessons.</li>
+</ul>
+
+<h2 id="components">4. The eight components</h2>
+<p>The harness is a file tree. The paper takes the file-level split from AHE and adds one component; the paper does not say which one (paper §2.1, Table 5). Because each component is a file, every edit is a diff. The <i>activation</i> column says when the component reaches the model, and that sets its token cost.</p>
+<div class="tw"><table>
+<tr><th>ID</th><th>Component (file)</th><th>Group</th><th>Activation</th><th>Definition (Table 5)</th></tr>
+<tr><td>C1</td><td>System prompt <code>systemprompt.md</code></td><td>Context construction</td><td>Every call</td><td>Persona and top-level procedure for all tasks.</td></tr>
+<tr><td>C2</td><td>Guardrails <code>guardrails.md</code></td><td>Context construction</td><td>Every call</td><td>Hard constraints that hold for any task or tool.</td></tr>
+<tr><td>C3</td><td>Memory <code>LongTermMEMORY.md</code></td><td>Context construction</td><td>Every call</td><td>Durable domain facts kept across tasks in a domain.</td></tr>
+<tr><td>C4</td><td>Tool guidance <code>tool_descriptions/tool_guidance.md</code></td><td>Tool interface</td><td>Every call</td><td>When and how to use each existing tool.</td></tr>
+<tr><td>C5</td><td>Subagents <code>sub_agents/&lt;n&gt;/AGENT.md</code></td><td>Orchestration</td><td>task tool</td><td>A worker in its own context window that returns only its result. The only component that adds an inference context.</td></tr>
+<tr><td>C6</td><td>Skills <code>skills/&lt;n&gt;/SKILL.md</code> + <code>skills/&lt;n&gt;/scripts/*</code></td><td>Context construction</td><td>skill tool</td><td>A specialist procedure loaded only when invoked; zero cost on tasks that do not need it.</td></tr>
+<tr><td>C7</td><td>Scripts <code>scripts/&lt;name&gt;.py</code></td><td>Tool interface</td><td>Run via bash</td><td>A deterministic capability, run instead of reasoned token by token.</td></tr>
+<tr><td>C8</td><td>Plugin <code>plugin/&lt;name&gt;.ts</code></td><td>Middleware control</td><td>Inside the tool loop</td><td>A hook around tool calls and turn boundaries. It <i>enforces</i> a behaviour; it does not <i>instruct</i> it.</td></tr>
+</table></div>
+<p>Under OpenCode the tree is as above. Under Codex the always-on text lives in <code>AGENTS.md</code> and the on-demand parts are the same (Appendix D.1). In the stock harness, the always-on files hold only the benchmark's instructions, and each on-demand folder holds a placeholder. The placeholder exists so that the editor can discover that the component exists.</p>
+<h3>The cost order the editor must follow</h3>
+<p>Prompt 1 (Appendix H) gives the editor a strict preference order for <i>where</i> to put a fix. This order is the most reusable practical rule in the paper:</p>
+<ol>
+<li><b>Skill</b> — for anything with a recognisable trigger. The default form for new instruction.</li>
+<li><b>Script</b> — for a deterministic operation that the runs did by hand and got wrong, or did slowly.</li>
+<li><b>Subagent</b> — for a bounded investigation whose input is large and whose answer is small. A bad trade when the output is as big as the input.</li>
+<li><b>Plugin</b> — for a recurring mechanical problem in the tool loop: trim oversized tool output, append a hint after a repeated error signature, cap a runaway tool, verify a write right after it happens. Only "repeated evidence that clear prose is skipped" justifies a defensive hook, and it must not block valid completion.</li>
+<li><b>Always-on text last</b> — only a short rule that applies to every run. "If you add always-on text, cut something else to pay for it."</li>
+</ol>
+<p>Which components carry the gains? Table 6 removes groups from the finished k = 5 harness (Gemini 3.5 Flash, OpenCode, WorkBuddy-Bench, average 80.8). Without skills: 75.5 (−5.3). Without scripts: 77.1 (−3.7). Without the prompt group: 79.3 (−1.5). Skills matter most on Code and Web (−3.6, −6.9); scripts matter most on Office (−7.4). Every ablated harness still beats the base (72.4). Skills and scripts take about half of all edits on each benchmark (Fig. 10).</p>
+
+<h2 id="task">5. Task-level recursion: one contrastive step</h2>
+<p>The running example is the JobBench "producers" task in Fig. 9: reconcile schedule, roster and budget files into connected production deliverables. Executor: Gemini 3.5 Flash under OpenCode. Editor: Claude Opus 4.8 (the default editor for all runs, Appendix D.2).</p>
+<h3>Step 1 — Propose</h3>
+<p>The pipeline runs the current harness once to get the reference e₀. The reference shows <i>how</i> the harness behaves. It does not show whether the deliverable is correct. In the example the base run scored 43.1, and the trajectory showed two procedural failures, not knowledge gaps: (1) figures were never reconciled across files, and (2) outputs were never reopened after writing.</p>
+<p>Two editor sessions then read the task, the harness, the reference trajectory and the library. Each writes one candidate harness by editing files on disk:</p>
+<ul>
+<li>The <b>INV candidate</b> added a guardrail (C2, 1,464 B): inventory all input files with <code>scripts/inspect_inputs.py</code>, reconcile each figure to its source, and reopen each output with <code>scripts/verify_outputs.py</code> before finishing. "Confirming a file exists is not confirming it is correct." It also added the scripts (C7, 3,881 B). One script check flags a spreadsheet formula cell that a reader sees as blank.</li>
+<li>The <b>DOM candidate</b> added a reconciliation skill (C6, 4,942 B): the source hierarchy when files disagree, committed versus conditional spend, hour caps and rest rules, completeness checks. It also added tool guidance (C4, 645 B): strip "$" and "," from numbers stored as strings; retry a timed-out web search once only; do not search the web for facts already in the workspace.</li>
+</ul>
+<p>The editors have hard limits (Prompt 1). Each edit must trace to a named moment in a trajectory. The preferred evidence is a <i>divergence</i> (runs disagreed, so the agent can already do it), then a repeated failure, then a visible risk. "KEEP_BASE" is a valid answer. Workspace facts that the runs verified are written into the harness as facts, labelled "in this workspace…".</p>
+<h3>Step 2 — Probe</h3>
+<p>Each candidate runs on the same task with the same model and environment. The pipeline compares each probe with the reference. The comparison shows one of three things: the edit fixed the targeted behaviour, left it the same, or caused a regression. The paper is explicit that this contrast <i>informs</i> composition and does not <i>verify</i> correctness, because runs are random and the candidates share the model's biases.</p>
+<h3>Step 3 — Compose</h3>
+<p>A composer session reads the reference, both candidates, their diffs and all run evidence. It may merge supported edits, revise conflicting edits, adopt one candidate whole, or keep the current harness. Each decision must cite a concrete observation, in the form <code>kept|revised|dropped -&gt; &lt;edit&gt; -&gt; &lt;trajectory moment&gt;</code> (Prompt 3). The composed harness then runs, and that run is the delivered result.</p>
+<p>In the example, the composer kept all four edits from the two interventions. The re-run cross-referenced the figures and restored the memo's missing sections. Score: 43.1 → 77.8 (+34.7, Fig. 9).</p>
+<p>Fig. C replays this example one step at a time, with the file sizes from paper Fig. 9. The dashed strip at the bottom is the benchmark grader. It scores the runs after the fact; nothing in the pipeline reads it.</p>
+<div class="anim" id="figC">
+<div class="sv"><svg viewBox="0 0 860 330" role="img" aria-label="Animated replay of one Propose-Probe-Compose step on the JobBench producers task"></svg></div>
+<div class="ctrl"><button data-a="reset">⟲ Reset</button><button data-a="prev">◀ Back</button><button data-a="play">▶ Play</button><button data-a="next">Next ▶</button><span class="ct"></span></div>
+<p class="cap" aria-live="polite"></p>
+</div>
+<p class="src">Fig. C — One contrastive step on the JobBench "producers" task (Gemini 3.5 Flash, OpenCode, k = 1). The paper does not report scores for the two probe runs, so the figure shows none. Source: paper Fig. 9 and its case-study paragraph.</p>
+<div class="card warn"><p><b>A trap in the example.</b> This +34.7 is one task. It is not a benchmark mean. The JobBench mean gain for the same configuration at k = 1 is +4.5 (31.5 → 36.0, Table 2). The scores are always computed after the fact by the benchmark's grader, and the pipeline never sees them.</p></div>
+<p>Composition is worth 1.6 points on WorkBuddy-Bench and 1.9 on JobBench. The "w/o composition" ablation probes both candidates and returns whichever the evidence favours, without merging (Table 3).</p>
+
+<h2 id="scale">6. Parallel and sequential recursion</h2>
+<p>The budget k scales the step in two ways (Fig. 4, paper §2.2.2):</p>
+<ul>
+<li><b>Parallel.</b> Run k reference executions. Propose and probe k INV and k DOM candidates (2k probes). Then run k independent composers; each sees the whole pool and writes one successor, which is executed. This is one population update: k sets its width, not its depth. The idea follows Recursive Self-Aggregation (RSA), applied to executable harnesses instead of reasoning text.</li>
+<li><b>Sequential.</b> Chain k contrastive steps. Each step starts from the previous harness and all earlier evidence. A later step may restore a candidate that an earlier step rejected, or reproduce an earlier checkpoint.</li>
+</ul>
+<p><b>Final selection (k &gt; 1).</b> An agentic selector compares anonymised deliverables against the request and the source files, and returns one existing output. It does not see which harness made which output. Picking an output from the unmodified harness is valid (Prompt 5). Its decision order: delivery, conformance (exact shape), fidelity to source, internal consistency, operational fitness, finish.</p>
+<h3>Count the runs</h3>
+<p>This count follows from §2.2.2. The code states the same rule in <code>harness2/core/ledger.py</code>: "R = 4k rollouts and P = 3k improvement stages" (editors and composers; selection and reflection are not counted).</p>
+<div class="tw"><table>
+<tr><th>Budget</th><th class="n">Reference runs</th><th class="n">Probe runs</th><th class="n">Composed runs</th><th class="n">Executor runs total</th><th>Improver sessions (the ledger counts 3k: editors + composers)</th></tr>
+<tr><td>k = 1</td><td class="n">1</td><td class="n">2</td><td class="n">1</td><td class="n">4</td><td>2 editors + 1 composer + 1 reflector</td></tr>
+<tr><td>k = 5 parallel</td><td class="n">5</td><td class="n">10</td><td class="n">5</td><td class="n">20</td><td>10 editors + 5 composers + 1 selector + 1 reflector</td></tr>
+</table></div>
+<p>Fig. D builds the run plan for any k from 1 to 5. Select a budget and a mode; the figure adds the runs and sessions in the order they happen. In both modes the first k runs are shared base runs, and the totals are the same: 4k runs and 3k counted sessions. The modes differ in shape. Parallel spends k as width: k composers each read all base runs and the whole pool of probes. Sequential spends k as depth: round r edits the harness that round r − 1 composed.</p>
+<div class="anim" id="figD">
+<div class="ctrl" style="margin:0 0 8px"><span class="lbl" style="font-size:13px">k =</span><button data-k="1">1</button><button data-k="2">2</button><button data-k="3">3</button><button data-k="4">4</button><button data-k="5">5</button><span style="width:12px"></span><button data-m="par">Parallel</button><button data-m="seq">Sequential</button><button data-a="replay">⟲ Replay</button></div>
+<div class="sv"><svg role="img" aria-label="Run plan for the selected budget and mode"></svg></div>
+<p class="cap" aria-live="polite"></p>
+</div>
+<p class="src">Fig. D — Run plan per task. Teal = executor run (counted in R = 4k). Orange = improver session (counted in P = 3k). Dashed orange = a session outside the ledger (selector, reflector). At k = 1 the two modes are the same procedure. Source: paper §2.2.2, Eq. 2 and Eq. 3; <code>harness2/core/ledger.py</code>; <code>run_sequential</code> in <code>harness2/core/recursion.py</code>; <code>harness2/core/report.py</code>.</p>
+<p>Each executor run is capped at 200 model turns and 3,600 seconds (Appendix D.1). Parallel sessions can run at the same time, so latency can be lower than the run count suggests, but the compute is not lower.</p>
+<p><b>What the budget buys.</b> On WB-code, parallel recursion goes from 76.5 (k = 1) to 80.8 (k = 5). On WB-office it goes from 79.5 to 83.4 (Fig. 5). Both forms rise steadily from k = 1 to 5. Both forms at k = 2 beat every plotted baseline at k = 5. Parallel finishes above sequential at k = 5, but sequential is higher on Code at k = 2. Harness Scaling (a baseline that also spends extra test-time budget) drops from k = 2 to 3 on both domains. So more test-time exploration alone does not give better results; the recursive composition does.</p>
+
+<h2 id="library">7. Harnessing-level recursion: improving the improver</h2>
+<p>After the deliverable is returned, the second level runs.</p>
+<ol>
+<li><b>Reflect.</b> An Experience Reflector (Prompt 6) reads the full record 𝓓_t. It diffs every candidate against the base and writes one row per changed component: component, candidates, change, observed difference, verdict. Verdicts are <code>helped</code>, <code>hurt</code>, <code>no observed effect</code> and <code>confounded</code>. The prompt says to prefer <code>confounded</code> when one candidate changed several components at once, or when one run is all the evidence: "an invented attribution poisons the library for every later task."</li>
+<li><b>Write at most one lesson.</b> A lesson has a <code>cue</code> (the shape of situation), a <code>lesson</code> (the operation on a named component), <code>evidence</code> and <code>confidence</code>. If no concrete, reusable contrast exists, the reflector writes <code>NO_ENTRY</code>. Being selected is never evidence that an edit helped.</li>
+<li><b>Update the library.</b> Each entry is the full adopted file tree plus its <code>EXPERIENCE.md</code>. An index lists all entries. Executable components stay as files, not as prose summaries. Each benchmark domain has its own library, and it starts empty (Appendix D.2).</li>
+<li><b>Reuse.</b> The next task starts from H₀ again. The editors may copy a component from <code>context/library/</code> into the harness, but they must re-check its workspace facts: "an earlier task's mapping or threshold is a hypothesis here, not a fact."</li>
+</ol>
+<p><b>Does the library help?</b> Without the library, scores fall 3.1 points on WorkBuddy-Bench and 1.8 on JobBench (Table 3). Adaptation is more common than copying: only 2–10% of modified files keep at least half their lines from a library entry (Fig. 10). A library from JobBench improves WorkBuddy-Bench one-step refinement by +0.6, +0.5 and +2.9 points on Code, Web and Office (Fig. 7 right).</p>
+<p><b>Editing without running is harmful.</b> Fig. 7 (left) edits the base harness directly, with no reference runs, no probes and no library. Code falls 73.4 → 63.2 and Web falls 69.9 → 65.0; Office rises 74.0 → 77.1. With a library built at k = 1, direct editing roughly matches the base (73.8, 72.6, 77.5). With a library built at k = 5, it gains +0.9, +4.4 and +5.1 over the base, with no probing. So more exploration on earlier tasks makes later edits better.</p>
+
+<h2 id="results">8. Main results</h2>
+<p><b>Setup.</b> Executors: Gemini 3.5 Flash and GLM-5, frozen. Initial harnesses: OpenCode and Codex. That gives four configurations. Editor and selector: Claude Opus 4.8 under OpenCode at high reasoning effort. Each score is the mean of three runs, each with a shuffled task order. Main rows are k = 1; "+ Recursion" is parallel k = 5.</p>
+<div class="tw"><table>
+<tr><th>Benchmark</th><th>What it tests</th><th>Test set</th><th>Grader</th></tr>
+<tr><td>WorkBuddy-Bench</td><td>Office-style deliverables: Code, Web, Office</td><td>40 / 35 / 25 tasks (test halves)</td><td>Hidden tests + file checks + LLM/VLM judge (Gemini 3.5 Flash)</td></tr>
+<tr><td>JobBench</td><td>Long end-to-end professional job tasks, 7 occupational domains</td><td>34 tasks (31/34 split)</td><td>Weighted rubric, Claude Opus 4.8 judge</td></tr>
+<tr><td>LAB (Harvey)</td><td>Legal work: analyse, draft, review, research; 24 practice areas</td><td>100 tasks</td><td>Per-criterion LLM judge, Claude Sonnet 4.6; report "Partial" pass rate</td></tr>
+</table></div>
+<p>No rubric, score or grader verdict ever reaches the editor, composer, selector or executor. A guard refuses to hand over a working folder that contains one (Appendix D.2).</p>
+<h3>WorkBuddy-Bench average (Table 1)</h3>
+<div class="tw"><table>
+<tr><th>Configuration</th><th class="n">Base</th><th class="n">ReasoningBank</th><th class="n">Meta-Harness†</th><th class="n">Harness Scaling</th><th class="n">Harness² k=1</th><th class="n">+ Recursion k=5</th></tr>
+<tr><td>Gemini 3.5 Flash / OpenCode</td><td class="n">72.4</td><td class="n">73.4</td><td class="n">76.4</td><td class="n">75.3</td><td class="n">77.5</td><td class="n">80.8 (+3.3)</td></tr>
+<tr><td>Gemini 3.5 Flash / Codex</td><td class="n">74.5</td><td class="n">72.5</td><td class="n">73.3</td><td class="n">73.8</td><td class="n">77.5</td><td class="n">80.4 (+2.9)</td></tr>
+<tr><td>GLM-5 / OpenCode</td><td class="n">64.2</td><td class="n">65.6</td><td class="n">69.7</td><td class="n">67.8</td><td class="n">75.7</td><td class="n">79.6 (+3.9)</td></tr>
+<tr><td>GLM-5 / Codex</td><td class="n">64.4</td><td class="n">64.1</td><td class="n">74.2</td><td class="n">62.9</td><td class="n">75.3</td><td class="n">78.3 (+3.0)</td></tr>
+</table></div>
+<p class="src">† Meta-Harness optimises offline on the training half; the other methods see only the test stream.</p>
+<h3>JobBench score and LAB Partial (Table 2)</h3>
+<div class="tw"><table>
+<tr><th>Configuration</th><th class="n">JB base</th><th class="n">JB Harness²</th><th class="n">JB +Rec.</th><th class="n">LAB base</th><th class="n">LAB Harness²</th><th class="n">LAB +Rec.</th></tr>
+<tr><td>Gemini / OpenCode</td><td class="n">31.5</td><td class="n">36.0</td><td class="n">+3.0</td><td class="n">79.9</td><td class="n">81.9</td><td class="n">+2.6</td></tr>
+<tr><td>Gemini / Codex</td><td class="n">33.9</td><td class="n">35.3</td><td class="n">+4.2</td><td class="n">71.6</td><td class="n">75.6</td><td class="n">+2.9</td></tr>
+<tr><td>GLM-5 / OpenCode</td><td class="n">20.6</td><td class="n">24.2</td><td class="n">+4.2</td><td class="n">59.6</td><td class="n">71.4</td><td class="n">+6.7</td></tr>
+<tr><td>GLM-5 / Codex</td><td class="n">23.6</td><td class="n">24.8</td><td class="n">+3.1</td><td class="n">58.1</td><td class="n">65.9</td><td class="n">+4.8</td></tr>
+</table></div>
+<h3>How to read these numbers</h3>
+<ul>
+<li><b>Consistent, not uniform.</b> One step beats the base in all 12 benchmark–configuration pairs. The gains range from +1.2 (GLM-5 / Codex JobBench) to +11.8 (GLM-5 / OpenCode LAB).</li>
+<li><b>Against baselines.</b> Harness² beats every baseline on WorkBuddy-Bench average and JobBench in all four configurations. On LAB, Meta-Harness leads for Gemini under Codex (76.5 against 75.6). ReasoningBank falls up to 6.6 points below base on coding (GLM-5 / Codex Code, 56.8 → 50.2). Harness Scaling is below base in 7 of 12 pairs.</li>
+<li><b>Weaker models gain more on WorkBuddy-Bench and LAB.</b> GLM-5 gains +11.5 and +10.9 on WorkBuddy-Bench average; Gemini gains +5.1 and +3.0. On JobBench the order reverses: Gemini +4.5 and +1.4, GLM-5 +3.6 and +1.2.</li>
+<li><b>"Harness over model" has limits.</b> GLM-5 with one step (75.7, 75.3) passes base Gemini (72.4, 74.5) on WorkBuddy-Bench. On LAB, GLM-5 with one step (71.4, 65.9) stays below base Gemini (79.9, 71.6). On JobBench, GLM-5 (24.2, 24.8) stays below base Gemini (31.5, 33.9).</li>
+<li><b>Fewer steps, often.</b> On WorkBuddy-Bench, Harness² often uses fewer executor steps per task than the base (Gemini / OpenCode 25.4 → 21.9, Table 1). Tool-error rates fall on all three benchmarks: 0.8% → 0.5%, 14.4% → 9.1%, 2.0% → 1.6% (Table 7). Tool calls fall on WorkBuddy-Bench (20.0 → 17.8) but rise on JobBench (27.4 → 32.8) and LAB (20.8 → 25.2).</li>
+</ul>
+
+<h2 id="analysis">9. What the analyses show</h2>
+<div class="tw"><table>
+<tr><th>Question</th><th>Finding</th><th>Source</th></tr>
+<tr><td>Is it compute-efficient?</td><td>Both Harness² settings lie on the empirical Pareto frontier of score gain against total tokens (execution + improvement). Gemini / OpenCode, k = 1 → 5: gain over base 4.5 → 7.5 on JobBench, 5.1 → 8.4 on WorkBuddy-Bench. Meta-Harness uses more compute than Harness² at k = 5 for a lower score.</td><td>Fig. 6</td></tr>
+<tr><td>Which parts matter?</td><td>Without library −3.1 / −1.8; without scoping −2.9 / −3.7; without composition −1.6 / −1.9 (WorkBuddy-Bench / JobBench, k = 1).</td><td>Table 3</td></tr>
+<tr><td>Does it need a stronger editor?</td><td>No. With the same model as executor and editor (OpenCode, k = 2), all five models from GLM-5 to Claude Opus 5 improve on every benchmark. Opus 5: +3.3, +5.5, +3.0 (WB, JB, LAB). GLM-5: +13.7 on LAB.</td><td>Fig. 8</td></tr>
+<tr><td>Does a harness transfer to another model?</td><td>The Gemini-tuned harness, unchanged: GLM-5 Code 58.5 → 75.8 (+17.3); Gemini 3.7 Flash +0.3 Code, +6.4 Office; Claude Opus 4.8 +2.6 Code, +1.1 Office. The benefit varies strongly by model and domain.</td><td>Fig. 12</td></tr>
+<tr><td>Does it beat production harnesses?</td><td>Starting from OpenCode at k = 5, Harness² beats the best fixed harness (CodeBuddy, OpenCode, Codex or Claude Code) by 4.6, 5.8, 4.9 on Code, Web, Office. Its gain over its own start is 7.4, 8.4, 9.4.</td><td>Fig. 13</td></tr>
+<tr><td>Does the library help in hindsight?</td><td>Leave-one-out re-run (own entry removed, later entries allowed): 77.5 → 79.4 WorkBuddy-Bench, 36.0 → 37.7 JobBench. This is offline reuse, not an online gain.</td><td>Fig. 11</td></tr>
+</table></div>
+<h3>Five more worked cases (Appendix E.7)</h3>
+<div class="tw"><table>
+<tr><th>Case</th><th>Failure in the reference</th><th>Edit</th><th class="n">Score</th></tr>
+<tr><td>WB Code, router tests</td><td>Tool calls written as plain text; nothing runs</td><td>One tool-guidance file (C4, 1,023 B): never write a tool call as text</td><td class="n">60.0 → 100.0</td></tr>
+<tr><td>WB Office, channel compare</td><td>Aggregated at the wrong grain</td><td>Skill pins grain and derived fields (C6); guardrail: inputs read-only, clean before aggregating (C2)</td><td class="n">23.6 → 100.0</td></tr>
+<tr><td>WB Web, CSV mapping wizard</td><td>Page state frozen at first render</td><td>Skill: one source of truth, re-derive on change (C6); offline-check script (C7); no-network guardrail (C2)</td><td class="n">64.0 → 100.0</td></tr>
+<tr><td>LAB arbitration redline</td><td>Markup left in Word's track-changes layer; vanishes as text</td><td>Skill: strikethrough/bold in-body markup (C6); 156 B guardrail that loads it (C2)</td><td class="n">44.4 → 94.5</td></tr>
+<tr><td>JobBench social-science RA (Opus 5 as executor and editor)</td><td>Research expands to fill the budget; files unwritten</td><td>All eight components, including a watchdog plugin (C8), a citable-table subagent (C5), domain memory (C3)</td><td class="n">72.0 → 100.0</td></tr>
+</table></div>
+<p>The watchdog plugin in the last case is a good model of C8. After 25 tool calls (<code>FIRST_WARN = 25</code>) with no output files, it appends a warning to the tool result: stop researching and write every required artifact. Its comments say "An instruction is skippable; a line appended to a tool result is not" and "never blocks; only appends".</p>
+
+<h2 id="failures">10. Failures and limits</h2>
+<p>Fig. 14 lists nine regressions in three groups. These are the cases to remember, because they show where label-free self-improvement breaks.</p>
+<div class="card warn">
+<p><b>Group 1 — Blind selection picked a weaker candidate.</b> WB-code: the pool scored 95, 85, 85, 80 and 55; the selector took the 55 as "the complete, plainest implementation" (96 → 55; the figure prints the reference as 96 and the best candidate as 95). WB-web: four of five candidates scored 100; the pick failed one static check (100 → 70). LAB transfer pricing: the selector ranked precision, but the criteria reward coverage (54 → 26).</p>
+<p><b>Group 2 — The edit itself capped the pool.</b> WB-code header injection: an edit said "keep key = name storage; it must not be 'fixed'", but the reference lowercases keys; all four candidates inherited the rule and scored 42 (50 → 42). WB-code validator cache: the edit said an id()-keyed cache is enough, and the skill's own checker reported PASS three times — "A checker written by the editor cannot catch the editor's assumption" (75 → 64). LAB notice of deficiency: a skill pre-decided a legal position that the criterion rewards the opposite of (83 → 81).</p>
+<p><b>Group 3 — Neither the edit nor the pick.</b> JobBench web administrators: a bimodal all-or-nothing criterion, sampling noise (31 → 24). WB-web particle boundary: three judge sessions returned no verdict; a judge crash, not a harness fault (44 → 10). JobBench court clerks: a PDF form-filling skill worked (33 of 33 values confirmed) but no criterion reads those PDFs; 85 of 132 steps went into it (16 → 8).</p>
+</div>
+<p><b>Stated limitations (Appendix F).</b> (1) Cost: more executions and editor sessions; parallel runs cut latency, not compute; only a bounded budget range was tested. (2) Execution-based feedback is sensitive to run variability and shared model biases; it does not guarantee correctness or transfer.</p>
+<p><b>Future work (Appendix G).</b> Manage a growing library (merge overlaps, retire old lessons, better retrieval). Choose the recursion form and budget per task, and stop when more probes add little new evidence.</p>
+<h3>What the method captures and what it misses</h3>
+<div class="tw"><table>
+<tr><th>Captures</th><th>Misses</th></tr>
+<tr><td>Procedural failures that a trajectory shows (unread inputs, unverified outputs, pseudo tool calls).</td><td>Errors the model shares across all its runs. All candidates and the checker come from the same evidence and biases (Fig. 14, group 2).</td></tr>
+<tr><td>Cost-aware placement of fixes (skill, script, plugin before always-on prose).</td><td>Task value: an edit can work and still score nothing (court clerks).</td></tr>
+<tr><td>Reusable experience across a task stream without labels.</td><td>Library management at scale (Appendix G).</td></tr>
+<tr><td>Gains with the same model as editor (Fig. 8).</td><td>Cheap use on a one-off quick prompt: one step is 4 executor runs.</td></tr>
+</table></div>
+
+<h2 id="video">11. Video claims, checked against the paper</h2>
+<p>The YouTube explainer (pW2ktrJlsyE) is a good first pass. Some claims are correct, some need a qualifier, and one is not in the paper.</p>
+<div class="tw"><table>
+<tr><th>Video claim</th><th>Paper says</th><th>Verdict</th></tr>
+<tr><td>"No single harness won everywhere. Claude Code better at coding and spreadsheets, Codex better at web."</td><td>Fig. 13: Claude Code best on Code and Office; Codex best on Web. Four fixed harnesses: CodeBuddy, OpenCode, Codex, Claude Code.</td><td>Correct</td></tr>
+<tr><td>"The agent can … edit its own control loop while it works."</td><td>A separate editor session (Claude Opus 4.8 by default) edits the harness between full re-runs of the same task. The executor never edits itself during a run. Same model as editor is a side test (Fig. 8, k = 2).</td><td>Needs a qualifier</td></tr>
+<tr><td>"Adding rules to the system prompt makes the agent worse."</td><td>The paper argues always-on prose costs budget (Prompt 1). Fig. 7 tests direct editing without execution, not prompt-only growth.</td><td>Reasoning is in the paper; the specific test is not</td></tr>
+<tr><td>"Writing its own harness blindly … performance dropped by 10%."</td><td>Fig. 7: Code 73.4 → 63.2 (−10.2 points); Web 69.9 → 65.0 (−4.9); Office 74.0 → 77.1 (+3.1).</td><td>Code only, and points, not %</td></tr>
+<tr><td>"Only proven edits get merged."</td><td>Contrasts "inform subsequent composition rather than verify task correctness" (paper §2.2.1).</td><td>Overstated</td></tr>
+<tr><td>"Watchdog hook … forced it to stop researching."</td><td>Fig. 19 plugin appends a warning after 25 calls with no output; "never blocks; only appends".</td><td>Overstated: it warns, it does not force</td></tr>
+<tr><td>"Boosted task accuracy by 35 to 50 points in a single step."</td><td>Single-task case studies: +34.7 (Fig. 9), +50.1 (Fig. 18). Benchmark mean one-step gains reach +11.5 (Table 1) and +11.8 pp (Table 2).</td><td>True per task, not per benchmark</td></tr>
+<tr><td>"GLM-5 with an evolved harness beats Gemini 3.5 Flash on its default harness."</td><td>True on WorkBuddy-Bench (75.7 vs 72.4; 75.3 vs 74.5). False on LAB (71.4 vs 79.9) and JobBench (24.2 vs 31.5).</td><td>True on one benchmark</td></tr>
+<tr><td>"Smaller model's code score jumped by 17 points instantly."</td><td>GLM-5 Code 58.5 → 75.8 (+17.3) with the Gemini-tuned harness (Fig. 12).</td><td>Correct</td></tr>
+<tr><td>"Four to 20 full agent runs for a single task."</td><td>Derived: k = 1 is 4 executor runs, k = 5 is 20 (<a href="#scale">§6</a>).</td><td>Correct</td></tr>
+<tr><td>"Self-written checker reported pass three times while failing the real test."</td><td>Fig. 14, validator cache case, 75 → 64.</td><td>Correct</td></tr>
+<tr><td>"Agent downloaded the benchmark's grading rubric from Hugging Face."</td><td>Not in the paper. The repo's <code>docs/EXPERIMENTS.md</code> says a Codex rollout on JobBench downloaded its task's rubric (<code>RUBRICS.json</code> is public on Hugging Face) during a validation run of the release (<a href="#repo">§12</a>).</td><td>Correct, but the source is the repo, not the paper</td></tr>
+</table></div>
+
+<h2 id="repo">12. The code release</h2>
+<p>The repository <a href="https://github.com/google-research/harness2">google-research/harness2</a> is public, Apache-2.0, package <code>harness2</code> 0.1.0, about 12,700 lines of Python. It targets Linux with Python 3.12 and <code>uv</code>; the code hardcodes POSIX paths such as <code>.venv/bin/python</code>, so on Windows 11 use WSL for benchmark runs. I read the code; I did not run it.</p>
+<h3>Where each idea lives in the code</h3>
+<div class="tw"><table>
+<tr><th>Idea</th><th>File</th><th>Key names</th></tr>
+<tr><td>Harness as files</td><td><code>harness2/core/tree.py</code></td><td><code>Tree = dict[str, str]</code> (path → content), <code>validate</code>, <code>autotrigger</code>, <code>diff_summary</code></td></tr>
+<tr><td>Two executor surfaces</td><td><code>harness2/substrate/opencode.py</code>, <code>codex.py</code></td><td><code>OPENCODE_SURFACE</code> (always-on cap <code>24_000</code> chars), <code>CODEX_SURFACE</code> (<code>AGENTS.md</code>, cap <code>8_000</code>; hooks in <code>.codex/hooks.json</code>)</td></tr>
+<tr><td>Propose–Probe–Compose</td><td><code>harness2/core/recursion.py</code></td><td><code>run_parallel</code> (labels <code>inv1..invk</code>, <code>dom1..domk</code>, <code>agg1..aggk</code>), <code>run_sequential</code> (<code>inv{t}</code>, <code>dom{t}</code>, <code>c{t}</code>), <code>_run_stage</code> (retry once, else keep previous tree)</td></tr>
+<tr><td>Budget</td><td><code>harness2/core/ledger.py</code></td><td>"R = 4k rollouts and P = 3k improvement stages"; <code>Ledger.assert_identity</code>. Selection and reflection are not counted.</td></tr>
+<tr><td>Prompts</td><td><code>harness2/core/prompts.py</code></td><td><code>_INV_TEMPLATE</code>, <code>_DOM_TEMPLATE</code>, <code>aggregate()</code>, <code>compose_round()</code>, <code>select()</code>, <code>experience()</code></td></tr>
+<tr><td>Evidence folder</td><td><code>harness2/core/context.py</code></td><td><code>build()</code> writes <code>context/task.md</code>, <code>source/</code>, <code>rollouts/</code>, <code>harness/</code>, <code>pool/</code>, <code>library/</code>…</td></tr>
+<tr><td>Selection + reflection</td><td><code>harness2/core/selection.py</code></td><td><code>run_selection</code> (anonymous shuffled IDs; at <code>--k 1</code> <code>trivial_selection</code>, no model call), <code>reflect_adoption</code></td></tr>
+<tr><td>Library (level 2)</td><td><code>harness2/core/library.py</code></td><td><code>Library.add()</code> stores tree + <code>EXPERIENCE.md</code>, rebuilds <code>INDEX.md</code>; <code>lib.retain(task_ids[: i - 1])</code> limits each task to earlier entries</td></tr>
+<tr><td>Grader leak guards</td><td><code>core/spec.py</code>, <code>core/context.py</code></td><td><code>leak_globs</code> (JobBench <code>RUBRICS.json</code>, WorkBuddy <code>tests/**</code>…), <code>assert_no_grader_verdicts</code>; <code>BenchPrompts</code> rejects the words "benchmark", "grader", "rubric", "score"</td></tr>
+</table></div>
+<p>The base harness is almost empty: each always-on file holds only a comment. The JobBench manifest is <code>third_party/jb_runner/harness_baseline_oc/harness.yaml</code>. Note one difference from the paper: that manifest numbers guardrails and skills both as "c6", and marks "c2 context_policy" as not injectable on OpenCode. The paper's Table 5 calls guardrails C2.</p>
+<h3>Try it with no API key</h3>
+<p>The demo uses scripted editors and real Python runs, so it needs no credentials.</p>
+<pre><code>uv venv --python 3.12 .venv
+source .venv/bin/activate
+uv pip install -e '.[render]'
+harness2-demo --output runs/demo --k 2</code></pre>
+<p>Demo flags: <code>--output</code>, <code>--k</code>, <code>--mode parallel|sequential|both</code>.</p>
+<h3>One real benchmark task (LAB)</h3>
+<pre><code>harness2-setup lab
+harness2-check --bench lab
+harness2 --bench lab --k 1 --mode parallel \
+  --only-domains antitrust-competition --max-tasks 1
+harness2-judge --bench lab --k 1 --mode parallel
+harness2-report --bench lab --k 1 --mode parallel</code></pre>
+<div class="card warn">
+<p><b>Warning — three setup facts before you start.</b></p>
+<ol>
+<li>The README says <code>cp .env.example .env</code>, but the repository has no <code>.env.example</code>. Create <code>.env</code> by hand. Required: <code>HARNESS2_SOLVER_MODEL</code> (OpenCode <code>provider/model</code> form). Common: <code>GOOGLE_CLOUD_PROJECT</code>, <code>HARNESS2_IMPROVER_MODEL</code>, <code>HARNESS2_JUDGE_MODEL</code>, <code>HARNESS2_RUNS_DIR</code>.</li>
+<li>Model runs cost API money. Start with <code>--dry-run</code> and <code>--max-tasks 1</code>. Model-backed runs also need Node.js 20+ and the Google Cloud CLI; WorkBuddy needs Docker; LAB needs <code>pandoc</code> and <code>poppler-utils</code>.</li>
+<li>The improver channel <code>claude_cli</code> runs <code>claude --dangerously-skip-permissions -p</code>. Run it only in a sandbox.</li>
+</ol>
+</div>
+<h3>The rubric-download story</h3>
+<p>This story is in <code>docs/EXPERIMENTS.md</code> ("Web access"), not in the paper: "In a validation run of this release, a Codex rollout on JobBench downloaded its task's rubric without being instructed to." JobBench publishes each task's <code>RUBRICS.json</code> on Hugging Face, and the release does not restrict network access. The docs tell you to block <code>huggingface.co</code>, <code>hf.co</code>, <code>*.hf.co</code>, <code>github.com</code> and <code>raw.githubusercontent.com</code> for the executor at the network level (egress firewall or DNS), because Codex runs with its sandbox disabled.</p>
+<p class="src">Other notes from the repo: <code>--seed</code> sets task order only, not model sampling. A failed judge stays unscored, not zero. The repo does not show how GLM-5 was served; <code>dependencies/PINNED.md</code> says paper runs "may have used different tasks, model deployments, and additional local tooling".</p>
+
+<h2 id="apply">13. Apply it to your Claude Code harness</h2>
+<p>The eight components map almost one-to-one onto the parts of Claude Code that you already build. This mapping is my reading; the paper tests OpenCode and Codex, and uses Claude Code only as a fixed comparison harness (Fig. 13).</p>
+<div class="tw"><table>
+<tr><th>Harness² component</th><th>Claude Code equivalent</th><th>Cost in Claude Code</th></tr>
+<tr><td>C1 System prompt</td><td><code>CLAUDE.md</code> (project or <code>~/.claude/CLAUDE.md</code>), output style</td><td>Always on</td></tr>
+<tr><td>C2 Guardrails</td><td>Rules sections in <code>CLAUDE.md</code>; <code>permissions.deny</code> in <code>settings.json</code> for hard limits</td><td>Always on (text) / enforced (permissions)</td></tr>
+<tr><td>C3 Memory</td><td>Memory files and <code>MEMORY.md</code> index</td><td>Always on (index)</td></tr>
+<tr><td>C4 Tool guidance</td><td>Tool notes in <code>CLAUDE.md</code>; MCP server instructions</td><td>Always on</td></tr>
+<tr><td>C5 Subagents</td><td><code>.claude/agents/&lt;name&gt;.md</code></td><td>Own context; returns text</td></tr>
+<tr><td>C6 Skills</td><td><code>.claude/skills/&lt;name&gt;/SKILL.md</code> (+ scripts inside)</td><td>Description always on; body on invoke</td></tr>
+<tr><td>C7 Scripts</td><td>Scripts in the repo or skill folder, run with Bash</td><td>On demand</td></tr>
+<tr><td>C8 Plugin</td><td>Hooks in <code>settings.json</code> or a plugin: <code>PreToolUse</code>, <code>PostToolUse</code>, <code>Stop</code>, <code>UserPromptSubmit</code></td><td>Outside model discretion</td></tr>
+</table></div>
+<p>The paper's watchdog (Fig. 19) has a direct Claude Code form: a <code>PostToolUse</code> hook that counts calls and adds context after N calls with no output file. The paper's "block finish until outputs verify" pattern has a <code>Stop</code> hook form. Follow the paper's rule for C8: add a hook only after repeated evidence that clear prose is skipped, and never block valid completion.</p>
+<h3>Run one Propose–Probe–Compose step by hand</h3>
+<p>Use a task you do often, with a deliverable you can inspect. Budget: 4 runs of the task.</p>
+<ol>
+<li>Copy your current harness (the files in the table above) to a folder named <code>H0/</code>.</li>
+<li>Run the task once in a fresh session. Save the full transcript and the deliverable as the reference.</li>
+<li>Read the transcript. Write down each moment where the agent went wrong. Name the moment; a feeling is not evidence.</li>
+<li>Make candidate INV: edit only procedure, tool use and verification. Put the fix in the cheapest form: skill, then script, then subagent, then hook, then always-on text.</li>
+<li>Make candidate DOM in a separate copy: add only practitioner knowledge, as a skill with a trigger line.</li>
+<li>Run each candidate once on the same task, in a fresh session.</li>
+<li>Compare each run with the reference at the moments from step 3. Mark each edit: fixed, no change, or regression.</li>
+<li>Compose: keep only the edits with a named supporting moment. Keeping H₀ is a valid result.</li>
+<li>Run the composed harness once. This is the delivered output.</li>
+<li>Write one <code>EXPERIENCE.md</code> entry with <code>cue</code>, <code>lesson</code>, <code>evidence</code>, <code>confidence</code>. Write <code>NO_ENTRY</code> if no edit has clean evidence.</li>
+</ol>
+<div class="card warn">
+<p><b>Warning — the three rules that discard a proposal (Prompt 1).</b></p>
+<ol>
+<li>Every skill needs a trigger line: its folder name must appear in always-on text ("When &lt;situation&gt;, load the <code>&lt;name&gt;</code> skill"). The paper calls this "the most violated rule here by a wide margin".</li>
+<li>No template braces in always-on text. Their files go through Jinja with StrictUndefined, so a doubled brace kills the job before it starts.</li>
+<li>Every script you name must exist and ship in the same proposal, at <code>skills/&lt;skill-name&gt;/scripts/&lt;file&gt;.py</code> for a skill's own helper.</li>
+</ol>
+</div>
+<div class="card ok">
+<p><b>Five rules to take away (they cost nothing to adopt).</b></p>
+<ol>
+<li>Keep always-on text short. If you add a line, delete a line.</li>
+<li>Put domain playbooks in skills with explicit trigger lines.</li>
+<li>Replace repeated hand reasoning (cell checks, format conversions) with a script.</li>
+<li>Enforce the rule that the model keeps skipping with a hook, not with more prose.</li>
+<li>Use a checker that the editing model did not write, when you can. A self-written checker shares the writer's assumptions (Fig. 14).</li>
+</ol>
+</div>
+
+<h2 id="quiz">14. Self-test</h2>
+<p>Answer each question aloud before you open it. Return to the cited section for each miss.</p>
+<details><summary>1. What does the "²" in Harness² mean?</summary><p>Two levels of recursion. Task-level recursion refines the execution harness for the current task. Harnessing-level recursion updates the improvement harness (its library) so that future refinement is better. <a href="#core">§1</a>, <a href="#library">§7</a>.</p></details>
+<details><summary>2. Name the eight components. Which four are always on?</summary><p>C1 system prompt, C2 guardrails, C3 memory, C4 tool guidance (always on); C5 subagents, C6 skills, C7 scripts, C8 plugin. Table 5, <a href="#components">§4</a>.</p></details>
+<details><summary>3. Which component is the only one that adds an inference context?</summary><p>C5 subagents. Each runs in its own context window and returns only its result. Table 5.</p></details>
+<details><summary>4. Why does the reference run not tell you whether the output is correct?</summary><p>There is no answer key at test time. The reference shows how the harness behaves (its trajectory), which is evidence about procedure, not correctness. Paper §2.2.1, <a href="#task">§5</a>.</p></details>
+<details><summary>5. What does the INV editor own, and what is it forbidden to add?</summary><p>It owns procedure, tool use and completion. It must not add professional rules, required domain sections or matter facts; the DOM candidate owns those. Prompt 1.</p></details>
+<details><summary>6. How many executor runs does one task cost at k = 1? At k = 5 parallel?</summary><p>k = 1: 1 reference + 2 probes + 1 composed = 4. k = 5: 5 + 10 + 5 = 20. <a href="#scale">§6</a>.</p></details>
+<details><summary>7. Rank the editor's preferred forms for a new fix.</summary><p>Skill, script, subagent, plugin, always-on text last. Prompt 1, <a href="#components">§4</a>.</p></details>
+<details><summary>8. Which ablation costs the most on JobBench, and by how much?</summary><p>Removing scoping (two generic editors instead of INV and DOM): −3.7 (36.0 → 32.3). Table 3.</p></details>
+<details><summary>9. Does the next task inherit the previous task's adopted harness?</summary><p>No. Every task starts from H₀. Earlier components are reused only if an editor copies them from the library through Propose, and their workspace facts must be re-checked. Paper §2.3.</p></details>
+<details><summary>10. Why does the reflector prefer the verdict "confounded"?</summary><p>When a candidate changed several components at once, or one run is the only evidence, no run isolates the cause. A wrong attribution "poisons the library for every later task". Prompt 6.</p></details>
+<details><summary>11. Is "a weaker model with a better harness beats a stronger model" true on all three benchmarks?</summary><p>No. True on WorkBuddy-Bench (GLM-5 75.7 vs Gemini base 72.4). False on LAB (71.4 vs 79.9) and JobBench (24.2 vs 31.5). Tables 1 and 2, <a href="#results">§8</a>.</p></details>
+<details><summary>12. The video says blind editing drops performance by 10%. What is the precise claim?</summary><p>Direct editing without execution, probes or library: Code 73.4 → 63.2 (−10.2 points), Web 69.9 → 65.0 (−4.9), Office 74.0 → 77.1 (+3.1). Fig. 7.</p></details>
+<details><summary>13. Name the three groups of failures in Fig. 14 and one example of each.</summary><p>Blind selection took a weaker candidate (picked 55 over 95). The edit capped the pool (self-written checker PASS three times; 75 → 64). Neither edit nor pick (judge crash, 44 → 10). <a href="#failures">§10</a>.</p></details>
+<details><summary>14. What does the Fig. 19 watchdog plugin do, exactly?</summary><p>After 25 tool calls with no output file, it appends a warning to the tool result: stop researching, write every artifact. It never blocks; it only appends. <a href="#analysis">§9</a>.</p></details>
+<details><summary>15. Do the gains require a stronger editor model?</summary><p>No. With the same model as executor and editor (OpenCode, k = 2), all five models improve on every benchmark; GLM-5 gains +13.7 on LAB. Fig. 8.</p></details>
+<details><summary>16. Where in Claude Code would you put a rule that the model keeps ignoring?</summary><p>In a hook (C8 equivalent), for example <code>PostToolUse</code> or <code>Stop</code>, after repeated evidence that clear prose is skipped. The hook must not block valid completion. <a href="#apply">§13</a>.</p></details>
+
+<h2 id="sources">15. Sources</h2>
+<ul>
+<li>Paper (primary, read in full, 37 pages): <a href="https://arxiv.org/abs/2610.14224">arXiv:2610.14224v1</a>; local copy <code>2610.14224v1.pdf</code>.</li>
+<li>Project page: <a href="https://harness2.github.io/">harness2.github.io</a>; data file <code>data/results.json</code>. Its numbers match Tables 1 and 2. Its figures were not readable as text.</li>
+<li>Code: <a href="https://github.com/google-research/harness2">github.com/google-research/harness2</a> (shallow clone of <code>main</code>, read 2026-10-24, not executed). See <a href="#repo">§12</a>.</li>
+<li>Video explainer: <a href="https://www.youtube.com/watch?v=pW2ktrJlsyE">youtube.com/watch?v=pW2ktrJlsyE</a>; transcript in <code>transcript.txt</code>. Checked in <a href="#video">§11</a>.</li>
+</ul>
+<p class="src">Not covered: exact data points in Fig. 5, 6, 8, 12 and 13 that are only in chart form. The text quotes only the values that the paper states in prose, tables, or printed figure labels.</p>
+</main>
+</div>
+<script>
+(function(){
+var RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
+var SUB=['₀','₁','₂','₃'];
+function box(id,x,y,w,h,lines){
+  var s='<g class="nd" id="'+id+'"><rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" rx="7"/>';
+  var y0=y+h/2-(lines.length-1)*7.5+4;
+  lines.forEach(function(t,i){s+='<text x="'+(x+w/2)+'" y="'+(y0+i*15)+'" text-anchor="middle"'+(i?'':' class="b"')+'>'+t+'</text>'});
+  return s+'</g>';
+}
+function edge(id,d,m){return '<path class="ed" id="'+id+'" d="'+d+'" marker-end="url(#'+m+')"/>'}
+function marker(m){return '<defs><marker id="'+m+'" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#64748b"/></marker></defs>'}
+function st(root,id,c){var e=root.querySelector('#'+id);if(!e)return;e.classList.remove('on','now','hid','done');if(c)e.classList.add(c)}
+function stepper(root,n,render){
+  var i=0,tm=null,cap=root.querySelector('.cap'),ct=root.querySelector('.ct'),pl=root.querySelector('[data-a=play]');
+  function go(j){i=Math.max(0,Math.min(n-1,j));cap.innerHTML=render(i);ct.textContent='Step '+(i+1)+' of '+n}
+  function stop(){clearInterval(tm);tm=null;pl.textContent='▶ Play'}
+  root.querySelector('.ctrl').addEventListener('click',function(e){
+    var a=e.target.getAttribute('data-a');if(!a)return;
+    if(a==='play'){
+      if(tm){stop();return}
+      if(i>=n-1)go(0);
+      pl.textContent='❚❚ Pause';
+      tm=setInterval(function(){if(i>=n-1){stop();return}go(i+1)},2800);
+    }else{stop();go(a==='next'?i+1:a==='prev'?i-1:0)}
+  });
+  go(0);
+}
+
+/* Fig. B: two recursion levels over three tasks */
+(function(){
+  var R=document.getElementById('figB'),S=R.querySelector('svg'),g=marker('ahB');
+  g+='<rect class="pn" x="10" y="32" width="120" height="296" rx="10"/><rect class="pn" x="145" y="32" width="500" height="296" rx="10"/><rect class="pn" x="660" y="32" width="190" height="296" rx="10"/>';
+  g+='<text class="pt" x="20" y="22">TASK STREAM</text><text class="pt" x="155" y="22" id="b-title"></text><text class="pt" x="670" y="22">LEVEL 2 — LIBRARY</text>';
+  [1,2,3].forEach(function(t){g+=box('b-q'+t,25,40+t*50,90,38,['task q'+SUB[t]])});
+  g+='<text class="lbl" x="70" y="262" text-anchor="middle">… q<tspan baseline-shift="sub" font-size="9">N</tspan></text><text class="lbl" x="70" y="300" text-anchor="middle">no labels,</text><text class="lbl" x="70" y="315" text-anchor="middle">no replay</text>';
+  g+=box('b-h0',160,110,82,44,['H₀','base harness'])+box('b-ref',262,110,82,44,['Reference','run e₀']);
+  g+=box('b-inv',364,50,82,44,['INV editor','candidate'])+box('b-dom',364,170,82,44,['DOM editor','candidate']);
+  g+=box('b-pinv',466,50,82,44,['Probe','run INV'])+box('b-pdom',466,170,82,44,['Probe','run DOM']);
+  g+=box('b-comp',553,110,82,44,['Compose','run H′'])+box('b-out',553,250,82,44,['Deliverable','returned']);
+  g+=box('b-refl',330,250,170,44,['Reflect (level 2)','verdicts + one lesson']);
+  [1,2,3].forEach(function(t){g+=edge('b-eq'+t,'M115 '+(59+t*50)+' C138 '+(59+t*50)+' 136 132 156 132','ahB')});
+  g+=edge('b-eh','M242 132 H258','ahB')+edge('b-eri','M344 126 C352 126 352 72 360 72','ahB')+edge('b-erd','M344 138 C352 138 352 192 360 192','ahB');
+  g+=edge('b-eip','M446 72 H462','ahB')+edge('b-edp','M446 192 H462','ahB');
+  g+=edge('b-epc','M548 72 C580 72 594 84 594 106','ahB')+edge('b-epd','M548 192 C580 192 594 180 594 158','ahB');
+  g+=edge('b-eco','M594 154 V246','ahB')+edge('b-eor','M553 272 H504','ahB')+edge('b-erl','M415 294 V316 H755 V276','ahB');
+  g+=edge('b-elib','M675 90 C640 90 640 38 600 38 H420 C410 38 405 40 405 46','ahB')+edge('b-elib2','M675 112 C656 112 652 122 652 140 V230 H405 V218','ahB')+'<text class="lbl" id="b-libl" x="470" y="27">editors read + copy</text>';
+  var L=[['entry 1','H★₁ tree + edit rows','lesson: cue → operation'],['entry 2','H★₂ tree + edit rows','lesson: NO_ENTRY'],['entry 3','H★₃ tree + edit rows','lesson: cue → operation']];
+  L.forEach(function(l,j){g+=box('b-L'+(j+1),675,62+j*68,160,56,l)});
+  S.innerHTML=g;
+  var ST={h0:0,ref:1,inv:2,dom:2,pinv:3,pdom:3,comp:4,out:4,refl:5};
+  var EST={eh:1,eri:2,erd:2,eip:3,edp:3,epc:4,epd:4,eco:4,eor:5,erl:6};
+  var CAP=[
+    function(t){return 'Task q'+SUB[t]+' arrives. The harness resets to the base H₀. '+(t===1?'The library is empty.':'The tuned harness of task q'+SUB[t-1]+' is not carried forward; only the library keeps it.')},
+    function(){return '<b>Reference.</b> H₀ runs the task once. The trajectory e₀ shows how the harness behaves. No score, rubric or answer key is available.'},
+    function(t){return '<b>Propose.</b> The INV editor (how the agent works) and the DOM editor (what a practitioner knows) read e₀. Each writes one candidate harness. '+(t===1?'The library is empty, so there is nothing to copy.':'They also read the library and can copy a component, but they must re-check its workspace facts.')},
+    function(){return '<b>Probe.</b> Each candidate runs on the same task, with the same model and environment. The contrast with e₀ shows fixed, unchanged or regressed behaviour.'},
+    function(){return '<b>Compose.</b> A composer keeps, revises or drops each edit, and cites a trajectory moment for each decision. The composed harness H′ runs. That run is the deliverable.'},
+    function(t){return '<b>Reflect (level 2 starts).</b> The reflector reads the full record 𝓓'+SUB[t]+'. Each changed component gets a verdict: helped, hurt, no observed effect, or confounded. '+(t===2?'In this illustration no reusable contrast exists, so the lesson is NO_ENTRY. The edit rows are still written.':'It writes at most one lesson.')},
+    function(t){return '<b>Update.</b> The library gains entry '+t+': the full adopted tree H★'+SUB[t]+' plus EXPERIENCE.md. This is Eq. 4: 𝓡'+(t===3?'₄':SUB[t+1])+' = Update(𝓡'+SUB[t]+', H★'+SUB[t]+', 𝓓'+SUB[t]+').'}
+  ];
+  stepper(R,22,function(i){
+    var fin=i===21,t=fin?3:Math.floor(i/7)+1,s=fin?7:i%7,k;
+    R.querySelector('#b-title').textContent=fin?'LEVEL 1 — RUNS ONCE PER TASK':'LEVEL 1 — TASK-LEVEL RECURSION ON q'+SUB[t];
+    for(k in ST)st(R,'b-'+k,s>ST[k]||(k==='refl'&&s===6)?'on':s===ST[k]?'now':'');
+    for(k in EST)st(R,'b-'+k,s>EST[k]?'on':s===EST[k]?'now':'');
+    [1,2,3].forEach(function(j){
+      st(R,'b-q'+j,fin||j<t?'done':j===t?(s===0?'now':'on'):'');
+      st(R,'b-eq'+j,!fin&&j===t?(s===0?'now':'on'):'hid');
+      st(R,'b-L'+j,fin||j<t?'on':j===t&&s===6?'now':'hid');
+    });
+    var lc=t>1?(s===2?'now':s>2?'on':''):'hid';
+    st(R,'b-elib',lc);st(R,'b-elib2',lc);st(R,'b-libl',lc==='hid'?'hid':'');
+    if(fin)return '<b>Summary.</b> The inner loop (level 1) improves the harness for one task, delivers, and then discards that harness. The outer loop (level 2) keeps what each inner loop learned, as files plus lessons. Each benchmark domain has its own library, and it starts empty. Without the library, scores fall 3.1 points on WorkBuddy-Bench and 1.8 on JobBench (Table 3).';
+    return CAP[s](t);
+  });
+})();
+
+/* Fig. C: the JobBench producers example */
+(function(){
+  var R=document.getElementById('figC'),S=R.querySelector('svg'),g=marker('ahC');
+  g+=box('c-h0',15,100,115,60,['H₀','stock OpenCode','Gemini 3.5 Flash']);
+  g+=box('c-ref',150,100,150,60,['Reference run e₀','① figures not reconciled','② outputs not reopened']);
+  g+=box('c-inv',325,25,190,70,['INV candidate','+ C2 guardrails.md 1,464 B','+ C7 scripts 3,881 B']);
+  g+=box('c-dom',325,165,190,70,['DOM candidate','+ C6 SKILL.md 4,942 B','+ C4 tool_guidance.md 645 B']);
+  g+=box('c-pinv',540,35,100,50,['Probe run','contrast vs e₀'])+box('c-pdom',540,175,100,50,['Probe run','contrast vs e₀']);
+  g+=box('c-comp',665,85,180,70,['Compose','kept 4 of 4 edits','each cites a trajectory']);
+  g+=box('c-out',665,185,180,62,['Re-run H′ = delivered','figures cross-checked','memo sections restored']);
+  g+=edge('c-eh','M130 130 H146','ahC')+edge('c-eri','M300 120 C312 120 312 60 321 60','ahC')+edge('c-erd','M300 140 C312 140 312 200 321 200','ahC');
+  g+=edge('c-eip','M515 60 H536','ahC')+edge('c-edp','M515 200 H536','ahC');
+  g+=edge('c-epc','M640 60 C655 60 652 110 661 110','ahC')+edge('c-epd','M640 200 C655 200 652 135 661 135','ahC')+edge('c-eco','M755 155 V181','ahC');
+  g+='<rect class="gr" x="15" y="272" width="830" height="44" rx="8"/><text class="lbl" x="30" y="299">Benchmark grader — runs after the fact; the pipeline never sees these scores</text>';
+  g+='<text class="score" id="c-s0" x="520" y="299">base 43.1</text><text class="score" id="c-s1" x="640" y="299">composed 77.8 (+34.7)</text>';
+  S.innerHTML=g;
+  var ST={h0:0,ref:1,inv:2,dom:3,pinv:4,pdom:4,comp:5,out:6},EST={eh:1,eri:2,erd:3,eip:4,edp:4,epc:5,epd:5,eco:6};
+  var CAP=[
+    'Start: the stock OpenCode harness H₀, with executor Gemini 3.5 Flash. The task: reconcile schedule, roster and budget files into connected production deliverables.',
+    '<b>Reference.</b> H₀ runs once. The trajectory shows two procedural failures, not knowledge gaps: figures were never reconciled across files, and outputs were never reopened after writing. The grader later scores this run 43.1.',
+    '<b>Propose, INV scope.</b> The invariant editor (Claude Opus 4.8) adds a guardrail (C2, 1,464 B): inventory all inputs with <code>scripts/inspect_inputs.py</code>, reconcile each figure, and reopen each output with <code>scripts/verify_outputs.py</code>. It adds those scripts (C7, 3,881 B).',
+    '<b>Propose, DOM scope.</b> The domain editor adds a reconciliation skill (C6, 4,942 B): source hierarchy, committed versus conditional spend, hour caps and rest rules. It adds tool guidance (C4, 645 B): strip symbols and commas from numbers stored as strings.',
+    '<b>Probe.</b> Each candidate runs on the same task, with the same model and environment. The pipeline compares each probe trajectory with e₀. The contrast informs the composer; it does not verify correctness.',
+    '<b>Compose.</b> The composer reads the reference, both candidates, their diffs and all runs. It kept all four edits. Each decision has the form <code>kept|revised|dropped -&gt; &lt;edit&gt; -&gt; &lt;trajectory moment&gt;</code>.',
+    '<b>Re-run.</b> The composed harness H′ runs, and that run is the delivered result. It cross-referenced the figures and restored the memo\'s missing sections. Grader: 43.1 → 77.8 (+34.7). This is one task: the JobBench mean gain for this configuration is +4.5 (Table 2).'
+  ];
+  stepper(R,7,function(i){
+    var k;
+    for(k in ST)st(R,'c-'+k,i>ST[k]?'on':i===ST[k]?'now':'hid');
+    for(k in EST)st(R,'c-'+k,i>EST[k]?'on':i===EST[k]?'now':'hid');
+    st(R,'c-s0',i>=1?'':'hid');st(R,'c-s1',i>=6?'':'hid');
+    return CAP[i];
+  });
+})();
+
+/* Fig. D: run plan for budget k */
+(function(){
+  var R=document.getElementById('figD'),S=R.querySelector('svg'),cap=R.querySelector('.cap'),K=2,M='par',tm=null;
+  function chip(x,y,lab,kind,ph){return '<g class="ch '+kind+'" data-ph="'+ph+'"><rect x="'+x+'" y="'+y+'" width="58" height="22" rx="5"/><text x="'+(x+29)+'" y="'+(y+15)+'" text-anchor="middle">'+lab+'</text></g>'}
+  function hdr(x,t){return '<text class="pt" x="'+x+'" y="22">'+t+'</text>'}
+  function build(){
+    var s=marker('ahD'),w,h,top=44,mx;
+    if(M==='par'){
+      h=top+K*58+16;
+      s+=hdr(20,'BASE')+hdr(120,'EDITORS → PROBES')+hdr(300,'COMPOSERS → FINALS');
+      for(var j=1;j<=K;j++){
+        var y=top+(j-1)*58;
+        s+=chip(20,y+13,'base '+j,'run',0);
+        s+=chip(120,y,'INV '+j,'ses',1)+chip(186,y,'probe','run',2);
+        s+=chip(120,y+26,'DOM '+j,'ses',1)+chip(186,y+26,'probe','run',2);
+        s+=chip(300,y+13,'agg '+j,'ses',3)+chip(366,y+13,'final '+j,'run',4);
+      }
+      s+='<g data-ph="3"><rect class="pool" x="258" y="'+top+'" width="22" height="'+(K*58-10)+'" rx="4"/><text class="lbl" x="269" y="'+(top-6)+'" text-anchor="middle">pool</text></g>';
+      mx=460;mx=sel(s,mx,h,5);s=mx[0];w=mx[1];
+    }else{
+      h=top+Math.max(K*26,86)+28;
+      s+=hdr(20,'BASE');
+      for(var b=1;b<=K;b++)s+=chip(20,top+(b-1)*26,'base '+b,'run',0);
+      for(var r=1;r<=K;r++){
+        var x0=110+(r-1)*150,p=1+3*(r-1);
+        s+=hdr(x0,'ROUND '+r);
+        s+=chip(x0,top,'INV '+r,'ses',p)+chip(x0+64,top,'probe','run',p+1);
+        s+=chip(x0,top+26,'DOM '+r,'ses',p)+chip(x0+64,top+26,'probe','run',p+1);
+        s+=chip(x0,top+60,'comp '+r,'ses',p+2)+chip(x0+64,top+60,'ckpt '+r,'run',p+2);
+        if(r<K)s+='<g data-ph="'+(p+2)+'"><path class="ed on" d="M'+(x0+29)+' '+(top+82)+' V'+(top+92)+' H'+(x0+138)+' V'+(top+11)+' H'+(x0+146)+'" marker-end="url(#ahD)"/><text class="lbl" x="'+(x0+60)+'" y="'+(top+106)+'">H⁽'+'¹²³⁴'[r-1]+'⁾</text></g>';
+      }
+      mx=sel(s,110+K*150,h,3*K+1);s=mx[0];w=mx[1];
+    }
+    S.setAttribute('viewBox','0 0 '+w+' '+h);
+    S.innerHTML=s;
+    cap.innerHTML='<b>Executor runs (teal): 4k = '+4*K+'</b> — '+K+' base + '+2*K+' probes + '+K+' '+(M==='par'?'finals':'checkpoints')+'. <b>Counted improver sessions (orange): 3k = '+3*K+'</b> — '+K+' INV + '+K+' DOM + '+K+' composers. Outside the ledger: '+(K>1?'1 selector + ':'')+'1 reflector. '+(K===1?'At k = 1 the two modes are the same procedure.':M==='par'?'Each composer reads all '+K+' base runs and all '+2*K+' probes in the pool, and writes one final.':'Each round edits the harness of the round before it, using all earlier evidence.');
+    var max=0;S.querySelectorAll('[data-ph]').forEach(function(e){max=Math.max(max,+e.getAttribute('data-ph'))});
+    var cur=RM?max:-1;
+    function show(){S.querySelectorAll('[data-ph]').forEach(function(e){e.classList.toggle('hid',+e.getAttribute('data-ph')>cur)})}
+    clearInterval(tm);show();
+    if(!RM)tm=setInterval(function(){cur++;show();if(cur>=max)clearInterval(tm)},600);
+    R.querySelectorAll('[data-k]').forEach(function(e){e.setAttribute('aria-pressed',+e.getAttribute('data-k')===K)});
+    R.querySelectorAll('[data-m]').forEach(function(e){e.setAttribute('aria-pressed',e.getAttribute('data-m')===M)});
+  }
+  function sel(s,x,h,ph){
+    var y=h/2-11;
+    if(K>1){s+=chip(x,y,'select','ses x',ph);x+=80;ph++}
+    s+=chip(x,y,'reflect','ses x',ph);
+    return [s,x+78];
+  }
+  R.querySelector('.ctrl').addEventListener('click',function(e){
+    var t=e.target;
+    if(t.hasAttribute('data-k'))K=+t.getAttribute('data-k');
+    else if(t.hasAttribute('data-m'))M=t.getAttribute('data-m');
+    else if(!t.hasAttribute('data-a'))return;
+    build();
+  });
+  build();
+})();
+})();
+</script>
+</body>
+</html>
