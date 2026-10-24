@@ -60,6 +60,10 @@ td.c{text-align:center;color:var(--teal)}
 .facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin:12px 0}
 .facts div{background:#172033;border:1px solid var(--b2);border-radius:8px;padding:8px 12px;font-size:14px;color:var(--text2)}
 .facts b{display:block;color:var(--orange);font-size:12px;text-transform:uppercase;letter-spacing:.05em}
+.badge{display:inline-block;font-size:12px;font-weight:600;padding:1px 9px;border-radius:99px;border:1px solid;white-space:nowrap}
+.b-full{color:#4ade80;border-color:#4ade8088}.b-part{color:#2dd4bf;border-color:#2dd4bf88}.b-loop{color:#fde68a;border-color:#fde68a88}.b-one{color:#fb923c;border-color:#fb923c88}.b-comp{color:#94a3b8;border-color:#94a3b888}
+.rec{background:#172033;border:1px solid var(--b2);border-radius:8px;padding:8px 14px;margin:12px 0}
+.pt{fill:#fb923c;font:600 12px system-ui,sans-serif;letter-spacing:.04em}
 @media (prefers-reduced-motion:reduce){.ed.now{animation:none}.fig *{transition:none!important}}
 @media (max-width:860px){.wrap{grid-template-columns:1fr}nav{position:static;max-height:none;border-right:0;border-bottom:1px solid var(--b2);padding:0 0 12px}}
 </style>
@@ -71,6 +75,10 @@ td.c{text-align:center;color:var(--teal)}
 <a href="#how">How to read this report</a>
 <a href="#blocks">Building blocks</a>
 <a href="#matrix">The 10 ideas at a glance</a>
+<div class="grp">Recursion</div>
+<a href="#rec">What "recursive" means</a>
+<a href="#rank">Ranked by recursiveness</a>
+<a href="#minimal">The minimal full build</a>
 <div class="grp">A. Build a harness</div>
 <a href="#i1">1. Hook compiler</a>
 <a href="#i2">2. Reflector + library</a>
@@ -130,22 +138,124 @@ td.c{text-align:center;color:var(--teal)}
 
 <h2 id="matrix">The 10 ideas at a glance</h2>
 <div class="tw"><table>
-<tr><th>#</th><th>Idea</th><th>Ref</th><th>Propose</th><th>Probe</th><th>Compose</th><th>Select</th><th>Reflect</th><th>Task runs needed</th></tr>
-<tr><td>1</td><td><a href="#i1">Hook compiler</a></td><td class="c">●</td><td class="c">●</td><td class="c">●</td><td class="c">●</td><td></td><td class="c">●</td><td>0 (replays logged calls)</td></tr>
-<tr><td>2</td><td><a href="#i2">Reflector + library</a></td><td class="c">●</td><td></td><td></td><td></td><td></td><td class="c">●</td><td>0 (1 reflector session per session)</td></tr>
-<tr><td>3</td><td><a href="#i3">/harness-step skill</a></td><td class="c">●</td><td class="c">●</td><td class="c">●</td><td class="c">●</td><td></td><td class="c">○</td><td>4 per task (k = 1)</td></tr>
-<tr><td>4</td><td><a href="#i4">Always-on diet auditor</a></td><td class="c">●</td><td class="c">●</td><td class="c">●</td><td class="c">●</td><td></td><td class="c">○</td><td>2 × 3–5 probe runs</td></tr>
-<tr><td>5</td><td><a href="#i5">Blind best-of-k selector</a></td><td class="c">●</td><td></td><td></td><td></td><td class="c">●</td><td></td><td>k</td></tr>
-<tr><td>6</td><td><a href="#i6">Skill A/B bench</a></td><td class="c">●</td><td></td><td class="c">●</td><td class="c">●</td><td></td><td class="c">○</td><td>2 arms × tasks × repeats</td></tr>
-<tr><td>7</td><td><a href="#i7">Checker library</a></td><td></td><td></td><td class="c">●</td><td></td><td></td><td></td><td>0 (seconds per check)</td></tr>
-<tr><td>8</td><td><a href="#i8">Evolve strong, deploy cheap</a></td><td class="c">●</td><td class="c">●</td><td class="c">●</td><td class="c">●</td><td class="c">○</td><td class="c">●</td><td>4k per task in the evolve phase</td></tr>
-<tr><td>9</td><td><a href="#i9">Adapter for the code</a></td><td class="c">●</td><td class="c">●</td><td class="c">●</td><td class="c">●</td><td class="c">●</td><td class="c">●</td><td>4k per task</td></tr>
-<tr><td>10</td><td><a href="#i10">Domain harness</a></td><td class="c">●</td><td class="c">●</td><td class="c">●</td><td class="c">●</td><td></td><td class="c">●</td><td>4 on improved tasks, 1 on the others</td></tr>
+<tr><th>#</th><th>Idea</th><th>Ref</th><th>Propose</th><th>Probe</th><th>Compose</th><th>Select</th><th>Reflect</th><th>Task runs needed</th><th>Recursion</th></tr>
+<tr><td>1</td><td><a href="#i1">Hook compiler</a></td><td class="c">●</td><td class="c">●</td><td class="c">●</td><td class="c">●</td><td></td><td class="c">●</td><td>0 (replays logged calls)</td><td><span class="badge b-one">Single step</span></td></tr>
+<tr><td>2</td><td><a href="#i2">Reflector + library</a></td><td class="c">●</td><td></td><td></td><td></td><td></td><td class="c">●</td><td>0 (1 reflector session per session)</td><td><span class="badge b-loop">Loop, not L2</span></td></tr>
+<tr><td>3</td><td><a href="#i3">/harness-step skill</a></td><td class="c">●</td><td class="c">●</td><td class="c">●</td><td class="c">●</td><td></td><td class="c">○</td><td>4 per task (k = 1)</td><td><span class="badge b-part">Partial</span></td></tr>
+<tr><td>4</td><td><a href="#i4">Always-on diet auditor</a></td><td class="c">●</td><td class="c">●</td><td class="c">●</td><td class="c">●</td><td></td><td class="c">○</td><td>2 × 3–5 probe runs</td><td><span class="badge b-one">Single step</span></td></tr>
+<tr><td>5</td><td><a href="#i5">Blind best-of-k selector</a></td><td class="c">●</td><td></td><td></td><td></td><td class="c">●</td><td></td><td>k</td><td><span class="badge b-comp">Component</span></td></tr>
+<tr><td>6</td><td><a href="#i6">Skill A/B bench</a></td><td class="c">●</td><td></td><td class="c">●</td><td class="c">●</td><td></td><td class="c">○</td><td>2 arms × tasks × repeats</td><td><span class="badge b-comp">Component</span></td></tr>
+<tr><td>7</td><td><a href="#i7">Checker library</a></td><td></td><td></td><td class="c">●</td><td></td><td></td><td></td><td>0 (seconds per check)</td><td><span class="badge b-comp">Component</span></td></tr>
+<tr><td>8</td><td><a href="#i8">Evolve strong, deploy cheap</a></td><td class="c">●</td><td class="c">●</td><td class="c">●</td><td class="c">●</td><td class="c">○</td><td class="c">●</td><td>4k per task in the evolve phase</td><td><span class="badge b-full">Full</span></td></tr>
+<tr><td>9</td><td><a href="#i9">Adapter for the code</a></td><td class="c">●</td><td class="c">●</td><td class="c">●</td><td class="c">●</td><td class="c">●</td><td class="c">●</td><td>4k per task</td><td><span class="badge b-full">Full</span></td></tr>
+<tr><td>10</td><td><a href="#i10">Domain harness</a></td><td class="c">●</td><td class="c">●</td><td class="c">●</td><td class="c">●</td><td></td><td class="c">●</td><td>4k on improved tasks, 1 on the others</td><td><span class="badge b-full">Full</span></td></tr>
 </table></div>
-<p class="src">● = the idea uses this stage. ○ = optional.</p>
+<p class="src">● = the idea uses this stage. ○ = optional. The last column is the recursion rank, explained in <a href="#rank">the ranking</a>.</p>
+
+<h2 id="rec">What "recursive" means in Harness²</h2>
+<p>The paper calls Harness² "recursive agent harnessing". The word has a narrow meaning here, and the meaning decides which of the 10 projects show the method and which only use a part of it. The paper's definition couples two updates: task-level recursion "refines the current execution harness using generated harnesses and execution evidence", and harnessing-level recursion "updates the improvement harness that guides this refinement" (paper §2). In both, an output of the improvement process becomes an input of the next improvement. Fig. R1 shows the two loops, and one shape that is not a loop.</p>
+<div class="fig"><div class="sv"><svg data-fig="r1" role="img" aria-label="Level-1 depth, parallel width, and level-2 loop"></svg></div></div>
+<p class="src">Fig. R1 — Top: level 1 in sequential mode is a chain, where each step starts from the previous step's harness. Middle: parallel mode spends k as width; nothing is fed back, so it is one generation, not a chain. Bottom: level 2 feeds what task t learned to the editors of task t+1, while the harness itself restarts from H₀. Source: paper Eq. 2–4 and §2.2.2.</p>
+<h3>Level 1: depth within one task</h3>
+<p>In sequential mode, step r starts from the harness that step r − 1 composed, and it reads every earlier run of the task: H⁽ʳ⁾ = Φ(H⁽ʳ⁻¹⁾, 𝓔⁽ʳ⁻¹⁾) (Eq. 3). The code does this in <code>run_sequential</code>: <code>current_harness = comp.tree</code> at the end of each round (<code>harness2/core/recursion.py</code>). Parallel mode is different. The paper says its implementation "performs one population update; k controls its width rather than its depth" (§2.2.2). Parallel mode makes several candidates and composes from all of them, but no composed harness is edited again. At k = 1 the two modes are the same procedure, and that procedure is one application of Φ: <b>a single step at k = 1 is not a recursion.</b></p>
+<h3>Level 2: across tasks</h3>
+<p>After each task, the reflector writes the adopted harness and a lesson into the library, and the next task's <i>editors</i> read the library (Eq. 4: 𝓡ₜ₊₁ = Update(𝓡ₜ, H★ₜ, 𝓓ₜ)). In the code, the library folder is copied into the context of every editor session (<code>harness2/core/context.py</code>). The execution harness does not carry over: every task starts again from H₀. What carries over is the <i>improver's</i> knowledge. A loop in which the working agent reads its own notes is useful, but it is memory for the executor, not level 2 (see idea 2).</p>
+<h3>What "recursive" does not mean here</h3>
+<p>Neither level rewrites the improvement code. The editor, composer, selector and reflector prompts and the editor model stay fixed; the improvement harness "is updated afterward through its harness improvement library" (§2). So the recursion is feedback through data, in the sense of a fold over steps and over tasks (Theory tab, T2). It is not a program that rewrites its own source, as a Gödel machine would.</p>
+<h3>How to check that a build is recursive</h3>
+<div class="tw"><table>
+<tr><th>Level</th><th>The evidence to look for in the records</th><th>The test that measures it</th></tr>
+<tr><td>Level 1</td><td>A composer decision line in step 2 that cites a moment in step 1's checkpoint run, e.g. <code>kept -&gt; &lt;edit&gt; -&gt; &lt;moment in the c1 run&gt;</code>.</td><td>Compare sequential k = 2 with k = 1 on the same task (paper Fig. 5 does this for k = 1 … 5).</td></tr>
+<tr><td>Level 2</td><td>An editor note on task t+1 that names a library entry from task t that it copied or adapted.</td><td>Re-run task t+1 with an empty library. The difference is the library's effect (paper Table 3: −3.1 on WorkBuddy-Bench, −1.8 on JobBench without it).</td></tr>
+</table></div>
+
+<h2 id="rank">The 10 projects, ranked by recursiveness</h2>
+<p>The rank uses the two tests above. A project is <b>full</b> if it has both loops, <b>partial</b> if it has one loop only under a stated condition, a <b>loop that is not level 2</b> if it feeds back to the executor instead of the improver, a <b>single step</b> if it applies Φ once, and a <b>component</b> if it is a part of a step (a probe, a checker, a selector). A low rank is not a low value: the components are what make the recursive projects work.</p>
+<div class="fig"><div class="sv">
+<svg viewBox="0 -40 860 340" role="img" aria-label="Ranking ladder of the ten projects by recursiveness">
+<g font-family="system-ui,sans-serif">
+<rect x="15" y="230" width="160" height="55" rx="6" fill="#172033"/><rect x="185" y="190" width="160" height="95" rx="6" fill="#172033"/><rect x="355" y="150" width="160" height="135" rx="6" fill="#172033"/><rect x="525" y="110" width="160" height="175" rx="6" fill="#172033"/><rect x="695" y="70" width="150" height="215" rx="6" fill="#172033"/>
+<text x="95" y="270" text-anchor="middle" font-size="12" fill="#94a3b8" font-weight="600">COMPONENT</text>
+<text x="265" y="270" text-anchor="middle" font-size="12" fill="#fb923c" font-weight="600">SINGLE STEP</text>
+<text x="435" y="270" text-anchor="middle" font-size="12" fill="#fde68a" font-weight="600">LOOP, NOT LEVEL 2</text>
+<text x="605" y="270" text-anchor="middle" font-size="12" fill="#2dd4bf" font-weight="600">PARTIAL (ONE LEVEL)</text>
+<text x="770" y="270" text-anchor="middle" font-size="12" fill="#4ade80" font-weight="600">FULL (BOTH LEVELS)</text>
+<g font-size="12" text-anchor="middle">
+<rect x="25" y="125" width="140" height="28" rx="6" fill="#0b1222" stroke="#94a3b8"/><text x="95" y="144" fill="#e2e8f0">5. Blind selector</text>
+<rect x="25" y="160" width="140" height="28" rx="6" fill="#0b1222" stroke="#94a3b8"/><text x="95" y="179" fill="#e2e8f0">6. A/B bench</text>
+<rect x="25" y="195" width="140" height="28" rx="6" fill="#0b1222" stroke="#94a3b8"/><text x="95" y="214" fill="#e2e8f0">7. Checker library</text>
+<rect x="195" y="120" width="140" height="28" rx="6" fill="#0b1222" stroke="#fb923c"/><text x="265" y="139" fill="#e2e8f0">1. Hook compiler</text>
+<rect x="195" y="155" width="140" height="28" rx="6" fill="#0b1222" stroke="#fb923c"/><text x="265" y="174" fill="#e2e8f0">4. Diet auditor</text>
+<rect x="365" y="115" width="140" height="28" rx="6" fill="#0b1222" stroke="#fde68a"/><text x="435" y="134" fill="#e2e8f0">2. Reflector (as is)</text>
+<rect x="535" y="75" width="140" height="28" rx="6" fill="#0b1222" stroke="#2dd4bf"/><text x="605" y="94" fill="#e2e8f0">3. /harness-step</text>
+<rect x="705" y="-34" width="130" height="28" rx="6" fill="#0b1222" stroke="#4ade80"/><text x="770" y="-15" fill="#e2e8f0">9. Released code</text>
+</g>
+<g font-size="11" fill="#94a3b8" text-anchor="middle">
+<text x="95" y="244">part of a step</text>
+<text x="265" y="204">Φ applied once</text>
+<text x="435" y="164">feeds the executor</text>
+<text x="605" y="124">L1 only if k ≥ 2</text>
+</g>
+<g font-size="12" text-anchor="middle">
+<rect x="705" y="1" width="130" height="28" rx="6" fill="#0b1222" stroke="#4ade80"/><text x="770" y="20" fill="#e2e8f0">10. Domain harness</text>
+<rect x="705" y="36" width="130" height="28" rx="6" fill="#0b1222" stroke="#4ade80"/><text x="770" y="55" fill="#e2e8f0">8. Evolve phase</text>
+</g>
+<text x="770" y="88" text-anchor="middle" font-size="11" fill="#94a3b8">10 and 8 need k ≥ 2</text>
+<path d="M435 115 C 450 20 560 -20 700 -20" fill="none" stroke="#fde68a" stroke-width="1.4" stroke-dasharray="5 4"/>
+<text x="455" y="-24" font-size="11" fill="#fde68a">2 + 3 rewired = the minimal full build</text>
+</g>
+</svg></div></div>
+<p class="src">Fig. R2 — The ladder. Higher steps have more of the method's feedback. The dashed line marks the upgrade of section "The minimal build": idea 2 rewired so that editors read the library, plus idea 3 with two chained steps.</p>
+<div class="tw"><table>
+<tr><th>Rank</th><th>Project</th><th>Level 1 (step feeds step)</th><th>Level 2 (task feeds improver)</th><th>Verdict</th><th>What would raise it</th></tr>
+<tr><td>1</td><td><a href="#i9">9. Adapter for the released code</a></td><td>Yes, in sequential mode (<code>run_sequential</code>)</td><td>Yes: the library is copied into every editor's context</td><td><span class="badge b-full">Full</span> as published</td><td>Nothing; this is the reference implementation</td></tr>
+<tr><td>2</td><td><a href="#i10">10. Domain harness</a></td><td>Yes, if improved tasks use sequential k ≥ 2</td><td>Yes, if the library feeds the editors</td><td><span class="badge b-full">Full</span> with k ≥ 2</td><td>The config shown uses k = 1: set k = 2 on improved tasks</td></tr>
+<tr><td>3</td><td><a href="#i8">8. Evolve strong, deploy cheap</a></td><td>As idea 3, in the evolve phase</td><td>Yes, in the evolve phase</td><td><span class="badge b-full">Full</span> while evolving</td><td>The deploy phase freezes the harness on purpose</td></tr>
+<tr><td>4</td><td><a href="#i3">3. /harness-step</a></td><td>No at k = 1; yes if steps are chained</td><td>Only with a library that the next run's editors read</td><td><span class="badge b-part">Partial</span></td><td>Chain two steps; add the rewired reflector</td></tr>
+<tr><td>5</td><td><a href="#i2">2. Reflector + library</a></td><td>No</td><td>No: the working agent reads the library, not the editors</td><td><span class="badge b-loop">Loop, not level 2</span></td><td>The level-2 variant in idea 2</td></tr>
+<tr><td>6</td><td><a href="#i1">1. Hook compiler</a></td><td>No: one pass over old data</td><td>No</td><td><span class="badge b-one">Single step</span></td><td>Let each mining round's editor read earlier hook entries</td></tr>
+<tr><td>7</td><td><a href="#i4">4. Diet auditor</a></td><td>No</td><td>No</td><td><span class="badge b-one">Single step</span></td><td>Little to gain from a loop here</td></tr>
+<tr><td>8</td><td><a href="#i5">5. Blind selector</a></td><td>No</td><td>No</td><td><span class="badge b-comp">Component</span></td><td>It closes a k &gt; 1 run inside ideas 3, 8, 9, 10</td></tr>
+<tr><td>9</td><td><a href="#i6">6. A/B bench</a></td><td>No</td><td>No</td><td><span class="badge b-comp">Component</span></td><td>It is the probe, used by idea 8</td></tr>
+<tr><td>10</td><td><a href="#i7">7. Checker library</a></td><td>No</td><td>No</td><td><span class="badge b-comp">Component</span></td><td>It supplies evidence to every probe</td></tr>
+</table></div>
+<p>Why the order inside the top group: idea 9 is first because the released code implements both loops, and both are verified in the code. Ideas 10 and 8 reach both loops only if your build uses sequential k ≥ 2 and gives the library to the editors. Inside the bottom group the order does not express a difference in recursion; all three are parts of a step.</p>
+
+<h2 id="minimal">The minimal build that shows both levels</h2>
+<p>The smallest project that shows both loops combines two ideas: idea 3 with two chained steps (sequential k = 2), and idea 2 rewired so that the reflector writes to a library that the <i>editors</i> of the next task read. Run it on two tasks of the same kind. Fig. R3 steps through it.</p>
+<div class="fig" id="am">
+<div class="sv"><svg role="img" aria-label="Animated minimal build with both recursion levels over two tasks"></svg></div>
+<div class="ctrl"><button data-a="reset">⟲ Reset</button><button data-a="prev">◀ Back</button><button data-a="play">▶ Play</button><button data-a="next">Next ▶</button><span class="ct"></span></div>
+<p class="cap" aria-live="polite"></p>
+</div>
+<p class="src">Fig. R3 — Two tasks, sequential k = 2, with a library that feeds the editors. The arrow from step 1 to step 2 is level 1; the arrow from the library to task 2's editors is level 2.</p>
+<h3>The build</h3>
+<pre><code>minimal-recursive/
+  tasks/task-1/  tasks/task-2/      # two tasks of the same kind
+  .claude/skills/harness-step/      # idea 3, with a --steps 2 option
+  prompts/editor.md                 # Prompt 1; adds: "read library/INDEX.md"
+  prompts/composer-seq.md           # Prompt 4 (sequential composer)
+  prompts/selector.md               # Prompt 5
+  prompts/reflector.md              # Prompt 6
+  library/INDEX.md                  # read by EDITORS only, never by the
+  library/task-1/                   #   working agent
+    harness/  EXPERIENCE.md
+  runs/task-N/{base1,base2,inv1,dom1,c1,inv2,dom2,c2}.jsonl</code></pre>
+<p>Two changes turn ideas 2 and 3 into this build:</p>
+<ol>
+<li><b>Chain the steps.</b> Step 2 starts in a fresh worktree copied from <code>wt-final</code> of step 1 (the checkpoint c1), not from <code>HEAD</code>. Its editors and composer receive every earlier run: both base runs, the step-1 probes and the c1 run. This is the code's <code>run_sequential</code> loop.</li>
+<li><b>Move the library to the editors.</b> The reflector writes to <code>library/</code>. No <code>SessionStart</code> hook prints it to the working agent. Instead, the editor prompt tells the editors to read <code>library/INDEX.md</code>, and to treat a copied fact as "a hypothesis here, not a fact" (Prompt 1).</li>
+</ol>
+<div class="facts">
+<div><b>Cost</b>Per task at k = 2: 8 runs (2 base, 4 probes, 2 checkpoints), 6 counted sessions, 1 selector, 1 reflector. Two tasks: 16 runs. The empty-library re-run of task 2 adds 8 runs.</div>
+<div><b>Level-1 evidence</b>A step-2 decision line that cites the c1 run.</div>
+<div><b>Level-2 evidence</b>A task-2 editor note that names the task-1 entry, and the difference against the empty-library re-run.</div>
+<div><b>Limit</b>One task pair gives one contrast, with no noise estimate. The paper averages three runs per score; treat a single pair as a demonstration, not a measurement.</div>
+</div>
 
 <!-- ============ IDEA 1 ============ -->
 <h2 id="i1">1. Hook compiler from repeated failures</h2>
+<p class="rec"><span class="badge b-one">Single step</span> <b>Is it recursive?</b> No. It applies one step Φ to old trajectories, once. It would become a fold if each mining round's editor read the hook entries of earlier rounds; then round n+1 would build on what round n learned.</p>
 <p><b>What it is.</b> A tool that reads your past Claude Code transcripts, finds errors that repeat, and turns each one into a hook that blocks the error every time. A CLAUDE.md rule asks the model not to do something; a hook prevents it. The Theory tab of the tutorial (T4) shows why: a rule such as "never kill a process by name" is a safety property, and a monitor inside the tool loop can enforce a safety property, where a prompt can only lower its probability.</p>
 <h3>The mapping onto Harness²</h3>
 <div class="tw"><table>
@@ -226,7 +336,8 @@ print("\n".join(blocked))</code></pre>
 </div>
 
 <!-- ============ IDEA 2 ============ -->
-<h2 id="i2">2. Reflector hook and experience library (level 2 only)</h2>
+<h2 id="i2">2. Reflector hook and experience library</h2>
+<p class="rec"><span class="badge b-loop">Loop, not L2</span> <b>Is it recursive?</b> It has a feedback loop, but not the paper's level 2. As designed, the <i>working agent</i> reads the library, so the library improves the execution harness, like the C3 memory component. That is closer to a memory method such as ReasoningBank, which the paper runs as a baseline, than to harnessing-level recursion. The level-2 variant below moves the library to the editors.</p>
 <p><b>What it is.</b> When a session ends, a hook starts a headless reflector session. The reflector reads the transcript and writes at most one lesson to a per-domain library. When the next session starts, a hook prints the library index, not the entries, so the agent can open a relevant entry on demand. This builds only the harnessing-level recursion of the paper (Eq. 4), with no probes.</p>
 <h3>The mapping onto Harness²</h3>
 <div class="tw"><table>
@@ -238,7 +349,16 @@ print("\n".join(blocked))</code></pre>
 <tr><td>Not built</td><td>Propose, Probe and Compose. So the lessons rest on one trajectory, with no contrast run.</td></tr>
 </table></div>
 <div class="fig"><div class="sv"><svg data-fig="f2" role="img" aria-label="Reflector hook and library data flow"></svg></div></div>
-<p class="src">Fig. 2 — Level 2 alone. The green boxes are the paper's harnessing-level recursion; there is no orange or blue box, because nothing is proposed or probed.</p>
+<p class="src">Fig. 2 — The reflector and the library alone. No box is orange or blue, because nothing is proposed or probed.</p>
+<div class="fig"><div class="sv"><svg data-fig="m2" role="img" aria-label="Memory for the working agent versus a library that feeds the improver"></svg></div></div>
+<p class="src">Fig. 2b — The same reflector and library, wired two ways. Top: the working agent reads the library, which is memory. Bottom: the next task's editors read it, which is the paper's level 2.</p>
+<div class="card key"><p><b>The level-2 variant.</b> Keep the reflector and the library. Change who reads the library:</p>
+<ol>
+<li>Remove the <code>SessionStart</code> hook that prints <code>INDEX.md</code> to the working agent.</li>
+<li>Add one line to the editor prompt of idea 3: "Read <code>library/INDEX.md</code>. You may copy a component; treat each copied fact as a hypothesis here, not a fact."</li>
+<li>Write library entries only after an improvement step (idea 3), so that each entry rests on a contrast between runs, not on one session.</li>
+</ol>
+<p>The memory version is still useful, and it costs less: no probe runs. It is a different mechanism, and the paper's library numbers (Table 3) do not measure it.</p></div>
 <h3>The build</h3>
 <pre><code>~/.claude/
   hooks/reflect.py         # SessionEnd: start the reflector in the background
@@ -277,6 +397,7 @@ confidence: low (one session, no contrast run)</code></pre>
 
 <!-- ============ IDEA 3 ============ -->
 <h2 id="i3">3. A <code>/harness-step</code> skill (level 1, k = 1)</h2>
+<p class="rec"><span class="badge b-part">Partial</span> <b>Is it recursive?</b> Partly. At k = 1 it is one application of Φ, which is not a recursion. It becomes level-1 recursive when you chain steps: step 2 starts from <code>wt-final</code> of step 1 and reads all earlier runs (sequential k ≥ 2). It reaches level 2 when its decisions go to a library that the next task's editors read. Both changes together are <a href="#minimal">the minimal full build</a>.</p>
 <p><b>What it is.</b> A skill that runs one full Propose–Probe–Compose step on a real task in a git repository. Each harness variant lives in its own git worktree, so the three variants can run side by side without changing each other's files. The deliverable is the output of the composed harness.</p>
 <h3>The mapping onto Harness²</h3>
 <div class="tw"><table>
@@ -323,6 +444,7 @@ cd "$1" &amp;&amp; claude -p "$TASK" --output-format stream-json --verbose \
 
 <!-- ============ IDEA 4 ============ -->
 <h2 id="i4">4. Always-on diet auditor</h2>
+<p class="rec"><span class="badge b-one">Single step</span> <b>Is it recursive?</b> No. It is one step: measure, propose, probe, compose. A repeated audit that reads earlier audit decisions would be a loop, but the auditor gains little from it, because each audit measures the current files from scratch.</p>
 <p><b>What it is.</b> A tool that measures everything that enters the context on every call (<code>CLAUDE.md</code> files, rules, <code>SessionStart</code> hook output, skill descriptions) and proposes a new home for each block in the paper's cost order. The paper's editor prompt states the reason: always-on prose is "competing with the agent's own output budget", and "if you add always-on text, cut something else to pay for it".</p>
 <h3>The mapping onto Harness²</h3>
 <div class="tw"><table>
@@ -374,6 +496,7 @@ for name in sys.argv[1:]:
 
 <!-- ============ IDEA 5 ============ -->
 <h2 id="i5">5. Blind best-of-k selector</h2>
+<p class="rec"><span class="badge b-comp">Component</span> <b>Is it recursive?</b> No. It is the selector component of Prompt 5. In the paper it closes every k &gt; 1 run, but it only chooses; it feeds nothing back into a later step.</p>
 <p><b>What it is.</b> Run one task k times, with different harness variants or just different samples. Remove every label that says which run made which output, shuffle the outputs, and let a selector session pick one by the paper's decision order. Use it where the output quality changes from run to run and the output can be checked against source files, for example a summary against its transcript.</p>
 <h3>The mapping onto Harness²</h3>
 <div class="tw"><table>
@@ -416,6 +539,7 @@ Return one letter and one sentence that cites the deciding difference.</code></p
 
 <!-- ============ IDEA 6 ============ -->
 <h2 id="i6">6. Skill A/B bench</h2>
+<p class="rec"><span class="badge b-comp">Component</span> <b>Is it recursive?</b> No. It is the probe stage used as an evaluation tool. It measures the effect of an edit; the loop that would use the measurement is in ideas 3 and 8.</p>
 <p><b>What it is.</b> A regression test for a skill change. Freeze 10–20 real tasks as fixtures. Run the old skill (arm A) and the new skill (arm B) on each, several times. Compare the trajectories, not only the outputs. Ship B only when its behaviour is better by more than the noise between two runs of A.</p>
 <h3>The mapping onto Harness²</h3>
 <div class="tw"><table>
@@ -459,6 +583,7 @@ print(json.dumps({"turns": turns, "tool_calls": calls, "tool_errors": errors}))<
 
 <!-- ============ IDEA 7 ============ -->
 <h2 id="i7">7. Independent checker library</h2>
+<p class="rec"><span class="badge b-comp">Component</span> <b>Is it recursive?</b> No. It is a building block for probes. Its value to the recursive projects is the quality of their evidence: a check that the executor did not write keeps a wrong assumption from passing through every step.</p>
 <p><b>What it is.</b> A set of deterministic checker scripts written and reviewed once, outside any task run, and then reused by every other idea. Each checker reports named failures (sheet and cell, file and line) and exits non-zero when it finds one. A skill tells the agent when to run which checker.</p>
 <h3>The mapping onto Harness²</h3>
 <div class="tw"><table>
@@ -505,6 +630,7 @@ sys.exit(1 if bad else 0)</code></pre>
 
 <!-- ============ IDEA 8 ============ -->
 <h2 id="i8">8. Evolve with a strong model, deploy with a cheap one</h2>
+<p class="rec"><span class="badge b-full">Full while evolving</span> <b>Is it recursive?</b> Yes, in the evolve phase, if that phase uses ideas 3 and 2 in their recursive forms (chained steps, a library read by the editors). The deploy phase freezes the harness, so the recursion stops there by design: it trades further adaptation for the cheap model's price.</p>
 <p><b>What it is.</b> Run Harness² with a strong executor (for example Opus) on the first N tasks of one kind. Merge the adopted harnesses into one frozen domain harness. Then run that harness with a cheaper model (Sonnet or Haiku), and measure the gain with the A/B bench of idea 6.</p>
 <h3>The mapping onto Harness²</h3>
 <div class="tw"><table>
@@ -535,6 +661,7 @@ claude -p "$TASK" --model sonnet  # deploy phase, in frozen/</code></pre>
 
 <!-- ============ IDEA 9 ============ -->
 <h2 id="i9">9. An adapter for the released code</h2>
+<p class="rec"><span class="badge b-full">Full, as published</span> <b>Is it recursive?</b> Yes, both levels, as published. Sequential mode chains k passes: <code>current_harness = comp.tree</code> at the end of each round (<code>harness2/core/recursion.py</code>). The library folder is copied into every editor's context (<code>harness2/core/context.py</code>). This is the reference against which the other projects are ranked.</p>
 <p><b>What it is.</b> Use the released <code>harness2</code> package as the engine, with your own task type. You write one adapter class. The package then gives you the full method: parallel and sequential recursion, the ledger, the library, the blind selector and the reports.</p>
 <h3>The mapping onto Harness²</h3>
 <div class="tw"><table>
@@ -578,6 +705,7 @@ class MyTasksAdapter:
 
 <!-- ============ IDEA 10 ============ -->
 <h2 id="i10">10. A domain harness for a pipeline you repeat</h2>
+<p class="rec"><span class="badge b-full">Full with k ≥ 2</span> <b>Is it recursive?</b> Yes, if two conditions hold: improved tasks use sequential k ≥ 2 (level 1), and the library feeds the editors (level 2). The config below sets <code>"k": 2</code> for this reason; with k = 1 the project has level 2 only.</p>
 <p><b>What it is.</b> Apply both recursion levels to a pipeline that you run again and again, for example source summaries or the build of one textbook module. Each run of the pipeline is one task q<sub>t</sub> in the paper's stream. The current skill is H₀. A library per domain carries what earlier runs learned.</p>
 <h3>The mapping onto Harness²</h3>
 <div class="tw"><table>
@@ -594,14 +722,14 @@ class MyTasksAdapter:
 <pre><code>{
   "domain": "source-summaries",
   "base_harness": ".claude/skills/source-summary/",
-  "k": 1,
+  "k": 2,
   "improve_every": 3,
   "checkers": ["checks/frontmatter.py", "checks/numbers_match.py"],
   "library": "library/source-summaries/"
 }</code></pre>
-<p>With <code>improve_every</code> = 3, every third task gets a full step (4 runs) and the other two run once. That is 4 + 1 + 1 = 6 runs per 3 tasks, an average of 2 runs per task, half of a full step on every task. To see whether the library helps, re-run 3 later tasks with an empty library and compare the checker failures; this is the paper's library ablation (Table 3) at small scale.</p>
+<p>With <code>improve_every</code> = 3 and k = 2, every third task gets two chained steps (8 runs) and the other two run once: 8 + 1 + 1 = 10 runs per 3 tasks, about 3.3 per task. With k = 1 the cycle costs 4 + 1 + 1 = 6 runs (2 per task), but then only level 2 is recursive. To see whether the library helps, re-run 3 later tasks with an empty library and compare the checker failures; this is the paper's library ablation (Table 3) at small scale.</p>
 <div class="facts">
-<div><b>Cost</b>(4 + (m − 1)) / m runs per task on average; 2 at m = 3.</div>
+<div><b>Cost</b>(4k + m − 1) / m runs per task on average: about 3.3 at k = 2, m = 3; 2 at k = 1, m = 3.</div>
 <div><b>Evidence</b>The paper's largest single-task gains came from procedural failures (Fig. 9: 43.1 → 77.8). Removing the library costs 3.1 / 1.8 points (Table 3).</div>
 <div><b>Risk</b>Long tasks make 4 runs expensive. Your review is the grader: if you give it to the editors, they optimise your review, not the task (Theory T3, the grader leak).</div>
 <div><b>First step</b>Write down 3 failures the pipeline has had, and one checker for each (idea 7).</div>
@@ -611,7 +739,7 @@ class MyTasksAdapter:
 <p>The ideas depend on each other. Ideas 1 and 4 need nothing else. Idea 7 gives ideas 3 and 6 evidence that the executor did not write, and idea 2 supplies the library that ideas 3 and 10 read. Idea 9 is the alternative engine: it replaces your hand-built versions of ideas 3 and 10 with the released code.</p>
 <div class="fig"><div class="sv"><svg data-fig="f11" role="img" aria-label="Dependencies between the ten ideas"></svg></div></div>
 <p class="src">Fig. 11 — Build order. An arrow means "makes the next idea work better or is a part of it". Dashed = an alternative path.</p>
-<div class="card key"><p><b>Recommended path.</b> (1) Idea 4, to measure where your always-on tokens go. (2) Idea 1, to turn the repeated failures into hooks. (3) Idea 7, one checker for your most common deliverable. (4) Idea 3 on one real task, at 4 runs. Only then decide between ideas 10 and 9 for a full stream.</p></div>
+<div class="card key"><p><b>Recommended path.</b> To see the recursion itself, add <a href="#minimal">the minimal full build</a> after step (4). (1) Idea 4, to measure where your always-on tokens go. (2) Idea 1, to turn the repeated failures into hooks. (3) Idea 7, one checker for your most common deliverable. (4) Idea 3 on one real task, at 4 runs. Only then decide between ideas 10 and 9 for a full stream.</p></div>
 
 <h2 id="sources">Sources</h2>
 <ul>
@@ -637,6 +765,7 @@ function route(a,b){
 function draw(svg,id,F){
   var N={},s='<defs><marker id="m-'+id+'" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#64748b"/></marker></defs>';
   F.n.forEach(function(n){N[n[0]]={x:n[1],y:n[2],w:n[3],h:16+15*n[5].length}});
+  (F.t||[]).forEach(function(t){s+='<text class="'+t[3]+'" x="'+t[0]+'" y="'+t[1]+'">'+t[2]+'</text>'});
   (F.e||[]).forEach(function(e,i){
     var o=e[2]||{},d=o.d||route(N[e[0]],N[e[1]]);
     s+='<path class="ed'+(o.dash?' dash':'')+'" id="'+id+'-e'+i+'" d="'+d+'" marker-end="url(#m-'+id+')"/>';
@@ -652,6 +781,29 @@ function draw(svg,id,F){
   svg.innerHTML=s;
 }
 var FIG={
+ r1:{w:860,h:330,t:[[15,22,'LEVEL 1 — SEQUENTIAL MODE: DEPTH k','pt'],[15,142,'PARALLEL MODE: WIDTH k, DEPTH 1','pt'],[15,252,'LEVEL 2 — ACROSS TASKS','pt'],[635,178,'one generation: no output','el'],[635,193,'is edited again','el'],[120,104,'history 𝓔 grows: each step reads every earlier run of the task','el']],n:[
+  ['h0',15,35,80,'ext',['H₀']],['p1',120,35,150,'prop',['Φ step 1','propose · probe · compose']],['h1',295,35,80,'ref',['H⁽¹⁾']],['p2',400,35,150,'prop',['Φ step 2','starts from H⁽¹⁾']],['h2',575,35,80,'ref',['H⁽²⁾']],['hk',700,35,145,'sel',['… H⁽ᵏ⁾','then select']],
+  ['b0',15,155,80,'ext',['H₀']],['cd',120,155,170,'prop',['k INV + k DOM','2k probes']],['cp',315,155,170,'comp',['k composers','each reads the pool']],['se',510,155,110,'sel',['selector','1 output']],
+  ['t1',15,265,150,'ref',['Task t','level-1 step(s)']],['up',195,265,150,'refl',['Reflect + Update','𝓡ₜ → 𝓡ₜ₊₁']],['lb',375,265,140,'refl',['Library','read by editors']],['t2',545,265,150,'prop',['Task t+1','editors read it']],['r0',720,265,125,'ext',['H₀ again','(restart)']]],
+  e:[['h0','p1'],['p1','h1'],['h1','p2'],['p2','h2'],['h2','hk'],['b0','cd'],['cd','cp'],['cp','se'],['t1','up'],['up','lb'],['lb','t2'],['r0','t2']]},
+ m2:{w:860,h:240,t:[[15,22,'IDEA 2 AS DESIGNED: MEMORY FOR THE WORKING AGENT','pt'],[15,147,'LEVEL-2 VARIANT: THE LIBRARY FEEDS THE IMPROVER','pt'],[705,55,'improves the execution','el'],[705,70,'harness, like C3 memory','el']],n:[
+  ['s1',15,35,140,'ref',['Session t','working agent']],['f1',185,35,140,'refl',['Reflector','writes a lesson']],['l1',355,35,130,'refl',['Library','INDEX.md']],['a1',515,35,170,'ref',['Session t+1','working agent reads it']],
+  ['s2',15,160,140,'ref',['Task t','a level-1 step']],['f2',185,160,140,'refl',['Reflector','verdicts + lesson']],['l2',355,160,130,'refl',['Library','INDEX.md']],['e2',515,160,170,'prop',['Task t+1 editors','read, copy, re-check']],['h2',715,160,130,'ref',['Harness for t+1','built from H₀']]],
+  e:[['s1','f1'],['f1','l1'],['l1','a1'],['s2','f2'],['f2','l2'],['l2','e2'],['e2','h2']]},
+ am:{w:860,h:330,t:[[15,28,'TASK 1 — STARTS FROM H₀','pt'],[15,248,'TASK 2 — STARTS FROM H₀ AGAIN','pt'],[150,122,'level 1: step 2 starts from c1','el'],[275,192,'level 2: task-2 editors read entry 1','el']],n:[
+  ['b1',15,40,110,'ref',['Task 1','2 base runs']],['s11',150,40,150,'prop',['Step 1','INV + DOM → probes','→ checkpoint c1']],['s12',325,40,150,'prop',['Step 2','starts from c1,','reads all earlier runs']],['sl1',500,40,130,'sel',['Selector','c1, c2 or base']],['rf1',655,40,190,'refl',['Reflector','verdicts + one lesson']],
+  ['lib',655,145,190,'refl',['Library','entry 1, then entry 2']],
+  ['b2',15,260,110,'ref',['Task 2','2 base runs']],['s21',150,260,150,'prop',['Step 1','editors read','library entry 1']],['s22',325,260,150,'prop',['Step 2','starts from c1']],['sl2',500,260,130,'sel',['Selector','c1, c2 or base']],['rf2',655,260,190,'refl',['Reflector','adds entry 2']]],
+  e:[['b1','s11'],['s11','s12'],['s12','sl1'],['sl1','rf1'],['rf1','lib'],['lib','s21',{dash:1,d:'M655 168 H265 V256'}],['b2','s21'],['s21','s22'],['s22','sl2'],['sl2','rf2'],['rf2','lib']],
+  steps:[[['b1'],[],'<b>Task 1 starts from H₀.</b> Two base runs (k = 2) form the shared history of the task.'],
+   [['s11'],[0],'<b>Step 1.</b> The INV and DOM editors propose, both candidates run as probes, and the composer writes checkpoint c1, which runs.'],
+   [['s12'],[1],'<b>Step 2 — level 1.</b> Step 2 starts from c1, not from H₀, and reads every earlier run. The output of step 1 is the input of step 2. Evidence: a step-2 decision line cites a moment in the c1 run.'],
+   [['sl1'],[2],'<b>Select.</b> The blind selector picks one output among c1, c2 and the base runs. A base pick is valid (Prompt 5).'],
+   [['rf1','lib'],[3,4],'<b>Reflect.</b> The reflector gives each changed component a verdict and writes at most one lesson. The library gains entry 1: the adopted harness and its EXPERIENCE.md.'],
+   [['b2'],[],'<b>Task 2 starts from H₀ again.</b> The harness of task 1 is not carried forward; only the library is.'],
+   [['s21'],[5,6],'<b>Step 1 of task 2 — level 2.</b> The editors read library entry 1 and may copy a component, but they treat each copied fact as a hypothesis. Evidence: an editor note names entry 1.'],
+   [['s22','sl2'],[7,8],'<b>Step 2 and selection</b>, as in task 1: step 2 starts from task 2\'s own c1.'],
+   [['rf2'],[9,10],'<b>Reflect again.</b> The library gains entry 2. To measure level 2, re-run task 2 with an empty library; the difference is the library\'s effect (paper Table 3, at small scale).']]},
  a1:{w:860,h:250,n:[
   ['t',15,40,140,'ext',['Past transcripts','~/.claude/projects/','*.jsonl']],
   ['m',180,40,135,'ref',['Mine','repeated failure','signatures']],
@@ -767,7 +919,7 @@ var FIG={
   e:[['i7','i3'],['i2','i3'],['i5','i3'],['i7','i6'],['i3','i10'],['i6','i8'],['i9','i10',{dash:1,d:'M615 278 H850 V83 H843'}]]}
 };
 document.querySelectorAll('svg[data-fig]').forEach(function(svg){var id=svg.getAttribute('data-fig');draw(svg,id,FIG[id])});
-['a1','a4'].forEach(function(id){
+['a1','a4','am'].forEach(function(id){
   var R=document.getElementById(id),F=FIG[id],S=F.steps,n=S.length,i=0,tm=null;
   draw(R.querySelector('svg'),id,F);
   var cap=R.querySelector('.cap'),ct=R.querySelector('.ct'),pl=R.querySelector('[data-a=play]');
