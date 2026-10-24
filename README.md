@@ -21,6 +21,10 @@ The **Theory** tab describes Harness² with theoretical computer science: a form
 
 Three animated figures step through the recursion: the two loops over a task stream (Fig. B), the JobBench example (Fig. C), and the run plan for k = 1–5 in parallel or sequential mode (Fig. D).
 
+## Project ideas
+
+[`harness2-projects.html`](https://az9713.github.io/harness2-tutorial/harness2-projects.html) describes 10 projects that apply the Harness² method to a Claude Code setup: a hook compiler, a reflector hook with an experience library, a `/harness-step` skill, an always-on context auditor, a blind best-of-k selector, a skill A/B bench, an independent checker library, evolve-strong/deploy-cheap transfer, an adapter for the released code, and a domain harness for a repeated pipeline. Each has a diagram that maps it onto the Harness² stages, a file tree, snippets, cost, evidence and risks.
+
 ## Resources
 
 | Resource | Link |

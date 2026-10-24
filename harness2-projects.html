@@ -1,0 +1,793 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>Harness² Project Ideas</title>
+<style>
+:root{--bg:#0f172a;--card:#1e293b;--text:#e2e8f0;--text2:#cbd5e1;--muted:#94a3b8;--orange:#fb923c;--teal:#2dd4bf;--b2:#334155}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 system-ui,-apple-system,"Segoe UI",sans-serif}
+.wrap{display:grid;grid-template-columns:240px minmax(0,1fr);gap:32px;max-width:1240px;margin:0 auto;padding:24px 16px}
+nav{position:sticky;top:16px;align-self:start;max-height:calc(100vh - 32px);overflow:auto;font-size:14px;border-right:1px solid var(--b2);padding-right:16px}
+nav a{display:block;color:var(--muted);text-decoration:none;padding:3px 0}
+nav a:hover{color:var(--teal)}
+nav .grp{color:var(--orange);font-weight:600;margin-top:12px;font-size:12px;text-transform:uppercase;letter-spacing:.06em}
+main{min-width:0;max-width:880px}
+h1{font-size:2rem;margin:0 0 4px}
+h2{font-size:1.45rem;margin:48px 0 12px;padding-top:12px;border-top:1px solid var(--b2)}
+h3{font-size:1.08rem;margin:24px 0 8px;color:var(--teal)}
+p,li{color:var(--text2)}
+a{color:var(--teal)}
+.sub{color:var(--muted);margin:0 0 24px}
+.card{background:var(--card);border:1px solid var(--b2);border-radius:10px;padding:12px 18px;margin:16px 0}
+.warn{border-color:#f8717166}
+.key{border-color:#fb923c66}
+code{font-family:ui-monospace,Consolas,monospace;font-size:.88em;background:#0b1222;border:1px solid var(--b2);border-radius:4px;padding:1px 5px;color:#fde68a}
+pre{background:#0b1222;border:1px solid var(--b2);border-radius:8px;padding:12px 14px;overflow:auto;font-size:13px;line-height:1.45;color:#e2e8f0}
+pre code{background:none;border:0;padding:0;color:inherit}
+.tw{overflow-x:auto;margin:12px 0}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{border:1px solid var(--b2);padding:6px 9px;text-align:left;vertical-align:top}
+th{background:#172033;color:var(--text)}
+td{color:var(--text2)}
+td.c{text-align:center;color:var(--teal)}
+.src{color:var(--muted);font-size:13px}
+.fig{background:var(--card);border:1px solid var(--b2);border-radius:10px;padding:12px 14px;margin:16px 0}
+.fig .sv{overflow-x:auto}
+.fig svg{display:block;width:100%;min-width:640px;height:auto}
+.nd rect{fill:#0b1222;stroke-width:1.6;transition:opacity .35s,fill .35s}
+.nd text{font:12px system-ui,sans-serif;fill:#cbd5e1}
+.nd text.b{font-weight:600}
+.nd{transition:opacity .35s}
+.nd.dim{opacity:.3}
+.nd.now rect{stroke-width:3;fill:#26324a}
+.ed{fill:none;stroke:#475569;stroke-width:1.6;transition:opacity .35s,stroke .35s}
+.ed.dash{stroke-dasharray:5 4}
+.ed.dim{opacity:.25}
+.ed.now{stroke:#fb923c;stroke-dasharray:6 4;animation:flow .8s linear infinite}
+@keyframes flow{to{stroke-dashoffset:-20}}
+.el{fill:#94a3b8;font:11px system-ui,sans-serif}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13px;color:var(--text2);margin:8px 0}
+.legend span::before{content:"";display:inline-block;width:12px;height:12px;border:2px solid var(--c);border-radius:3px;margin-right:6px;vertical-align:-2px}
+.ctrl{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:10px}
+.ctrl button{background:#0b1222;color:var(--text);border:1px solid var(--b2);border-radius:6px;padding:4px 12px;font:inherit;font-size:14px;cursor:pointer}
+.ctrl button:hover,.ctrl button:focus-visible{border-color:var(--teal);outline:none}
+.ctrl .ct{margin-left:auto;color:var(--muted);font-size:13px}
+.cap{min-height:4.8em;margin:10px 0 0;color:var(--text2)}
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin:12px 0}
+.facts div{background:#172033;border:1px solid var(--b2);border-radius:8px;padding:8px 12px;font-size:14px;color:var(--text2)}
+.facts b{display:block;color:var(--orange);font-size:12px;text-transform:uppercase;letter-spacing:.05em}
+@media (prefers-reduced-motion:reduce){.ed.now{animation:none}.fig *{transition:none!important}}
+@media (max-width:860px){.wrap{grid-template-columns:1fr}nav{position:static;max-height:none;border-right:0;border-bottom:1px solid var(--b2);padding:0 0 12px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<nav>
+<div class="grp">Start</div>
+<a href="#how">How to read this report</a>
+<a href="#blocks">Building blocks</a>
+<a href="#matrix">The 10 ideas at a glance</a>
+<div class="grp">A. Build a harness</div>
+<a href="#i1">1. Hook compiler</a>
+<a href="#i2">2. Reflector + library</a>
+<a href="#i3">3. /harness-step skill</a>
+<a href="#i4">4. Always-on diet auditor</a>
+<div class="grp">B. Tools for the method</div>
+<a href="#i5">5. Blind best-of-k selector</a>
+<a href="#i6">6. Skill A/B bench</a>
+<a href="#i7">7. Independent checker library</a>
+<div class="grp">C. Run it on a stream</div>
+<a href="#i8">8. Evolve strong, deploy cheap</a>
+<a href="#i9">9. Adapter for the released code</a>
+<a href="#i10">10. Domain harness for a pipeline</a>
+<div class="grp">End</div>
+<a href="#order">Build order</a>
+<a href="#sources">Sources</a>
+<a href="harness2-learn.html">← Back to the tutorial</a>
+</nav>
+<main>
+<h1>Harness² Project Ideas</h1>
+<p class="sub">Ten projects that use the Harness² method (arXiv:2610.14224) on a Claude Code setup. Each one shows which part of the method it reuses, the files to create, the run cost, the evidence from the paper, and the risks. Companion to <a href="harness2-learn.html">Learn Harness²</a>.</p>
+
+<h2 id="how">How to read this report</h2>
+<p>Every project is a part, or all, of the Harness² pipeline: a reference run, two editors that propose edits, probe runs, a composer, a blind selector, and a reflector that writes to a library. Each idea's diagram colours its boxes by the pipeline stage it plays. So you can see at a glance which stages the idea reuses and which stages it leaves out.</p>
+<div class="legend">
+<span style="--c:#2dd4bf">Reference / execution run</span>
+<span style="--c:#fb923c">Propose (editor, Prompt 1)</span>
+<span style="--c:#60a5fa">Probe (contrast run or check)</span>
+<span style="--c:#c084fc">Compose / decide (Prompt 3)</span>
+<span style="--c:#fde68a">Select (Prompt 5)</span>
+<span style="--c:#4ade80">Reflect / library (Prompt 6)</span>
+<span style="--c:#94a3b8">Your files, or a step outside Harness²</span>
+</div>
+<p>Each section has the same parts: <b>what it is</b>, <b>the mapping</b> onto Harness², a <b>diagram</b>, <b>the build</b> (file tree and short snippets), and four facts: cost, evidence, risk, first step. The snippets are sketches to hand to an agent. They are not tested code. Ideas 1 and 4 also have a step-through animation, because the earlier answer recommended them as the starting points.</p>
+<div class="card warn"><p><b>One fact changes how most of these ideas are built.</b> The released code (<code>google-research/harness2</code>) runs its executor on two substrates only: OpenCode and Codex (<code>harness2/substrate/opencode.py</code>, <code>codex.py</code>). Its <code>claude_cli</code> channel runs the <i>editors</i> through the Claude CLI, not the executor (<code>harness2/core/proposer.py</code>). So ideas 1–8 and 10 re-implement the method inside Claude Code by hand, and only idea 9 uses the released code directly.</p></div>
+
+<h2 id="blocks">Building blocks</h2>
+<h3>The eight components, in Claude Code terms</h3>
+<p>The paper's harness is eight files (Table 5). A Claude Code project has a close equivalent for each one. This mapping is my reading; the paper tests OpenCode and Codex, not Claude Code.</p>
+<div class="tw"><table>
+<tr><th>Paper component</th><th>When it reaches the model</th><th>Claude Code equivalent</th></tr>
+<tr><td>C1 system prompt, C2 guardrails, C3 memory, C4 tool guidance</td><td>Every call</td><td><code>CLAUDE.md</code> (project and user), rules, <code>SessionStart</code> hook output</td></tr>
+<tr><td>C5 subagents</td><td>When the task tool calls one</td><td><code>.claude/agents/&lt;name&gt;.md</code></td></tr>
+<tr><td>C6 skills</td><td>When the skill tool loads one</td><td><code>.claude/skills/&lt;name&gt;/SKILL.md</code></td></tr>
+<tr><td>C7 scripts</td><td>When bash runs one</td><td><code>scripts/*.py</code>, or scripts inside a skill folder</td></tr>
+<tr><td>C8 plugin (inside the tool loop)</td><td>Around every tool call</td><td>Hooks in <code>.claude/settings.json</code>: <code>PreToolUse</code>, <code>PostToolUse</code>, <code>Stop</code>, <code>SessionStart</code>, <code>SessionEnd</code></td></tr>
+</table></div>
+<h3>The prompts you reuse</h3>
+<div class="tw"><table>
+<tr><th>Paper prompt</th><th>Job</th><th>Used in ideas</th></tr>
+<tr><td>Prompt 1, editor (INV or DOM scope)</td><td>Read a trajectory; propose a harness edit tied to a named moment, in the cost order skill → script → subagent → plugin → always-on; or answer <code>KEEP_BASE</code></td><td>1, 3, 4, 8, 9, 10</td></tr>
+<tr><td>Prompts 3 and 4, composer (parallel, sequential)</td><td>Merge, revise or drop each edit, with the line <code>kept|revised|dropped -&gt; &lt;edit&gt; -&gt; &lt;trajectory moment&gt;</code></td><td>1, 3, 4, 6, 8, 10</td></tr>
+<tr><td>Prompt 5, selector</td><td>Pick one anonymised output; the base output is a valid pick</td><td>5, 8</td></tr>
+<tr><td>Prompt 6, experience reflector</td><td>Give each changed component a verdict (helped, hurt, no observed effect, confounded); write at most one lesson, or <code>NO_ENTRY</code></td><td>1, 2, 3, 10</td></tr>
+</table></div>
+<p>The paper prints the prompts in Appendix H; the code release holds the full text in <code>harness2/core/prompts.py</code>. The run budget for a full step is 4k executor runs and 3k editor and composer sessions (<code>harness2/core/ledger.py</code>); at k = 1, that is 4 runs and 3 sessions.</p>
+
+<h2 id="matrix">The 10 ideas at a glance</h2>
+<div class="tw"><table>
+<tr><th>#</th><th>Idea</th><th>Ref</th><th>Propose</th><th>Probe</th><th>Compose</th><th>Select</th><th>Reflect</th><th>Task runs needed</th></tr>
+<tr><td>1</td><td><a href="#i1">Hook compiler</a></td><td class="c">●</td><td class="c">●</td><td class="c">●</td><td class="c">●</td><td></td><td class="c">●</td><td>0 (replays logged calls)</td></tr>
+<tr><td>2</td><td><a href="#i2">Reflector + library</a></td><td class="c">●</td><td></td><td></td><td></td><td></td><td class="c">●</td><td>0 (1 reflector session per session)</td></tr>
+<tr><td>3</td><td><a href="#i3">/harness-step skill</a></td><td class="c">●</td><td class="c">●</td><td class="c">●</td><td class="c">●</td><td></td><td class="c">○</td><td>4 per task (k = 1)</td></tr>
+<tr><td>4</td><td><a href="#i4">Always-on diet auditor</a></td><td class="c">●</td><td class="c">●</td><td class="c">●</td><td class="c">●</td><td></td><td class="c">○</td><td>2 × 3–5 probe runs</td></tr>
+<tr><td>5</td><td><a href="#i5">Blind best-of-k selector</a></td><td class="c">●</td><td></td><td></td><td></td><td class="c">●</td><td></td><td>k</td></tr>
+<tr><td>6</td><td><a href="#i6">Skill A/B bench</a></td><td class="c">●</td><td></td><td class="c">●</td><td class="c">●</td><td></td><td class="c">○</td><td>2 arms × tasks × repeats</td></tr>
+<tr><td>7</td><td><a href="#i7">Checker library</a></td><td></td><td></td><td class="c">●</td><td></td><td></td><td></td><td>0 (seconds per check)</td></tr>
+<tr><td>8</td><td><a href="#i8">Evolve strong, deploy cheap</a></td><td class="c">●</td><td class="c">●</td><td class="c">●</td><td class="c">●</td><td class="c">○</td><td class="c">●</td><td>4k per task in the evolve phase</td></tr>
+<tr><td>9</td><td><a href="#i9">Adapter for the code</a></td><td class="c">●</td><td class="c">●</td><td class="c">●</td><td class="c">●</td><td class="c">●</td><td class="c">●</td><td>4k per task</td></tr>
+<tr><td>10</td><td><a href="#i10">Domain harness</a></td><td class="c">●</td><td class="c">●</td><td class="c">●</td><td class="c">●</td><td></td><td class="c">●</td><td>4 on improved tasks, 1 on the others</td></tr>
+</table></div>
+<p class="src">● = the idea uses this stage. ○ = optional.</p>
+
+<!-- ============ IDEA 1 ============ -->
+<h2 id="i1">1. Hook compiler from repeated failures</h2>
+<p><b>What it is.</b> A tool that reads your past Claude Code transcripts, finds errors that repeat, and turns each one into a hook that blocks the error every time. A CLAUDE.md rule asks the model not to do something; a hook prevents it. The Theory tab of the tutorial (T4) shows why: a rule such as "never kill a process by name" is a safety property, and a monitor inside the tool loop can enforce a safety property, where a prompt can only lower its probability.</p>
+<h3>The mapping onto Harness²</h3>
+<div class="tw"><table>
+<tr><th>Harness² stage</th><th>In this project</th></tr>
+<tr><td>Reference runs</td><td>Your transcripts in <code>~/.claude/projects/*/*.jsonl</code>. They already exist, so this stage costs nothing.</td></tr>
+<tr><td>Propose (INV editor, Prompt 1)</td><td>One editor session per repeated failure signature. Its only allowed outputs are one <code>PreToolUse</code> hook or <code>KEEP_BASE</code>. Prompt 1's rule applies: a defensive hook needs "repeated evidence that clear prose is skipped", and "it must not block valid completion".</td></tr>
+<tr><td>Probe</td><td>A <i>replay</i>: run the candidate hook on every logged tool call. Count the bad calls it blocks and the good calls it blocks. This is cheaper than the paper's probe, because a hook is a deterministic function of one tool call; no task needs to run again.</td></tr>
+<tr><td>Compose</td><td>Keep a hook only if it blocks zero good calls in the replay (the transparency condition, Theory T4). Record each decision as <code>kept|dropped -&gt; &lt;hook&gt; -&gt; &lt;replay counts&gt;</code>.</td></tr>
+<tr><td>Reflect</td><td>Write the hook and an <code>EXPERIENCE.md</code> entry: cue = the failure signature, evidence = the replay counts.</td></tr>
+</table></div>
+<div class="fig" id="a1">
+<div class="sv"><svg role="img" aria-label="Animated pipeline of the hook compiler"></svg></div>
+<div class="ctrl"><button data-a="reset">⟲ Reset</button><button data-a="prev">◀ Back</button><button data-a="play">▶ Play</button><button data-a="next">Next ▶</button><span class="ct"></span></div>
+<p class="cap" aria-live="polite"></p>
+</div>
+<p class="src">Fig. 1 — The hook compiler as a Harness² step. The replay replaces the probe runs, because a hook decides on one tool call at a time.</p>
+<h3>The build</h3>
+<pre><code>hook-compiler/
+  mine.py              # read transcripts; cluster repeated failing tool calls
+  signatures.json      # output: signature, count, example calls
+  prompts/editor.md    # Prompt 1, INV scope; output = one hook or KEEP_BASE
+  candidates/&lt;sig&gt;/hook.py
+  replay.py            # run a hook over every logged Bash call
+  decisions.md         # kept|dropped -&gt; hook -&gt; replay counts
+  library/&lt;sig&gt;/EXPERIENCE.md</code></pre>
+<p>A candidate hook for the kill-by-name rule. A <code>PreToolUse</code> hook reads the event as JSON on stdin; exit code 2 blocks the call and sends stderr back to Claude.</p>
+<pre><code># candidates/kill-by-name/hook.py  (PreToolUse, matcher "Bash")
+import json
+import re
+import sys
+
+cmd = json.load(sys.stdin).get("tool_input", {}).get("command", "")
+if re.search(r"\b(pkill|killall)\b|\btaskkill\b.*/IM\b", cmd, re.I):
+    print("Blocked: kill a PID you captured, not a name.", file=sys.stderr)
+    sys.exit(2)</code></pre>
+<pre><code>// .claude/settings.json (or ~/.claude/settings.json)
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          { "type": "command",
+            "command": "python ~/.claude/hooks/kill_by_name.py" }
+        ]
+      }
+    ]
+  }
+}</code></pre>
+<p>The replay probe. It sends every logged Bash call to the hook in the same JSON shape that Claude Code uses, and lists what the hook blocks. A person then marks each blocked call as a real violation or a false positive.</p>
+<pre><code># replay.py HOOK
+import glob
+import json
+import os
+import subprocess
+import sys
+
+hook, blocked = sys.argv[1], []
+logs = glob.glob(os.path.expanduser("~/.claude/projects/*/*.jsonl"))
+for path in logs:
+    for line in open(path, encoding="utf-8"):
+        msg = json.loads(line).get("message") or {}
+        for part in msg.get("content") or []:
+            if not isinstance(part, dict) or part.get("name") != "Bash":
+                continue
+            event = {"tool_name": "Bash", "tool_input": part["input"]}
+            r = subprocess.run([sys.executable, hook], text=True,
+                               input=json.dumps(event), capture_output=True)
+            if r.returncode == 2:
+                blocked.append(part["input"].get("command", ""))
+print(len(blocked), "blocked")
+print("\n".join(blocked))</code></pre>
+<div class="facts">
+<div><b>Cost</b>No task runs. One editor session per signature. The replay takes seconds.</div>
+<div><b>Evidence</b>Prompt 1 names hooks for "a recurring mechanical problem in the tool loop". Table 5: a plugin "enforces a behavior rather than instructs it".</div>
+<div><b>Risk</b>A false positive blocks valid work. The replay measures it; keep only hooks with zero false positives on the history.</div>
+<div><b>First step</b>Write <code>mine.py</code> and list the 5 most frequent failing command patterns.</div>
+</div>
+
+<!-- ============ IDEA 2 ============ -->
+<h2 id="i2">2. Reflector hook and experience library (level 2 only)</h2>
+<p><b>What it is.</b> When a session ends, a hook starts a headless reflector session. The reflector reads the transcript and writes at most one lesson to a per-domain library. When the next session starts, a hook prints the library index, not the entries, so the agent can open a relevant entry on demand. This builds only the harnessing-level recursion of the paper (Eq. 4), with no probes.</p>
+<h3>The mapping onto Harness²</h3>
+<div class="tw"><table>
+<tr><th>Harness² stage</th><th>In this project</th></tr>
+<tr><td>Reference</td><td>The session that just ended, as its transcript.</td></tr>
+<tr><td>Reflect (Prompt 6)</td><td>A headless <code>claude -p</code> session with an adapted Prompt 6: verdicts <code>helped</code>, <code>hurt</code>, <code>no observed effect</code>, <code>confounded</code>; at most one lesson with <code>cue</code>, <code>lesson</code>, <code>evidence</code>, <code>confidence</code>; otherwise <code>NO_ENTRY</code>.</td></tr>
+<tr><td>Library update (Eq. 4)</td><td><code>~/.claude/library/&lt;domain&gt;/&lt;date&gt;-&lt;slug&gt;/EXPERIENCE.md</code> plus a one-line row in <code>INDEX.md</code>. In the paper an entry also holds the adopted harness tree; here, store copies of any skill or hook that the session changed.</td></tr>
+<tr><td>Reuse</td><td>A <code>SessionStart</code> hook prints <code>INDEX.md</code>. The paper's rule for reuse applies: "an earlier task's mapping or threshold is a hypothesis here, not a fact."</td></tr>
+<tr><td>Not built</td><td>Propose, Probe and Compose. So the lessons rest on one trajectory, with no contrast run.</td></tr>
+</table></div>
+<div class="fig"><div class="sv"><svg data-fig="f2" role="img" aria-label="Reflector hook and library data flow"></svg></div></div>
+<p class="src">Fig. 2 — Level 2 alone. The green boxes are the paper's harnessing-level recursion; there is no orange or blue box, because nothing is proposed or probed.</p>
+<h3>The build</h3>
+<pre><code>~/.claude/
+  hooks/reflect.py         # SessionEnd: start the reflector in the background
+  hooks/print_index.py     # SessionStart: print library/&lt;domain&gt;/INDEX.md
+  library/REFLECTOR.md     # adapted Prompt 6
+  library/&lt;domain&gt;/INDEX.md
+  library/&lt;domain&gt;/&lt;date&gt;-&lt;slug&gt;/EXPERIENCE.md</code></pre>
+<pre><code># hooks/reflect.py  (SessionEnd hook; input JSON has transcript_path)
+import json
+import os
+import subprocess
+import sys
+
+if os.environ.get("REFLECT_CHILD"):      # the reflector's own session
+    sys.exit(0)
+event = json.load(sys.stdin)
+prompt = open(os.path.expanduser("~/.claude/library/REFLECTOR.md")).read()
+prompt += "\nTranscript: " + event["transcript_path"]
+env = dict(os.environ, REFLECT_CHILD="1")
+subprocess.Popen(["claude", "-p", prompt, "--allowedTools", "Read,Write"],
+                 env=env, stdout=subprocess.DEVNULL,
+                 stderr=subprocess.DEVNULL)</code></pre>
+<pre><code>&lt;!-- EXPERIENCE.md: one lesson, or the single line NO_ENTRY --&gt;
+cue:        a task that writes .xlsx files with formulas
+lesson:     C7 script: reopen each .xlsx with cached values and list
+            formula cells that read blank
+evidence:   transcript line 412: formula cells written, file never reopened
+confidence: low (one session, no contrast run)</code></pre>
+<div class="facts">
+<div><b>Cost</b>No task runs. One headless session per finished session; it reads the transcript, so long sessions cost more tokens.</div>
+<div><b>Evidence</b>Removing the library costs 3.1 points on WorkBuddy-Bench and 1.8 on JobBench (Table 3).</div>
+<div><b>Risk</b>No contrast run. Fig. 7: editing with no execution and no library fell 73.4 → 63.2 on Code. A false lesson costs in proportion to the remaining tasks (Theory T5.4). Default to <code>NO_ENTRY</code>.</div>
+<div><b>First step</b>Write <code>REFLECTOR.md</code> from Prompt 6, run it by hand on 3 old transcripts, and read what it writes before you add the hook.</div>
+</div>
+<div class="card"><p><b>Two checks before you trust the hook.</b> (1) The <code>REFLECT_CHILD</code> guard stops the reflector's own session from starting another reflector when it ends. (2) Check that the background process survives the end of the parent session on your OS. On Windows, add <code>creationflags=subprocess.DETACHED_PROCESS</code> to <code>Popen</code>.</p></div>
+
+<!-- ============ IDEA 3 ============ -->
+<h2 id="i3">3. A <code>/harness-step</code> skill (level 1, k = 1)</h2>
+<p><b>What it is.</b> A skill that runs one full Propose–Probe–Compose step on a real task in a git repository. Each harness variant lives in its own git worktree, so the three variants can run side by side without changing each other's files. The deliverable is the output of the composed harness.</p>
+<h3>The mapping onto Harness²</h3>
+<div class="tw"><table>
+<tr><th>Harness² stage</th><th>In this project</th></tr>
+<tr><td>Harness H</td><td>The project's <code>CLAUDE.md</code> and <code>.claude/</code> folder at <code>HEAD</code>.</td></tr>
+<tr><td>Reference e₀</td><td><code>claude -p "$TASK" --output-format stream-json --verbose</code> in worktree <code>wt-ref</code>; save the stream as the trajectory.</td></tr>
+<tr><td>Propose</td><td>Two headless editor sessions with Prompt 1, scope INV and scope DOM. Each may edit only <code>CLAUDE.md</code>, <code>.claude/</code> and <code>scripts/</code> in its own worktree, or answer <code>KEEP_BASE</code>.</td></tr>
+<tr><td>Probe</td><td>Run the same task in <code>wt-inv</code> and <code>wt-dom</code>, with the same model and permission flags.</td></tr>
+<tr><td>Compose (Prompt 3)</td><td>A composer session reads the three trajectories and both <code>git diff</code> outputs, writes the merged harness to <code>wt-final</code>, and writes one decision line per edit.</td></tr>
+<tr><td>Final run</td><td>Run the task in <code>wt-final</code>. That output is the deliverable.</td></tr>
+</table></div>
+<div class="fig"><div class="sv"><svg data-fig="f3" role="img" aria-label="One Propose-Probe-Compose step in git worktrees"></svg></div></div>
+<p class="src">Fig. 3 — One contrastive step with git worktrees. Four task runs (teal and blue) and three improver sessions (orange and purple), as in the paper's budget at k = 1.</p>
+<h3>The build</h3>
+<pre><code>.claude/skills/harness-step/
+  SKILL.md
+  prompts/editor.md      # Prompt 1; the scope line is INV or DOM
+  prompts/composer.md    # Prompt 3, adapted to one pair of candidates
+  run_arm.sh             # run the task in one worktree, save stream-json</code></pre>
+<pre><code>---
+name: harness-step
+description: Run one Harness² Propose-Probe-Compose step (k=1) on a task
+  in this repo. Use when the user asks to improve the project harness.
+---
+1. Create worktrees from HEAD: ../wt-ref, ../wt-inv, ../wt-dom.
+2. Reference: run the task in ../wt-ref; save runs/ref.jsonl.
+3. Propose: run prompts/editor.md twice, scope INV and scope DOM.
+   Each edits only CLAUDE.md, .claude/ and scripts/ in its own worktree,
+   or answers KEEP_BASE.
+4. Probe: run the task in ../wt-inv and ../wt-dom; save the streams.
+5. Compose: give prompts/composer.md the three streams and both diffs.
+   It writes ../wt-final and one line per edit:
+   kept|revised|dropped -&gt; &lt;edit&gt; -&gt; &lt;trajectory moment&gt;
+6. Run the task in ../wt-final. Report its output and the decisions.</code></pre>
+<pre><code># run_arm.sh WORKTREE NAME  (same flags for every arm)
+cd "$1" &amp;&amp; claude -p "$TASK" --output-format stream-json --verbose \
+  --permission-mode acceptEdits &gt; "runs/$2.jsonl"</code></pre>
+<div class="facts">
+<div><b>Cost</b>4 task runs and 3 sessions per step, as the paper's ledger counts at k = 1.</div>
+<div><b>Evidence</b>One step at k = 1 improved all 12 model–harness–benchmark pairs (Tables 1–2). One JobBench task went 43.1 → 77.8 (Fig. 9).</div>
+<div><b>Risk</b>The task must be safe to run 4 times: no external side effects (email, deploys, payments). Your user-level <code>~/.claude</code> loads in every arm; that is the same for all arms, but a rule there can hide the effect of an edit.</div>
+<div><b>First step</b>Pick a task that writes only local files and that went wrong before. Run steps 1–2 by hand and read the reference trajectory.</div>
+</div>
+
+<!-- ============ IDEA 4 ============ -->
+<h2 id="i4">4. Always-on diet auditor</h2>
+<p><b>What it is.</b> A tool that measures everything that enters the context on every call (<code>CLAUDE.md</code> files, rules, <code>SessionStart</code> hook output, skill descriptions) and proposes a new home for each block in the paper's cost order. The paper's editor prompt states the reason: always-on prose is "competing with the agent's own output budget", and "if you add always-on text, cut something else to pay for it".</p>
+<h3>The mapping onto Harness²</h3>
+<div class="tw"><table>
+<tr><th>Harness² stage</th><th>In this project</th></tr>
+<tr><td>Reference</td><td>An inventory of always-on blocks, with the token count ℓ of each and an estimate of its trigger rate π: the fraction of past sessions in which the block's topic came up.</td></tr>
+<tr><td>Propose (Prompt 1 placement order)</td><td>For each block: keep (applies to every run), move to a skill (has a trigger), move to a script (deterministic), move to a hook (must be enforced), or delete. The Theory tab, T6.1, gives the test: a skill costs less than always-on text when π &lt; 1 − d/ℓ, where d is the skill's description length.</td></tr>
+<tr><td>Probe</td><td>Run 3–5 real tasks with the old and the new harness. Check that each moved rule still acts when its topic comes up: the skill loads, or the hook fires.</td></tr>
+<tr><td>Compose</td><td>Accept a move only where the probe shows the same behaviour with fewer always-on tokens.</td></tr>
+</table></div>
+<div class="fig" id="a4">
+<div class="sv"><svg role="img" aria-label="Animated pipeline of the always-on diet auditor"></svg></div>
+<div class="ctrl"><button data-a="reset">⟲ Reset</button><button data-a="prev">◀ Back</button><button data-a="play">▶ Play</button><button data-a="next">Next ▶</button><span class="ct"></span></div>
+<p class="cap" aria-live="polite"></p>
+</div>
+<p class="src">Fig. 4 — The diet auditor as a Harness² step. The probe checks that a moved rule still acts; the paper's token argument says why the move is worth it.</p>
+<h3>The build</h3>
+<pre><code>diet-audit/
+  measure.py          # tokens per always-on block (about 4 bytes per token)
+  trigger_rate.py     # share of past sessions that mention each block's topic
+  prompts/placer.md   # Prompt 1 placement order + the T6.1 test
+  probe_tasks.txt     # 3-5 real tasks that touch the moved rules
+  report.md           # block, tokens, pi, proposed home, probe result</code></pre>
+<pre><code># measure.py FILE...  tokens per heading block, about 4 bytes per token
+import pathlib
+import re
+import sys
+
+for name in sys.argv[1:]:
+    text = pathlib.Path(name).expanduser().read_text(encoding="utf-8")
+    for block in re.split(r"\n(?=#+ )", text):
+        if not block.strip():
+            continue
+        title = block.strip().splitlines()[0][:60]
+        print(f"{len(block.encode()) // 4:6d}  {name}  {title}")</code></pre>
+<p>Illustrative output of the report. The numbers are examples, not measurements.</p>
+<div class="tw"><table>
+<tr><th>Block</th><th>Tokens ℓ</th><th>Trigger rate π</th><th>Proposed home</th><th>Why</th></tr>
+<tr><td>Writing-style rules</td><td>420</td><td>1.00</td><td>Keep always-on</td><td>Applies to every reply.</td></tr>
+<tr><td>A video-pipeline procedure</td><td>900</td><td>0.08</td><td>Skill</td><td>π = 0.08 is far below 1 − 50/900 ≈ 0.94.</td></tr>
+<tr><td>"Never kill a process by name"</td><td>60</td><td>—</td><td>Hook (idea 1), plus one line kept</td><td>It must be enforced, not requested.</td></tr>
+<tr><td>A framework-specific gotcha</td><td>180</td><td>0.02</td><td>Skill, or a project CLAUDE.md</td><td>Only relevant in projects that use that framework.</td></tr>
+</table></div>
+<div class="facts">
+<div><b>Cost</b>No runs to measure. The probe needs 2 × 3–5 task runs.</div>
+<div><b>Evidence</b>Prompt 1's cost order. Table 6: removing skills from the finished harness costs 5.3 points; removing the always-on prompt group costs 1.5.</div>
+<div><b>Risk</b>A rule moved to a skill may not load when it should. The probe tests exactly this; keep a one-line pointer always-on if the skill does not trigger reliably.</div>
+<div><b>First step</b>Run <code>measure.py</code> on your global and project <code>CLAUDE.md</code> and sort by tokens.</div>
+</div>
+
+<!-- ============ IDEA 5 ============ -->
+<h2 id="i5">5. Blind best-of-k selector</h2>
+<p><b>What it is.</b> Run one task k times, with different harness variants or just different samples. Remove every label that says which run made which output, shuffle the outputs, and let a selector session pick one by the paper's decision order. Use it where the output quality changes from run to run and the output can be checked against source files, for example a summary against its transcript.</p>
+<h3>The mapping onto Harness²</h3>
+<div class="tw"><table>
+<tr><th>Harness² stage</th><th>In this project</th></tr>
+<tr><td>Reference runs ×k</td><td>k runs of the task, each in its own output folder.</td></tr>
+<tr><td>Anonymise</td><td>Copy the outputs to folders <code>A</code>, <code>B</code>, … in a random order. Keep the label map in a file the selector cannot read. Remove harness names from file contents too.</td></tr>
+<tr><td>Select (Prompt 5)</td><td>The selector compares the outputs against the request and the source files, in this order: delivery, conformance (exact shape), fidelity to source, internal consistency, operational fitness, finish. A base output is a valid pick.</td></tr>
+</table></div>
+<div class="fig"><div class="sv"><svg data-fig="f5" role="img" aria-label="Blind best-of-k selection"></svg></div></div>
+<p class="src">Fig. 5 — Blind selection. The label map goes around the selector, so the pick can depend only on the content of the outputs (Theory T1.8).</p>
+<h3>The build</h3>
+<pre><code># anonymise.py RUN_DIR...  copy outputs to blind/A, blind/B, ...
+import json
+import pathlib
+import random
+import shutil
+import sys
+
+runs = sys.argv[1:]
+random.shuffle(runs)
+key = {}
+for i, run in enumerate(runs):
+    label = chr(65 + i)
+    shutil.copytree(pathlib.Path(run) / "out", pathlib.Path("blind") / label)
+    key[label] = run
+pathlib.Path("key.json").write_text(json.dumps(key))  # selector never reads</code></pre>
+<pre><code>&lt;!-- prompts/selector.md (outline from Prompt 5) --&gt;
+You compare the outputs in blind/ against the request and the files in
+sources/. You do not know which process made which output. Decide in this
+order, and stop at the first rule that separates them:
+1 delivery  2 conformance  3 fidelity to source  4 internal consistency
+5 operational fitness  6 finish.
+Return one letter and one sentence that cites the deciding difference.</code></pre>
+<div class="facts">
+<div><b>Cost</b>k task runs plus 1 selector session.</div>
+<div><b>Evidence</b>The paper uses a blind selector for every k &gt; 1 run; parallel k = 5 adds 2.9 to 3.9 points on WorkBuddy-Bench over k = 1 (Table 1).</div>
+<div><b>Risk</b>The selector can be wrong: Fig. 14 shows it picking a 55-point output over a 95-point one. The picked output also looks better than its harness is (the optimizer's curse, Theory T3.3).</div>
+<div><b>First step</b>Run one summary task 3 times, anonymise, and compare the selector's pick with your own blind pick.</div>
+</div>
+
+<!-- ============ IDEA 6 ============ -->
+<h2 id="i6">6. Skill A/B bench</h2>
+<p><b>What it is.</b> A regression test for a skill change. Freeze 10–20 real tasks as fixtures. Run the old skill (arm A) and the new skill (arm B) on each, several times. Compare the trajectories, not only the outputs. Ship B only when its behaviour is better by more than the noise between two runs of A.</p>
+<h3>The mapping onto Harness²</h3>
+<div class="tw"><table>
+<tr><th>Harness² stage</th><th>In this project</th></tr>
+<tr><td>Reference</td><td>Arm A: the current skill on the frozen tasks.</td></tr>
+<tr><td>Probe</td><td>Arm B: the changed skill on the same tasks, same model, same flags.</td></tr>
+<tr><td>Behavioural contrast</td><td>Metrics from each trajectory: tool errors, turns, tool calls, rule violations, files reopened after writing. The paper compares trajectories because it has no score; here a score can exist, but it runs only after the decision, as in the paper.</td></tr>
+<tr><td>Compose / decide</td><td>Ship, revise or drop B. Measure the noise floor by running A against A: the code release calls the k = 1 gap between its two modes "a NOISE FLOOR, not a result" (<code>harness2/core/report.py</code>).</td></tr>
+</table></div>
+<div class="fig"><div class="sv"><svg data-fig="f6" role="img" aria-label="Skill A/B bench"></svg></div></div>
+<p class="src">Fig. 6 — The probe stage used as a regression test. The optional grader sits after the decision, so it cannot steer it.</p>
+<h3>The build</h3>
+<pre><code>skill-bench/
+  fixtures/&lt;task-id&gt;/    # frozen inputs + task.txt
+  arms/A/  arms/B/        # two copies of the skill
+  run_bench.sh            # for each task, arm, repeat: claude -p ... &gt; runs/
+  metrics.py              # behaviour metrics from one stream-json file
+  decide.md               # per metric: mean A, mean B, A-vs-A spread</code></pre>
+<pre><code># metrics.py RUN.jsonl  behaviour metrics from one stream-json run
+import json
+import sys
+
+turns = calls = errors = 0
+for line in open(sys.argv[1], encoding="utf-8"):
+    ev = json.loads(line)
+    content = (ev.get("message") or {}).get("content")
+    if ev.get("type") == "assistant":
+        turns += 1
+    for part in content if isinstance(content, list) else []:
+        if part.get("type") == "tool_use":
+            calls += 1
+        if part.get("type") == "tool_result" and part.get("is_error"):
+            errors += 1
+print(json.dumps({"turns": turns, "tool_calls": calls, "tool_errors": errors}))</code></pre>
+<div class="facts">
+<div><b>Cost</b>2 arms × tasks × repeats. Example: 10 tasks × 3 repeats = 60 runs, plus 30 for the A-vs-A noise floor.</div>
+<div><b>Evidence</b>The paper reports each score as the mean of three runs with shuffled task order (Tables 1–2), because single runs vary.</div>
+<div><b>Risk</b>Fixtures go stale when your real tasks change. Too few repeats give a decision inside the noise.</div>
+<div><b>First step</b>Freeze 10 past inputs of one skill, and run arm A twice to measure the noise floor first.</div>
+</div>
+
+<!-- ============ IDEA 7 ============ -->
+<h2 id="i7">7. Independent checker library</h2>
+<p><b>What it is.</b> A set of deterministic checker scripts written and reviewed once, outside any task run, and then reused by every other idea. Each checker reports named failures (sheet and cell, file and line) and exits non-zero when it finds one. A skill tells the agent when to run which checker.</p>
+<h3>The mapping onto Harness²</h3>
+<div class="tw"><table>
+<tr><th>Harness² piece</th><th>In this project</th></tr>
+<tr><td>C7 scripts</td><td>The checkers themselves, e.g. a formula cell that a reader sees as blank, numbers that differ between two files, broken links, missing front-matter fields.</td></tr>
+<tr><td>C6 skill</td><td>One skill that maps a deliverable type to its checkers.</td></tr>
+<tr><td>Probe evidence</td><td>Checker output is a behavioural fact that the composer, the A/B bench (idea 6) and the reflector can cite.</td></tr>
+<tr><td>Why independent</td><td>Fig. 14: a checker that the editor wrote during the task "reported PASS three times" while the real tests failed (75 → 64). The paper's comment: "A checker written by the editor cannot catch the editor's assumption."</td></tr>
+</table></div>
+<div class="fig"><div class="sv"><svg data-fig="f7" role="img" aria-label="Independent checker library"></svg></div></div>
+<p class="src">Fig. 7 — Checkers written outside the task give evidence that does not share the executor's assumptions (Theory T3, the checker section).</p>
+<h3>The build</h3>
+<p>The paper's Fig. 9 shows the idea of <code>verify_outputs.py</code>: compare a formula with the value a reader sees. This version uses openpyxl, which reads formulas and, separately, the cached values that the last spreadsheet program saved.</p>
+<pre><code># checks/xlsx_blank_formulas.py FILE  formula cells that read blank
+import sys
+from openpyxl import load_workbook
+
+live = load_workbook(sys.argv[1])                  # formulas as written
+seen = load_workbook(sys.argv[1], data_only=True)  # values a reader sees
+bad = []
+for ws in live.worksheets:
+    for row in ws.iter_rows():
+        for c in row:
+            shown = seen[ws.title][c.coordinate].value
+            is_formula = isinstance(c.value, str) and c.value.startswith("=")
+            if is_formula and shown in (None, ""):
+                bad.append(f"{ws.title}!{c.coordinate}")
+print("\n".join(bad))
+sys.exit(1 if bad else 0)</code></pre>
+<p>A file that openpyxl wrote and no spreadsheet program has recalculated has no cached values, so every formula reports blank. That is the correct warning: a reader who opens the file in a viewer that does not recalculate sees blank cells.</p>
+<pre><code>checks/
+  xlsx_blank_formulas.py
+  numbers_match.py        # a number in the output must appear in a source
+  links_ok.py
+  frontmatter.py
+  tests/                  # one known-bad and one known-good file per checker
+.claude/skills/run-checks/SKILL.md   # deliverable type -&gt; checkers</code></pre>
+<div class="facts">
+<div><b>Cost</b>No task runs. Each check takes seconds.</div>
+<div><b>Evidence</b>Removing scripts from the finished harness costs 3.7 points overall and 7.4 on Office (Table 6).</div>
+<div><b>Risk</b>A checker bug is systematic: it is wrong on every file. The known-bad and known-good test files catch this once.</div>
+<div><b>First step</b>Write one checker for the deliverable type you produce most often, with one bad and one good test file.</div>
+</div>
+
+<!-- ============ IDEA 8 ============ -->
+<h2 id="i8">8. Evolve with a strong model, deploy with a cheap one</h2>
+<p><b>What it is.</b> Run Harness² with a strong executor (for example Opus) on the first N tasks of one kind. Merge the adopted harnesses into one frozen domain harness. Then run that harness with a cheaper model (Sonnet or Haiku), and measure the gain with the A/B bench of idea 6.</p>
+<h3>The mapping onto Harness²</h3>
+<div class="tw"><table>
+<tr><th>Harness² stage</th><th>In this project</th></tr>
+<tr><td>Levels 1 and 2</td><td>Ideas 3 and 2 together, with the strong model as the executor, over N tasks.</td></tr>
+<tr><td>Consolidate (not in the paper)</td><td>Merge the library into one harness. The paper lists this as future work (Appendix G). Group components by the job they do (their <code>cue</code>), not by shared lines: the paper found that only 2–10% of modified files keep at least half their lines from a library entry (Fig. 10).</td></tr>
+<tr><td>Transfer</td><td>The cheap model runs the frozen harness. The paper's evidence: the harness evolved for Gemini 3.5 Flash raised GLM-5 on Code from 58.5 to 75.8 (+17.3).</td></tr>
+<tr><td>Check</td><td>Idea 6 bench: cheap model with the base harness against the cheap model with the frozen harness.</td></tr>
+</table></div>
+<div class="fig"><div class="sv"><svg data-fig="f8" role="img" aria-label="Evolve with a strong model and deploy with a cheap one"></svg></div></div>
+<p class="src">Fig. 8 — The expensive exploration runs once, on N tasks. The frozen harness then runs at the cheap model's price.</p>
+<h3>The build</h3>
+<pre><code>evolve-deploy/&lt;domain&gt;/
+  tasks/          # the first N tasks
+  library/        # filled by ideas 2 + 3 with --model opus
+  consolidate.md  # prompt: group library components by cue; one per job
+  frozen/         # CLAUDE.md + .claude/ for the cheap model
+  bench/          # idea 6, arms: base harness vs frozen/, --model sonnet</code></pre>
+<pre><code># the only change between the two phases is the executor model
+claude -p "$TASK" --model opus    # evolve phase, inside /harness-step
+claude -p "$TASK" --model sonnet  # deploy phase, in frozen/</code></pre>
+<div class="facts">
+<div><b>Cost</b>N × 4k strong-model runs once, then cheap runs. Example: N = 10 at k = 1 is 40 strong runs.</div>
+<div><b>Evidence</b>Cross-model transfer: GLM-5 Code 58.5 → 75.8 with the Gemini-evolved harness.</div>
+<div><b>Risk</b>That is one model pair in the paper. Consolidation is new and untested in the paper. A harness tuned for a strong model may assume skills the cheap model lacks; the bench shows it.</div>
+<div><b>First step</b>Pick a domain with at least 10 similar tasks, and decide what a correct output is before you start.</div>
+</div>
+
+<!-- ============ IDEA 9 ============ -->
+<h2 id="i9">9. An adapter for the released code</h2>
+<p><b>What it is.</b> Use the released <code>harness2</code> package as the engine, with your own task type. You write one adapter class. The package then gives you the full method: parallel and sequential recursion, the ledger, the library, the blind selector and the reports.</p>
+<h3>The mapping onto Harness²</h3>
+<div class="tw"><table>
+<tr><th>Package piece</th><th>What you supply</th></tr>
+<tr><td><code>BenchmarkAdapter</code> (<code>harness2/core/spec.py</code>)</td><td>The methods <code>tasks</code>, <code>domain_of</code>, <code>task_prompt</code>, <code>task_files</code>, <code>execute</code>, <code>delivered</code>, <code>trajectory</code>, <code>deliverable_text</code>, <code>base_harness</code>, <code>validate_tree</code>, <code>score</code> (and optionally <code>deliverable_files</code>). The docstring: "Implement these and the whole method works."</td></tr>
+<tr><td><code>BenchSpec</code></td><td>Name, runs folder, install mode, prompts, channels, and <code>leak_globs</code>: patterns for grader files (rubrics, tests, expected outputs). The context builder asserts that none of them reach the editors (<code>harness2/core/context.py</code>).</td></tr>
+<tr><td><code>score</code></td><td>Your grader. The package calls it "only after selection committed"; <code>None</code> means the judge failed, "which is not a zero".</td></tr>
+<tr><td>Substrate (executor)</td><td>OpenCode or Codex. A Claude Code executor needs a new substrate (protocol in <code>harness2/substrate/base.py</code>) that maps c1–c8 onto <code>CLAUDE.md</code>, <code>.claude/agents</code>, <code>.claude/skills</code>, scripts and hooks.</td></tr>
+<tr><td>Editor channel</td><td><code>claude_cli</code> or <code>opencode</code> (<code>harness2/core/spec.py</code>, <code>CHANNELS</code>).</td></tr>
+</table></div>
+<div class="fig"><div class="sv"><svg data-fig="f9" role="img" aria-label="Adapter for the released harness2 code"></svg></div></div>
+<p class="src">Fig. 9 — You write the grey boxes on the left. The package supplies the method; the executor is OpenCode or Codex unless you add a substrate.</p>
+<h3>The build</h3>
+<pre><code># harness2/benchmarks/mytasks.py  (skeleton; method bodies omitted)
+from pathlib import Path
+
+from harness2.core.spec import BenchSpec
+
+
+class MyTasksAdapter:
+    spec: BenchSpec  # leak_globs=("grader/**", "expected/**")
+    substrate = None  # an OpencodeSubstrate or a CodexSubstrate
+
+    def tasks(self, split="all") -&gt; list[str]: ...
+    def domain_of(self, task_id: str) -&gt; str: ...
+    def task_prompt(self, task_id: str) -&gt; str: ...
+    def task_files(self, task_id: str) -&gt; Path | None: ...
+    def execute(self, task_id, harness_dir, run_id, *, timeout=None): ...
+    def delivered(self, run_dir: Path) -&gt; bool: ...
+    def trajectory(self, run_dir: Path, *, obs_trunc: int) -&gt; str: ...
+    def deliverable_text(self, run_dir: Path) -&gt; str: ...
+    def base_harness(self) -&gt; Path: ...
+    def validate_tree(self, tree: dict[str, str]) -&gt; None: ...
+    def score(self, run_dir: Path, task_id: str) -&gt; dict | None: ...</code></pre>
+<div class="facts">
+<div><b>Cost</b>4k executor runs and 3k editor sessions per task, plus a selector and a reflector. API spend for both the executor and the editors.</div>
+<div><b>Evidence</b>This is the code that produced the paper's tables, so the method runs exactly as published.</div>
+<div><b>Risk</b>On Windows it needs WSL. The <code>claude_cli</code> channel runs <code>claude --dangerously-skip-permissions -p</code>: run it only in a sandbox (a container or VM with no secrets). The README refers to a <code>.env.example</code> that the repository does not contain.</div>
+<div><b>First step</b>In WSL, run the package's demo on its own benchmark first, so you know the setup works before you write an adapter.</div>
+</div>
+
+<!-- ============ IDEA 10 ============ -->
+<h2 id="i10">10. A domain harness for a pipeline you repeat</h2>
+<p><b>What it is.</b> Apply both recursion levels to a pipeline that you run again and again, for example source summaries or the build of one textbook module. Each run of the pipeline is one task q<sub>t</sub> in the paper's stream. The current skill is H₀. A library per domain carries what earlier runs learned.</p>
+<h3>The mapping onto Harness²</h3>
+<div class="tw"><table>
+<tr><th>Harness² piece</th><th>In this project</th></tr>
+<tr><td>Task stream q₁ … q<sub>N</sub></td><td>Each batch of sources, or each module.</td></tr>
+<tr><td>Base harness H₀</td><td>The pipeline's skill, scripts and hooks as they are today. Every task starts from it again (Theory T2.2).</td></tr>
+<tr><td>Level 1</td><td>Idea 3 on a task. To cut the cost, improve only every m-th task and run the others once with H₀ and the library.</td></tr>
+<tr><td>Evidence without a score</td><td>Checkers from idea 7, plus your own review after the fact. Keep both out of the editors' context, as the paper keeps the grader out (<code>leak_globs</code> in idea 9).</td></tr>
+<tr><td>Level 2</td><td>Idea 2's reflector after every task, into <code>library/&lt;domain&gt;/</code>.</td></tr>
+</table></div>
+<div class="fig"><div class="sv"><svg data-fig="f10" role="img" aria-label="Domain harness for a repeated pipeline"></svg></div></div>
+<p class="src">Fig. 10 — Both levels on your own stream. The dashed arrow is the library read by the next task's editors.</p>
+<h3>The build</h3>
+<pre><code>{
+  "domain": "source-summaries",
+  "base_harness": ".claude/skills/source-summary/",
+  "k": 1,
+  "improve_every": 3,
+  "checkers": ["checks/frontmatter.py", "checks/numbers_match.py"],
+  "library": "library/source-summaries/"
+}</code></pre>
+<p>With <code>improve_every</code> = 3, every third task gets a full step (4 runs) and the other two run once. That is 4 + 1 + 1 = 6 runs per 3 tasks, an average of 2 runs per task, half of a full step on every task. To see whether the library helps, re-run 3 later tasks with an empty library and compare the checker failures; this is the paper's library ablation (Table 3) at small scale.</p>
+<div class="facts">
+<div><b>Cost</b>(4 + (m − 1)) / m runs per task on average; 2 at m = 3.</div>
+<div><b>Evidence</b>The paper's largest single-task gains came from procedural failures (Fig. 9: 43.1 → 77.8). Removing the library costs 3.1 / 1.8 points (Table 3).</div>
+<div><b>Risk</b>Long tasks make 4 runs expensive. Your review is the grader: if you give it to the editors, they optimise your review, not the task (Theory T3, the grader leak).</div>
+<div><b>First step</b>Write down 3 failures the pipeline has had, and one checker for each (idea 7).</div>
+</div>
+
+<h2 id="order">Build order</h2>
+<p>The ideas depend on each other. Ideas 1 and 4 need nothing else. Idea 7 gives ideas 3 and 6 evidence that the executor did not write, and idea 2 supplies the library that ideas 3 and 10 read. Idea 9 is the alternative engine: it replaces your hand-built versions of ideas 3 and 10 with the released code.</p>
+<div class="fig"><div class="sv"><svg data-fig="f11" role="img" aria-label="Dependencies between the ten ideas"></svg></div></div>
+<p class="src">Fig. 11 — Build order. An arrow means "makes the next idea work better or is a part of it". Dashed = an alternative path.</p>
+<div class="card key"><p><b>Recommended path.</b> (1) Idea 4, to measure where your always-on tokens go. (2) Idea 1, to turn the repeated failures into hooks. (3) Idea 7, one checker for your most common deliverable. (4) Idea 3 on one real task, at 4 runs. Only then decide between ideas 10 and 9 for a full stream.</p></div>
+
+<h2 id="sources">Sources</h2>
+<ul>
+<li>Paper: Xu et al., Harness²: Recursive Agent Harnessing for an Open World, arXiv:2610.14224v1, 9 Oct 2026. Tables 1–3, 5, 6; Figs. 7, 9, 10, 14; Prompts 1, 3, 5, 6; Appendices G, H. <a href="https://arxiv.org/pdf/2610.14224">arxiv.org/pdf/2610.14224</a></li>
+<li>Code: <a href="https://github.com/google-research/harness2">github.com/google-research/harness2</a>, read without running it: <code>harness2/core/spec.py</code>, <code>ledger.py</code>, <code>context.py</code>, <code>proposer.py</code>, <code>report.py</code>, <code>prompts.py</code>; <code>harness2/substrate/</code>.</li>
+<li>Theory references (T1.8, T2.2, T3, T4, T5.4, T6.1): the Theory tab of <a href="harness2-learn.html#theory">Learn Harness²</a>.</li>
+<li>Claude Code features used in the snippets: hooks (<code>PreToolUse</code>, <code>SessionStart</code>, <code>SessionEnd</code>; exit code 2 blocks a tool call), skills, subagents, and headless mode (<code>claude -p</code>, <code>--output-format stream-json</code>, <code>--model</code>, <code>--allowedTools</code>, <code>--permission-mode</code>). Check the flags against your installed version.</li>
+</ul>
+<p class="src">The snippets are untested sketches. The numbers in the diet-audit table are illustrative. Everything else cites the paper or the code.</p>
+</main>
+</div>
+<script>
+(function(){
+var COL={ref:'#2dd4bf',prop:'#fb923c',probe:'#60a5fa',comp:'#c084fc',sel:'#fde68a',refl:'#4ade80',ext:'#94a3b8'};
+function route(a,b){
+  var x1,y1,x2,y2,m;
+  if(b.x>=a.x+a.w-1){x1=a.x+a.w;y1=a.y+a.h/2;x2=b.x-2;y2=b.y+b.h/2;m=(x1+x2)/2;return 'M'+x1+' '+y1+' C'+m+' '+y1+' '+m+' '+y2+' '+x2+' '+y2}
+  if(b.x+b.w<=a.x+1){x1=a.x;y1=a.y+a.h/2;x2=b.x+b.w+2;y2=b.y+b.h/2;m=(x1+x2)/2;return 'M'+x1+' '+y1+' C'+m+' '+y1+' '+m+' '+y2+' '+x2+' '+y2}
+  var lo=Math.max(a.x,b.x),hi=Math.min(a.x+a.w,b.x+b.w),x=(lo+hi)/2;
+  if(b.y>=a.y+a.h)return 'M'+x+' '+(a.y+a.h)+' V'+(b.y-2);
+  return 'M'+x+' '+a.y+' V'+(b.y+b.h+2);
+}
+function draw(svg,id,F){
+  var N={},s='<defs><marker id="m-'+id+'" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#64748b"/></marker></defs>';
+  F.n.forEach(function(n){N[n[0]]={x:n[1],y:n[2],w:n[3],h:16+15*n[5].length}});
+  (F.e||[]).forEach(function(e,i){
+    var o=e[2]||{},d=o.d||route(N[e[0]],N[e[1]]);
+    s+='<path class="ed'+(o.dash?' dash':'')+'" id="'+id+'-e'+i+'" d="'+d+'" marker-end="url(#m-'+id+')"/>';
+    if(o.t)s+='<text class="el" x="'+o.x+'" y="'+o.y+'">'+o.t+'</text>';
+  });
+  F.n.forEach(function(n){
+    var b=N[n[0]],c=COL[n[4]];
+    s+='<g class="nd" id="'+id+'-'+n[0]+'"><rect x="'+b.x+'" y="'+b.y+'" width="'+b.w+'" height="'+b.h+'" rx="7" stroke="'+c+'"/>';
+    n[5].forEach(function(t,i){s+='<text x="'+(b.x+b.w/2)+'" y="'+(b.y+20+i*15)+'" text-anchor="middle"'+(i?'':' class="b" style="fill:'+c+'"')+'>'+t+'</text>'});
+    s+='</g>';
+  });
+  svg.setAttribute('viewBox','0 0 '+F.w+' '+F.h);
+  svg.innerHTML=s;
+}
+var FIG={
+ a1:{w:860,h:250,n:[
+  ['t',15,40,140,'ext',['Past transcripts','~/.claude/projects/','*.jsonl']],
+  ['m',180,40,135,'ref',['Mine','repeated failure','signatures']],
+  ['e',340,40,150,'prop',['INV editor','(Prompt 1)','hook or KEEP_BASE']],
+  ['r',515,40,140,'probe',['Replay probe','bad calls blocked?','good calls passed?']],
+  ['c',680,40,165,'comp',['Compose','keep a hook only if','0 false positives']],
+  ['i',680,160,165,'ext',['Install','.claude/settings.json']],
+  ['l',340,160,315,'refl',['Library entry','hook + EXPERIENCE.md (evidence = counts)']]],
+  e:[['t','m'],['m','e'],['e','r'],['r','c'],['c','i'],['i','l']],
+  steps:[[['t'],[],'<b>Reference.</b> Your past transcripts are the reference runs. They already exist, so this step costs nothing.'],
+   [['m'],[0],'<b>Mine.</b> Read every tool call and its result. Cluster the calls that failed, or that a person corrected, into repeated signatures. Example: a kill command that names a process.'],
+   [['e'],[1],'<b>Propose.</b> An INV editor (Prompt 1) reads the examples of one signature and writes one PreToolUse hook, or answers KEEP_BASE. Prompt 1: a defensive hook needs "repeated evidence that clear prose is skipped".'],
+   [['r'],[2],'<b>Probe by replay.</b> Run the candidate hook on every logged Bash call. Count the bad calls it blocks and the good calls it blocks. No task needs to run again, because a hook decides on one call at a time.'],
+   [['c'],[3],'<b>Compose.</b> Keep the hook only if it blocked zero good calls in the replay. This is the transparency condition: a hook "must not block valid completion" (Prompt 1).'],
+   [['i','l'],[4,5],'<b>Install and reflect.</b> Register the hook in settings.json. Write a library entry with the hook and the replay counts as its evidence, so later sessions can reuse the pattern.']]},
+ a4:{w:860,h:250,n:[
+  ['v',15,40,150,'ext',['Inventory','CLAUDE.md, rules,','hook output, skills']],
+  ['me',190,40,135,'ref',['Measure','tokens ℓ per block','trigger rate π']],
+  ['pl',350,40,145,'prop',['Editor places','each block in the','cost order']],
+  ['pr',520,40,140,'probe',['Probe','3–5 real tasks,','old vs new']],
+  ['cp',685,40,160,'comp',['Compose','accept a move if the','behaviour is the same']],
+  ['rp',350,160,495,'refl',['Report + library entry','always-on tokens saved × calls per run']]],
+  e:[['v','me'],['me','pl'],['pl','pr'],['pr','cp'],['cp','rp']],
+  steps:[[['v'],[],'<b>Inventory.</b> List everything that reaches the model on every call: global and project CLAUDE.md, rules, SessionStart hook output, and the description line of every skill.'],
+   [['me'],[0],'<b>Measure.</b> Count the tokens ℓ of each block (about 4 bytes per token). Estimate the trigger rate π: the share of past sessions in which the block\'s topic came up.'],
+   [['pl'],[1],'<b>Propose.</b> An editor applies Prompt 1\'s order: skill, script, subagent, hook, always-on last. Test for a skill: it costs less than always-on text when π &lt; 1 − d/ℓ (Theory T6.1).'],
+   [['pr'],[2],'<b>Probe.</b> Run 3–5 real tasks that touch the moved rules, once with the old harness and once with the new one. Check that each moved rule still acts: the skill loads, or the hook fires.'],
+   [['cp'],[3],'<b>Compose.</b> Accept each move where the probe shows the same behaviour with fewer always-on tokens. Keep a one-line pointer always-on where a skill did not load reliably.'],
+   [['rp'],[4],'<b>Report.</b> Write the table of blocks, tokens, π, new home and probe result. The saving is the tokens removed times the model calls per run, on every run.']]},
+ f2:{w:860,h:240,n:[
+  ['s',15,40,140,'ext',['Session ends','SessionEnd hook']],
+  ['tr',180,40,150,'ref',['Reference = the','session transcript']],
+  ['rf',355,40,165,'refl',['Reflector (Prompt 6)','headless claude -p','verdicts per change']],
+  ['v',545,40,135,'comp',['One lesson','or NO_ENTRY']],
+  ['lb',705,40,140,'refl',['Library','&lt;domain&gt;/','INDEX.md']],
+  ['ss',545,160,300,'ext',['Next session: SessionStart hook','prints INDEX.md only']],
+  ['ag',180,160,340,'prop',['Agent opens an entry on demand','and re-checks its facts (a hypothesis)']]],
+  e:[['s','tr'],['tr','rf'],['rf','v'],['v','lb'],['lb','ss'],['ss','ag']]},
+ f3:{w:860,h:250,n:[
+  ['t',15,95,125,'ext',['Task','+ .claude/ at HEAD']],
+  ['r',165,95,130,'ref',['Reference run','in wt-ref']],
+  ['i',320,30,145,'prop',['INV editor','edits wt-inv/']],
+  ['d',320,160,145,'prop',['DOM editor','edits wt-dom/']],
+  ['pi',490,30,130,'probe',['Probe run','in wt-inv']],
+  ['pd',490,160,130,'probe',['Probe run','in wt-dom']],
+  ['c',650,80,195,'comp',['Composer (Prompt 3)','kept|revised|dropped','→ wt-final']],
+  ['f',650,185,195,'ref',['Final run in wt-final','= the deliverable']]],
+  e:[['t','r'],['r','i'],['r','d'],['i','pi'],['d','pd'],['pi','c'],['pd','c'],['c','f']]},
+ f5:{w:860,h:250,n:[
+  ['t',15,95,120,'ext',['Task','+ sources']],
+  ['a',165,25,130,'ref',['Run 1','harness variant 1']],
+  ['b',165,100,130,'ref',['Run 2','harness variant 2']],
+  ['k',165,175,130,'ref',['Run k','or the base']],
+  ['an',325,95,150,'ext',['Anonymise','strip labels,','shuffle → A, B, …']],
+  ['se',505,95,175,'sel',['Selector (Prompt 5)','delivery → conformance','→ fidelity → …']],
+  ['km',505,195,175,'ext',['Label map key.json','never shown to selector']],
+  ['o',705,95,140,'ref',['Picked output','a base pick is valid']]],
+  e:[['t','a'],['t','b'],['t','k'],['a','an'],['b','an'],['k','an'],['an','se'],['an','km'],['se','o'],['km','o']]},
+ f6:{w:860,h:240,n:[
+  ['fx',15,90,140,'ext',['Frozen task set','fixtures/ (10–20)']],
+  ['a',185,25,150,'ref',['Arm A: skill v1','× 3 runs per task']],
+  ['b',185,160,150,'probe',['Arm B: skill v2','× 3 runs per task']],
+  ['m',365,90,155,'ext',['Trajectory metrics','tool errors, turns,','rule violations']],
+  ['d',550,90,140,'comp',['Decide','B wins by more','than A-vs-A noise?']],
+  ['g',715,25,130,'ext',['Grader (optional)','after the decision']],
+  ['sh',715,160,130,'refl',['Ship + log','EXPERIENCE.md']]],
+  e:[['fx','a'],['fx','b'],['a','m'],['b','m'],['m','d'],['d','g',{dash:1}],['d','sh']]},
+ f7:{w:860,h:240,n:[
+  ['w',15,90,150,'ext',['Checker library','checks/*.py','reviewed once']],
+  ['sk',195,25,150,'prop',['Skill (C6)','which checker for','which deliverable']],
+  ['ru',195,160,150,'ref',['Any task run','writes a deliverable']],
+  ['ck',375,90,150,'probe',['Run the checker','deterministic,','not the editor\'s']],
+  ['ev',555,90,130,'comp',['Evidence','named failures:','cell, file, line']],
+  ['us',715,90,130,'refl',['Used by','composer, bench,','reflector']]],
+  e:[['w','sk'],['sk','ck'],['ru','ck'],['ck','ev'],['ev','us']]},
+ f8:{w:860,h:250,n:[
+  ['s',15,95,120,'ext',['First N tasks','of one domain']],
+  ['ev',165,25,165,'ref',['Harness² with Opus','levels 1 + 2','4k runs per task']],
+  ['lb',165,165,165,'refl',['Library','N adopted harnesses','+ lessons']],
+  ['co',360,95,150,'comp',['Consolidate','group components','by cue (new step)']],
+  ['fz',540,95,130,'ext',['Frozen domain','harness']],
+  ['dp',700,25,145,'ref',['Deploy with','Sonnet or Haiku']],
+  ['ab',700,165,145,'probe',['Idea 6 bench','base vs frozen,','cheap model']]],
+  e:[['s','ev'],['ev','lb'],['lb','co'],['ev','co'],['co','fz'],['fz','dp'],['fz','ab']]},
+ f9:{w:860,h:250,n:[
+  ['y',15,95,130,'ext',['Your task type','inputs + grader']],
+  ['ad',175,95,140,'ext',['Your adapter','tasks · execute ·','trajectory · score']],
+  ['co',345,25,170,'comp',['harness2 core','recursion · ledger','library · selection']],
+  ['su',345,165,170,'ref',['Substrate','OpenCode or Codex','(executor)']],
+  ['ed',545,25,150,'prop',['Editors via the','claude_cli channel','Prompts 1, 3, 5, 6']],
+  ['sb',545,165,150,'ext',['Sandbox','WSL, container,','no secrets']],
+  ['rp',725,95,120,'refl',['Reports','+ library']]],
+  e:[['y','ad'],['ad','co'],['ad','su'],['co','ed'],['su','sb'],['ed','rp']]},
+ f10:{w:860,h:250,n:[
+  ['st',15,95,125,'ext',['Task stream','run 1, 2, … N']],
+  ['h0',165,95,135,'ext',['H₀ = the','current skill']],
+  ['l1',330,40,165,'ref',['Level 1 (idea 3)','on every m-th task','4 runs; others 1']],
+  ['ck',330,165,165,'probe',['Checkers (idea 7)','+ your review,','after the fact']],
+  ['rf',525,95,140,'refl',['Reflector','(idea 2)','lesson / NO_ENTRY']],
+  ['lb',695,95,150,'refl',['Domain library','read by the next','task\'s editors']]],
+  e:[['st','h0'],['h0','l1'],['l1','ck'],['l1','rf'],['ck','rf'],['rf','lb'],['lb','l1',{dash:1,d:'M770 95 V20 H412 V36',t:'next task reads the library',x:500,y:14}]]},
+ f11:{w:860,h:310,n:[
+  ['i4',15,40,175,'prop',['4. Diet auditor','start here']],
+  ['i1',15,140,175,'prop',['1. Hook compiler','start here']],
+  ['i7',220,20,175,'probe',['7. Checker library','foundation']],
+  ['i2',220,110,175,'refl',['2. Reflector + library','foundation']],
+  ['i5',220,200,175,'sel',['5. Blind selector','foundation']],
+  ['i3',440,60,175,'comp',['3. /harness-step','core step']],
+  ['i6',440,170,175,'probe',['6. A/B bench','core check']],
+  ['i10',665,60,175,'refl',['10. Domain harness','full stream']],
+  ['i8',665,170,175,'ref',['8. Evolve strong,','deploy cheap']],
+  ['i9',440,255,175,'ext',['9. Released code','alternative engine']]],
+  e:[['i7','i3'],['i2','i3'],['i5','i3'],['i7','i6'],['i3','i10'],['i6','i8'],['i9','i10',{dash:1,d:'M615 278 H850 V83 H843'}]]}
+};
+document.querySelectorAll('svg[data-fig]').forEach(function(svg){var id=svg.getAttribute('data-fig');draw(svg,id,FIG[id])});
+['a1','a4'].forEach(function(id){
+  var R=document.getElementById(id),F=FIG[id],S=F.steps,n=S.length,i=0,tm=null;
+  draw(R.querySelector('svg'),id,F);
+  var cap=R.querySelector('.cap'),ct=R.querySelector('.ct'),pl=R.querySelector('[data-a=play]');
+  function go(j){
+    i=Math.max(0,Math.min(n-1,j));
+    var seen={},se={};
+    for(var k=0;k<=i;k++){S[k][0].forEach(function(x){seen[x]=k});S[k][1].forEach(function(x){se[x]=k})}
+    F.n.forEach(function(nd){var e=document.getElementById(id+'-'+nd[0]);e.classList.toggle('dim',!(nd[0] in seen));e.classList.toggle('now',seen[nd[0]]===i)});
+    F.e.forEach(function(_,k){var e=document.getElementById(id+'-e'+k);e.classList.toggle('dim',!(k in se));e.classList.toggle('now',se[k]===i)});
+    cap.innerHTML=S[i][2];ct.textContent='Step '+(i+1)+' of '+n;
+  }
+  function stop(){clearInterval(tm);tm=null;pl.textContent='▶ Play'}
+  R.querySelector('.ctrl').addEventListener('click',function(e){
+    var a=e.target.getAttribute('data-a');if(!a)return;
+    if(a==='play'){if(tm){stop();return}if(i>=n-1)go(0);pl.textContent='❚❚ Pause';tm=setInterval(function(){if(i>=n-1){stop();return}go(i+1)},3000)}
+    else{stop();go(a==='next'?i+1:a==='prev'?i-1:0)}
+  });
+  go(0);
+});
+})();
+</script>
+</body>
+</html>
