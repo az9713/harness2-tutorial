@@ -1,0 +1,339 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>Harness² Verification</title>
+<style>
+:root{--bg:#0f172a;--card:#1e293b;--text:#e2e8f0;--text2:#cbd5e1;--muted:#94a3b8;--orange:#fb923c;--teal:#2dd4bf;--b2:#334155}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 system-ui,-apple-system,"Segoe UI",sans-serif}
+.wrap{display:grid;grid-template-columns:240px minmax(0,1fr);gap:32px;max-width:1240px;margin:0 auto;padding:24px 16px}
+nav{position:sticky;top:16px;align-self:start;max-height:calc(100vh - 32px);overflow:auto;font-size:14px;border-right:1px solid var(--b2);padding-right:16px}
+nav a{display:block;color:var(--muted);text-decoration:none;padding:3px 0}
+nav a:hover{color:var(--teal)}
+nav .grp{color:var(--orange);font-weight:600;margin-top:12px;font-size:12px;text-transform:uppercase;letter-spacing:.06em}
+main{min-width:0;max-width:880px}
+h1{font-size:2rem;margin:0 0 4px}
+h2{font-size:1.45rem;margin:48px 0 12px;padding-top:12px;border-top:1px solid var(--b2)}
+h3{font-size:1.08rem;margin:24px 0 8px;color:var(--teal)}
+p,li{color:var(--text2)}
+a{color:var(--teal)}
+.sub{color:var(--muted);margin:0 0 24px}
+.card{background:var(--card);border:1px solid var(--b2);border-radius:10px;padding:12px 18px;margin:16px 0}
+.key{border-color:#fb923c66}
+code{font-family:ui-monospace,Consolas,monospace;font-size:.88em;background:#0b1222;border:1px solid var(--b2);border-radius:4px;padding:1px 5px;color:#fde68a;overflow-wrap:anywhere}
+.tw{overflow-x:auto;margin:12px 0}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{border:1px solid var(--b2);padding:6px 9px;text-align:left;vertical-align:top}
+th{background:#172033;color:var(--text)}
+td{color:var(--text2)}
+.src{color:var(--muted);font-size:13px}
+.badge{display:inline-block;font-size:12px;font-weight:600;padding:1px 9px;border-radius:99px;border:1px solid;white-space:nowrap}
+.b-full{color:#4ade80;border-color:#4ade8088}.b-loop{color:#fde68a;border-color:#fde68a88}.b-one{color:#fb923c;border-color:#fb923c88}.b-comp{color:#94a3b8;border-color:#94a3b888}
+.f{background:var(--card);border:1px solid var(--b2);border-radius:10px;padding:4px 18px 12px;margin:20px 0}
+.f h3{margin-top:14px}
+.f dl{display:grid;grid-template-columns:120px minmax(0,1fr);gap:6px 14px;margin:8px 0}
+.f dt{color:var(--orange);font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;padding-top:2px}
+.f dd{margin:0;color:var(--text2)}
+blockquote{margin:6px 0;padding:6px 12px;border-left:3px solid var(--b2);background:#0b1222;border-radius:0 6px 6px 0;color:var(--text2);font-size:15px}
+blockquote.old{border-left-color:#f87171aa}
+blockquote.new{border-left-color:#4ade80aa}
+.tri{font-family:ui-monospace,Consolas,monospace;color:var(--orange);font-weight:600}
+@media (max-width:860px){.wrap{grid-template-columns:1fr}nav{position:static;max-height:none;border-right:0;border-bottom:1px solid var(--b2);padding:0 0 12px}.f dl{grid-template-columns:1fr}.f dt{padding-top:6px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<nav>
+<div class="grp">Start</div>
+<a href="#what">What was checked</a>
+<a href="#sources">The four sources</a>
+<a href="#how">How it was checked</a>
+<div class="grp">Round 1 results</div>
+<a href="#summary">Summary</a>
+<a href="#findings">Findings F1–F8</a>
+<a href="#held">What held</a>
+<a href="#open">Open items for round 2</a>
+<div class="grp">End</div>
+<a href="#checks">Checks and limits</a>
+<a href="#status">Status</a>
+<a href="harness2-learn.html#theory">← Theory tab</a>
+<a href="harness2-projects.html#p9-theory">← Project 9 through the theory</a>
+</nav>
+<main>
+<h1>Harness² Verification</h1>
+<p class="sub">Round 1, 24 Oct 2026. The Theory tab and the Project 9 section of this site, checked against the Harness² paper and the released code. Each claim on this page gives its source, so you can check it yourself.</p>
+
+<div class="card key"><p><b>Round 1 in brief.</b> I compared the Theory tab (chapters T1 to T6), in 33 rows (19 rows for its 20 numbered definitions and propositions, 14 rows for further claims in its text), with the released code, and with the Project 9 section that builds on that code. 15 rows hold as written, 15 hold only under a condition, 1 differs from the code, and 2 have no code object. The largest correction: the run budget "4k runs per task" is per recursion mode, and the code's default runs two modes, which gives 7k runs per task. The selector of the released code never sees a base run, although the paper's printed selector prompt says that a base run is a valid pick. I changed 8 places on the Theory tab (T0, T1.4, T1.6, T1.7, T1.8, T2, T2.2, T7) and 9 places on the Project 9 page, and added a section of six mapping tables. Reading the paper for this page showed 4 open items for round 2.</p></div>
+
+<h2 id="what">1. What was checked</h2>
+<p>This site has two pages that describe Harness². The <a href="harness2-learn.html#theory">Theory tab</a> describes the method as a formal model: definitions and propositions numbered T1.1 to T6.1. The <a href="harness2-projects.html#p9">Project 9 section</a> explains how to use the released Python package as an engine. Both pages were written from the paper and the code by the same author (an AI agent), so the two pages can share an error.</p>
+<p>The user set three goals for this check:</p>
+<ol>
+<li>Verify the theory against the released code.</li>
+<li>Connect Project 9 to the theory, item by item.</li>
+<li>Fix both pages where they disagree with the code, in rounds. A round maps the items, lists the discrepancies, fixes the pages and reports. A maximum of 3 rounds; stop early when a round finds nothing.</li>
+</ol>
+<p>Scope of round 1: every formal item of T1 to T6 (Def T1.1–T1.4, T1.6; Prop T1.5, T1.7, T1.8; Def T2.1, Prop T2.2; Prop T3.1–T3.3; Def T4.1, Prop T4.2; Def T5.1, Prop T5.2–T5.4; Prop T6.1), plus the notes in the text that make claims about the code. Chapters T7 to T9 state no new formal item. On the Project 9 side: every code fact in the section "Project 9 in depth", including the figure captions.</p>
+
+<h2 id="sources">2. The four sources</h2>
+<div class="tw"><table>
+<tr><th>Source</th><th>Exact version</th><th>How this page cites it</th></tr>
+<tr><td><b>Paper</b></td><td><i>Harness²: Recursive Agent Harnessing for an Open World</i>, arXiv 2610.14224v1, 37 pages</td><td>Section and page of the v1 PDF, for example <a href="https://arxiv.org/pdf/2610.14224v1#page=5">§2.2.1, p. 5</a>. The links open the PDF at that page in most browsers.</td></tr>
+<tr><td><b>Code</b></td><td><a href="https://github.com/google-research/harness2/tree/1cfe254e8d25b15f37048c3730134686abe60335">google-research/harness2</a>, commit <code>1cfe254</code> (13 Oct 2026)</td><td><code>file:line</code> at that commit. Each one links to the lines on GitHub. Paths without a folder are in <code>harness2/core/</code>; other paths are relative to <code>harness2/</code> or to the repository root.</td></tr>
+<tr><td><b>Theory</b></td><td><code>harness2-learn.html</code>, tab Theory, as of commit <code>f96236c</code> of this site (before round 1)</td><td>The item number (T1.4, T2.2) and the old and new text.</td></tr>
+<tr><td><b>Project 9</b></td><td><code>harness2-projects.html</code>, section "Project 9 in depth", as of commit <code>f96236c</code></td><td>The part name (key card, term 8, Fig. P1 step 7, limit 9) and the old and new text.</td></tr>
+</table></div>
+<p class="src">The paper PDF is not in this repository, because of copyright. I read a local copy of v1 and extracted its text with <code>pypdf</code>; the page numbers are those of the PDF. Values that appear only inside the paper's figures are not used.</p>
+
+<h2 id="how">3. How it was checked</h2>
+<h3>3.1 Which source decides</h3>
+<p>The four sources do not have equal weight. Each kind of claim has one source that decides it. The tag on each Theory item (Paper, Code, Literature or Model) tells which kind of claim it is.</p>
+<div class="tw"><table>
+<tr><th>Kind of claim</th><th>Deciding source</th><th>Example</th></tr>
+<tr><td>What the released package does</td><td>The code at <code>1cfe254</code>, and its tests</td><td>"<code>Library.add</code> stores nothing without a lesson"</td></tr>
+<tr><td>What the paper says</td><td>The paper PDF</td><td>"each rollout is capped at 200 model turns"</td></tr>
+<tr><td>A logical result</td><td>The proof on the Theory tab. The code only tells whether the assumptions of the proof are true.</td><td>Prop T1.8, label invariance</td></tr>
+<tr><td>A design choice of Project 9</td><td>Nothing outside the pages. Project 9 must agree with itself and must say where it differs from the code.</td><td>The minimal build lets the selector pick a base run</td></tr>
+</table></div>
+<p>When the paper and the code disagree, this check does not pick one. It reports both and marks the item.</p>
+
+<h3>3.2 Three pair checks, in order</h3>
+<ol>
+<li><b>Theory ↔ code.</b> For each formal item, find the code object and its <code>file:line</code>. Give a verdict.</li>
+<li><b>Project 9 ↔ code.</b> Check each code fact of the Project 9 section: the file, the line and the behaviour.</li>
+<li><b>Theory ↔ Project 9.</b> Steps 1 and 2 connect both pages to the same code, so each item joins the two results. Step 3 finds only what is left.</li>
+</ol>
+<p>Then, for this page, a fourth pass: <b>paper ↔ the three others</b>, for every item that round 1 touched.</p>
+
+<h3>3.3 The triangle: how to read one item</h3>
+<p>Each item has three cells: the theory (T), Project 9 (P) and the code (C). The pattern of agreement decides the action.</p>
+<div class="tw"><table>
+<tr><th>Pattern</th><th>Meaning</th><th>Action</th></tr>
+<tr><td class="tri">T = P = C</td><td>All agree</td><td>Verdict "holds"</td></tr>
+<tr><td class="tri">T = C ≠ P</td><td>Project 9 is wrong</td><td>Fix Project 9</td></tr>
+<tr><td class="tri">P = C ≠ T</td><td>The theory is wrong, or it simplifies</td><td>Fix the theory, or add the condition</td></tr>
+<tr><td class="tri">T = P ≠ C</td><td>Both pages are wrong in the same way</td><td>Fix both. Only a check against the code finds this case.</td></tr>
+<tr><td class="tri">P ≠ C by design</td><td>Project 9 differs on purpose</td><td>Check that a limit states it</td></tr>
+<tr><td class="tri">all different</td><td>Not clear</td><td>Report; do not fix</td></tr>
+</table></div>
+
+<h3>3.4 Verdicts and evidence rules</h3>
+<p><span class="badge b-full">holds</span> the code does what the item says. <span class="badge b-loop">holds with condition</span> the item is true only under a stated condition. <span class="badge b-one">differs</span> the code does something else. <span class="badge b-comp">theory only</span> no code object exists.</p>
+<ul>
+<li>The code was read, not run. The repository tests were read as evidence of intended behaviour.</li>
+<li>Every code claim has a <code>file:line</code> at commit <code>1cfe254</code>. A reviewer agent re-checked the line numbers against the printed source; it found one wrong line (534 instead of 535), which was corrected before this page was written.</li>
+<li>Run counts such as "7k" and "14 runs" are calculated from the code. No run produced them.</li>
+</ul>
+
+<h2 id="summary">4. Summary</h2>
+<div class="tw"><table>
+<tr><th>Chapter</th><th>Rows</th><th><span class="badge b-full">holds</span></th><th><span class="badge b-loop">holds with condition</span></th><th><span class="badge b-one">differs</span></th><th><span class="badge b-comp">theory only</span></th><th>Full table</th></tr>
+<tr><td>T1 The formal model</td><td>9</td><td>2</td><td>6</td><td>1</td><td>0</td><td><a href="harness2-projects.html#p9-t1">#p9-t1</a></td></tr>
+<tr><td>T2 The "²" as a fold</td><td>7</td><td>4</td><td>3</td><td>0</td><td>0</td><td><a href="harness2-projects.html#p9-t2">#p9-t2</a></td></tr>
+<tr><td>T3 No grader</td><td>5</td><td>3</td><td>1</td><td>0</td><td>1</td><td><a href="harness2-projects.html#p9-t3">#p9-t3</a></td></tr>
+<tr><td>T4 Instruct vs enforce</td><td>4</td><td>2</td><td>2</td><td>0</td><td>0</td><td><a href="harness2-projects.html#p9-t4">#p9-t4</a></td></tr>
+<tr><td>T5 Learning without labels</td><td>3</td><td>1</td><td>1</td><td>0</td><td>1</td><td><a href="harness2-projects.html#p9-t5">#p9-t5</a></td></tr>
+<tr><td>T6 Cost model</td><td>5</td><td>3</td><td>2</td><td>0</td><td>0</td><td><a href="harness2-projects.html#p9-t6">#p9-t6</a></td></tr>
+<tr><td><b>Total</b></td><td><b>33</b></td><td><b>15</b></td><td><b>15</b></td><td><b>1</b></td><td><b>2</b></td><td></td></tr>
+</table></div>
+<p>The handoff from the previous session listed five candidate discrepancies, (a) to (e). Round 1 confirmed four of them and found one more:</p>
+<div class="tw"><table>
+<tr><th>Candidate</th><th>Result</th><th>Finding</th></tr>
+<tr><td>(a) T1.7 counts 4k runs per task</td><td>Confirmed: 4k is per mode; 7k with both modes</td><td><a href="#F3">F3</a></td></tr>
+<tr><td>(b) The selection pool may not contain the base</td><td>Confirmed: finals only</td><td><a href="#F4">F4</a></td></tr>
+<tr><td>(c) No selector session at k = 1</td><td>No discrepancy: T2.1 already said "selection when k &gt; 1"</td><td>—</td></tr>
+<tr><td>(d) "Random" permutation versus a seeded shuffle</td><td>Confirmed; T1.8 holds with a condition</td><td><a href="#F5">F5</a></td></tr>
+<tr><td>(e) One library per domain versus per mode and run</td><td>Confirmed</td><td><a href="#F6">F6</a></td></tr>
+<tr><td>Not in the list</td><td>T1.4 draws a new reference run in each step; the code does not</td><td><a href="#F1">F1</a></td></tr>
+</table></div>
+
+<h2 id="findings">5. Findings F1–F8</h2>
+<p>Each finding gives the four sources side by side, the triangle pattern, the conclusion, and the text before and after the fix.</p>
+
+<div class="f" id="F1">
+<h3>F1. Def T1.4: a step of Φ draws no new reference run in the code</h3>
+<dl>
+<dt>Paper</dt><dd>§2.2.1, Propose (<a href="https://arxiv.org/pdf/2610.14224v1#page=5">p. 5</a>): "The pipeline first obtains a reference execution e₀ ∼ A(q<sub>t</sub>; M, H)." The same paragraph: "Conditioned on the task, current harness, reference, earlier history, and library in R<sub>t</sub>, the pipeline proposes two candidates." For sequential recursion, §2.2.2 (<a href="https://arxiv.org/pdf/2610.14224v1#page=6">p. 6</a>): "The initial history contains k base executions and is extended after each step with ξ<sup>(r)</sup>." So the paper describes a reference per step in §2.2.1, and k base executions at the start of the sequential chain in §2.2.2. It does not say whether a sequential step draws a new reference.</dd>
+<dt>Code</dt><dd>Every editor and composer stage of both modes receives the base runs: <code>rollouts=base</code> at <a href="https://github.com/google-research/harness2/blob/1cfe254e8d25b15f37048c3730134686abe60335/harness2/core/recursion.py#L381">recursion.py:381</a>, <a href="https://github.com/google-research/harness2/blob/1cfe254e8d25b15f37048c3730134686abe60335/harness2/core/recursion.py#L421">421</a>, <a href="https://github.com/google-research/harness2/blob/1cfe254e8d25b15f37048c3730134686abe60335/harness2/core/recursion.py#L503">503</a> and <a href="https://github.com/google-research/harness2/blob/1cfe254e8d25b15f37048c3730134686abe60335/harness2/core/recursion.py#L550">550</a>. The docstring of <code>run_sequential</code> says "DEPTH: k nested passes over the same shared base evidence" (<a href="https://github.com/google-research/harness2/blob/1cfe254e8d25b15f37048c3730134686abe60335/harness2/core/recursion.py#L466">recursion.py:466</a>). The base runs are executed once per task (<a href="https://github.com/google-research/harness2/blob/1cfe254e8d25b15f37048c3730134686abe60335/harness2/core/schedule.py#L619-L626">schedule.py:619–626</a>). In round r ≥ 2, the run of the previous checkpoint enters the history (<a href="https://github.com/google-research/harness2/blob/1cfe254e8d25b15f37048c3730134686abe60335/harness2/core/recursion.py#L561">recursion.py:561</a>), and the composer prompt calls it "this round's on-policy evidence" (<a href="https://github.com/google-research/harness2/blob/1cfe254e8d25b15f37048c3730134686abe60335/harness2/core/prompts.py#L975-L979">prompts.py:975–979</a>). Composers of both modes and editors of sequential mode also read earlier candidates and decision notes (<a href="https://github.com/google-research/harness2/blob/1cfe254e8d25b15f37048c3730134686abe60335/harness2/core/recursion.py#L424-L425">424–425</a>, <a href="https://github.com/google-research/harness2/blob/1cfe254e8d25b15f37048c3730134686abe60335/harness2/core/recursion.py#L506-L509">506–509</a>, <a href="https://github.com/google-research/harness2/blob/1cfe254e8d25b15f37048c3730134686abe60335/harness2/core/recursion.py#L553-L554">553–554</a>). An invalid proposal is retried once, then the stage returns the current harness (<a href="https://github.com/google-research/harness2/blob/1cfe254e8d25b15f37048c3730134686abe60335/harness2/core/recursion.py#L242-L251">recursion.py:242–251</a>); the paper says the same in App. D.2 (<a href="https://arxiv.org/pdf/2610.14224v1#page=21">p. 21</a>).</dd>
+<dt>Theory</dt><dd>Def T1.4, step 1, unchanged: "Draw a reference e₀ ∼ P<sub>q,H</sub>. Draw H<sub>I</sub> ∼ π<sub>INV</sub>(· | q, H, e₀, L) and H<sub>D</sub> ∼ π<sub>DOM</sub>(· | q, H, e₀, L)." The kernels do not take the history 𝓔. Prop T1.7, on the same tab, counts "k shared base runs, then in each of k rounds two probe runs and one checkpoint run". If each step drew its own reference as T1.4 says, a sequential task would need a different count. So the tab did not agree with itself.</dd>
+<dt>Project 9</dt><dd>Fig. P1 step 3: editors get "the full base trajectories"; step 6: round-2 editors "read every earlier run of this task". This agrees with the code.</dd>
+<dt>Pattern</dt><dd><span class="tri">P = C ≠ T</span>; the paper is between the two.</dd>
+<dt>Conclusion</dt><dd>The code resolves the gap in the paper: references are drawn once (k base runs of H₀) and reused; from round 2 the previous checkpoint's run is the on-policy reference. The theory now says this in a Code paragraph. The definition itself still omits 𝓔 from the kernels, although the paper lists "earlier history"; see <a href="#O3">O3</a>.</dd>
+<dt>Before</dt><dd><blockquote class="old">(no Code paragraph after Def T1.4)</blockquote></dd>
+<dt>After</dt><dd><blockquote class="new">Code — The released code implements Φ with three differences. (1) A step draws no new reference run. The references are the k base runs of H₀, drawn once per task (run_task, schedule.py:619–626), and every editor and composer stage of both modes reads them (rollouts=base, recursion.py:381, 421, 503, 550). In sequential round r ≥ 2, the reference for H<sup>(r−1)</sup> is the run e′ of the step before. […] (2) The composers of both modes, and the editors of sequential mode, also read the history 𝓔 […]. (3) An invalid proposal gets one retry. After that, the stage returns H unchanged […].</blockquote></dd>
+</dl>
+</div>
+
+<div class="f" id="F2">
+<h3>F2. Def T1.6: the selector chooses among all checkpoints, not only the last</h3>
+<dl>
+<dt>Paper</dt><dd>§2.2.2, Final Selection (<a href="https://arxiv.org/pdf/2610.14224v1#page=6">p. 6</a>): "For k &gt; 1, an agentic selector compares anonymized deliverables against the task request and source materials." The paper does not list which deliverables. The note to Prompt 4 (<a href="https://arxiv.org/pdf/2610.14224v1#page=35">p. 35</a>): "At the final round the job paragraph opens with 'Compose THE FINAL harness, from the WHOLE history rather than just this round.'"</dd>
+<dt>Code</dt><dd><code>selection_pool</code> for sequential mode is <code>c1 … ck</code>, every checkpoint (<a href="https://github.com/google-research/harness2/blob/1cfe254e8d25b15f37048c3730134686abe60335/harness2/core/selection.py#L106-L110">selection.py:106–110</a>). Round r edits the previous checkpoint (<code>current_harness = comp.tree</code>, <a href="https://github.com/google-research/harness2/blob/1cfe254e8d25b15f37048c3730134686abe60335/harness2/core/recursion.py#L562">recursion.py:562</a>).</dd>
+<dt>Theory</dt><dd>Def T1.6 described the chain H<sup>(r)</sup> ∼ Φ(q, H<sup>(r−1)</sup>, 𝓔<sup>(r−1)</sup>) and was silent on which state is the output.</dd>
+<dt>Project 9</dt><dd>Fig. P1 step 8: "The candidates are the k finals, c1 and c2." Agrees with the code.</dd>
+<dt>Pattern</dt><dd><span class="tri">P = C; T silent</span></dd>
+<dt>Conclusion</dt><dd>A reader of T1.6 could assume that the output is H<sup>(k)</sup>. In the code, an earlier checkpoint can win. The tab now says so.</dd>
+<dt>After</dt><dd><blockquote class="new">Code — In run_sequential, round r edits H<sup>(r−1)</sup> (current_harness = comp.tree, recursion.py:562) and carries the whole history forward (recursion.py:561). The selector then chooses among all k checkpoints H<sup>(1)</sup>, …, H<sup>(k)</sup>, not only H<sup>(k)</sup> (selection_pool, selection.py:106–110). So the output of the chain is not always its last state.</blockquote></dd>
+</dl>
+</div>
+
+<div class="f" id="F3">
+<h3>F3. Prop T1.7: 4k runs and 3k sessions are per mode; both modes use 7k and 6k</h3>
+<dl>
+<dt>Paper</dt><dd>The paper states no formula for the run count. It reports that main tables use k = 1 and "+ Recursion applies parallel task-level recursion at k = 5" (§3.1, <a href="https://arxiv.org/pdf/2610.14224v1#page=7">p. 7</a>): one mode per experiment. App. F (<a href="https://arxiv.org/pdf/2610.14224v1#page=29">p. 29</a>) names the cost of recursion without a number.</dd>
+<dt>Code</dt><dd>The ledger module: "R = 4k rollouts and P = 3k improvement stages. Base executions count toward each mode." (<a href="https://github.com/google-research/harness2/blob/1cfe254e8d25b15f37048c3730134686abe60335/harness2/core/ledger.py#L15-L18">ledger.py:15–18</a>). <code>run_task</code> executes the k base runs once (<a href="https://github.com/google-research/harness2/blob/1cfe254e8d25b15f37048c3730134686abe60335/harness2/core/schedule.py#L619-L626">schedule.py:619–626</a>); each mode's ledger records them again (<a href="https://github.com/google-research/harness2/blob/1cfe254e8d25b15f37048c3730134686abe60335/harness2/core/recursion.py#L360-L361">recursion.py:360–361</a>, <a href="https://github.com/google-research/harness2/blob/1cfe254e8d25b15f37048c3730134686abe60335/harness2/core/recursion.py#L469-L470">469–470</a>). So with both modes: k + 3k + 3k = 7k executions, and 3k + 3k = 6k counted sessions. The test asserts R = 4k and P = 3k for each mode at k = 1 and 2 (<a href="https://github.com/google-research/harness2/blob/1cfe254e8d25b15f37048c3730134686abe60335/tests/test_workflow.py#L73">tests/test_workflow.py:73</a>). Defaults: <code>MODES = ("agg", "seq")</code> for <code>run_task</code> and <code>run_domain</code> (<a href="https://github.com/google-research/harness2/blob/1cfe254e8d25b15f37048c3730134686abe60335/harness2/core/schedule.py#L41">schedule.py:41</a>); <code>harness2-demo</code> defaults to <code>--mode both</code> (<a href="https://github.com/google-research/harness2/blob/1cfe254e8d25b15f37048c3730134686abe60335/harness2/cli/demo.py#L29">cli/demo.py:29</a>); the <code>harness2</code> CLI defaults to parallel only (<a href="https://github.com/google-research/harness2/blob/1cfe254e8d25b15f37048c3730134686abe60335/harness2/cli/_common.py#L34">cli/_common.py:34</a>).</dd>
+<dt>Theory</dt><dd>Prop T1.7 said "In both modes, one task uses R(k) = 4k executor runs" and "A stream of N tasks uses 4kN executor runs", with no mode condition.</dd>
+<dt>Project 9</dt><dd>The key card, term 8, the Fig. P3 caption and the path B row said "4k runs per task" with no mode condition. The cost calculator on the same page already used the code's rule: "k base runs per task are shared by both modes". So Project 9 did not agree with itself.</dd>
+<dt>Pattern</dt><dd><span class="tri">T = P ≠ C</span>: both pages wrong in the same way.</dd>
+<dt>Conclusion</dt><dd>The 4k identity is correct per mode, and the paper ran one mode per experiment, so the paper's numbers are not affected. A Project 9 user who runs the demo or calls <code>run_domain</code> with its defaults pays 7k runs per task, 75% more than the old text said (7k against 4k). Both pages now say "per mode" and give 7k.</dd>
+<dt>Before</dt><dd><blockquote class="old">T1.7: In both modes, one task uses R(k) = 4k executor runs and P(k) = 3k counted improver sessions. A stream of N tasks uses 4kN executor runs.</blockquote>
+<blockquote class="old">Project 9 key card: "… 4k agent runs per task, and a library that only grows …"; term 8: "The budget per task: 4k executor runs and 3k editor and composer sessions."</blockquote></dd>
+<dt>After</dt><dd><blockquote class="new">T1.7: In each mode, one task uses R(k) = 4k executor runs and P(k) = 3k counted improver sessions, as recorded in that mode's ledger. The k base runs are shared, so with both modes one task uses 7k executor runs and 6k counted sessions. A stream of N tasks in one mode uses 4kN executor runs.</blockquote>
+<blockquote class="new">Project 9: "4k agent runs per task in each mode (7k with both modes)"; term 8: "The budget per task, in each mode: […] both modes together use 7k runs and 6k sessions." Same qualifier in the Fig. P3 caption, the path B row and Fig. P1 step 7 ("The demo default --mode both also runs the parallel mode on the same 2 base runs: 14 runs in all"). The T7 summary row now reads "R = 4k, P = 3k per mode".</blockquote></dd>
+</dl>
+</div>
+
+<div class="f" id="F4">
+<h3>F4. T1.8 note: the base output is not among the selector's options in the code</h3>
+<dl>
+<dt>Paper</dt><dd>Prompt 5 (<a href="https://arxiv.org/pdf/2610.14224v1#page=35">p. 35</a>): "Some of these runs used the UNMODIFIED harness and some used adapted ones, and you are not told which is which -- PICKING AN OUTPUT FROM AN UNMODIFIED HARNESS IS A COMPLETELY VALID AND EXPECTED OUTCOME." §2.2.2 (<a href="https://arxiv.org/pdf/2610.14224v1#page=6">p. 6</a>) says the selector "returns an existing output", but does not list the pool.</dd>
+<dt>Code</dt><dd><code>selection_pool</code> returns "exactly the k finals of <code>mode</code> […] so the reference executions are not in the pool and there is no abstention by construction. This is the published convention and the only pool this release builds." (<a href="https://github.com/google-research/harness2/blob/1cfe254e8d25b15f37048c3730134686abe60335/harness2/core/selection.py#L93-L111">selection.py:93–111</a>). The selector gets <code>POOL_FINALS_SELECT</code>, which does not mention an unmodified harness (<a href="https://github.com/google-research/harness2/blob/1cfe254e8d25b15f37048c3730134686abe60335/harness2/core/prompts.py#L77-L83">prompts.py:77–83</a>; <code>pool_kind="finals"</code>, <a href="https://github.com/google-research/harness2/blob/1cfe254e8d25b15f37048c3730134686abe60335/harness2/core/schedule.py#L527">schedule.py:527</a>). The paper's text exists as <code>POOL_MIXED_SELECT</code> (<a href="https://github.com/google-research/harness2/blob/1cfe254e8d25b15f37048c3730134686abe60335/harness2/core/prompts.py#L66-L74">prompts.py:66–74</a>), but <code>run_task</code> refuses any pool policy except "finals" (<a href="https://github.com/google-research/harness2/blob/1cfe254e8d25b15f37048c3730134686abe60335/harness2/core/schedule.py#L595-L599">schedule.py:595–599</a>).</dd>
+<dt>Theory</dt><dd>The text after T1.8: "Prompt 5 also says that returning an output of the unmodified harness is valid, so the base output stays among the options."</dd>
+<dt>Project 9</dt><dd>Limit 9, "Selection never returns the base", already stated the code's behaviour and the difference from Prompt 5.</dd>
+<dt>Pattern</dt><dd><span class="tri">T = Paper ≠ C; P = C</span></dd>
+<dt>Conclusion</dt><dd>The paper and the code disagree, and the code calls its own choice "the published convention". This check does not decide which one the authors ran. The theory now keeps the paper's statement, marked as the paper's, and adds the code's behaviour.</dd>
+<dt>Before</dt><dd><blockquote class="old">Prompt 5 also says that returning an output of the unmodified harness is valid, so the base output stays among the options.</blockquote></dd>
+<dt>After</dt><dd><blockquote class="new">In the paper, Prompt 5 also says that returning an output of the unmodified harness is valid, so the base output stays among the options.<br>Code — The released code differs here. The pool holds only the k finals, and a base run is never an option (selection_pool, selection.py:93–111). The selector gets a text that does not mention an unmodified harness (POOL_FINALS_SELECT, prompts.py:77–83). The paper's text is in the code as POOL_MIXED_SELECT (prompts.py:66–74), but run_task refuses every pool except the finals (schedule.py:595–599). At k = 1 there is no selector session (schedule.py:514). […]</blockquote></dd>
+</dl>
+</div>
+
+<div class="f" id="F5">
+<h3>F5. Prop T1.8: the permutation is a seeded shuffle, fixed for each task</h3>
+<dl>
+<dt>Paper</dt><dd>Prompt 5 (<a href="https://arxiv.org/pdf/2610.14224v1#page=35">p. 35</a>): "The ids are arbitrary and shuffled, and tell you nothing about how an output was produced."</dd>
+<dt>Code</dt><dd><code>assign_ids</code>: "anon id -&gt; label, by canonical sort then a seeded shuffle: stable across reruns"; the seed is a SHA-1 hash of task id, k and mode (<a href="https://github.com/google-research/harness2/blob/1cfe254e8d25b15f37048c3730134686abe60335/harness2/core/selection.py#L71-L76">selection.py:71–76</a>). If no final delivers a file on a benchmark with <code>state_deliverable</code>, the candidates are shown as session transcripts (<a href="https://github.com/google-research/harness2/blob/1cfe254e8d25b15f37048c3730134686abe60335/harness2/core/selection.py#L134-L152">selection.py:134–152</a>). After a selector failure, the record names the first final by sort order, but the selection counts as failed and is never judged (<a href="https://github.com/google-research/harness2/blob/1cfe254e8d25b15f37048c3730134686abe60335/harness2/core/selection.py#L237-L252">selection.py:237–252</a>; <a href="https://github.com/google-research/harness2/blob/1cfe254e8d25b15f37048c3730134686abe60335/tests/test_workflow.py#L208">tests/test_workflow.py:208</a>).</dd>
+<dt>Theory</dt><dd>Prop T1.8: "π is a uniformly random permutation that hides which harness made which output."</dd>
+<dt>Project 9</dt><dd>Fig. P1 step 8: "The selector sees anonymised outputs and picks one." No claim about the shuffle.</dd>
+<dt>Pattern</dt><dd><span class="tri">T ≠ C</span>, item holds with a condition</dd>
+<dt>Conclusion</dt><dd>The proof needs only that π does not depend on the outputs; that is true. But π is fixed for a task, so a selector that prefers a position (for example, always "A") prefers the same harness on every rerun of that task. Over many tasks the hash spreads the positions, so the preference cancels on average but not per task. The transcript fallback can show the harness to the selector. The tab now states both conditions.</dd>
+<dt>After</dt><dd><blockquote class="new">[…] The permutation π is a shuffle seeded by task id, k and mode (assign_ids, selection.py:71–76), so it is the same on every rerun. The proof needs only that π does not depend on the outputs, and that holds. But for one task π is fixed, so the proposition holds for that task only if the selector has no preference for a position in the list. Across tasks, the seed spreads the positions. When no final delivers a file on a benchmark with state_deliverable, the selector sees session transcripts instead of outputs (selection.py:134–152), and a transcript can show the harness.</blockquote></dd>
+</dl>
+</div>
+
+<div class="f" id="F6">
+<h3>F6. T2: one fold per domain, per mode and per run setting; 𝓜<sub>ed</sub> is two channels</h3>
+<dl>
+<dt>Paper</dt><dd>App. D.2 (<a href="https://arxiv.org/pdf/2610.14224v1#page=21">p. 21</a>): "Each benchmark domain has its own library directory. Tasks run sequentially within each domain and can read earlier entries." §3.1 (<a href="https://arxiv.org/pdf/2610.14224v1#page=7">p. 7</a>): "The harness improvement library starts empty for each benchmark stream." App. D.2: "The editor and the selector are Claude Opus 4.8" (one model for both roles). The paper ran one mode per experiment, so it does not discuss two modes in one stream.</dd>
+<dt>Code</dt><dd><code>run_domain</code> makes one <code>Library</code> per mode (<a href="https://github.com/google-research/harness2/blob/1cfe254e8d25b15f37048c3730134686abe60335/harness2/core/schedule.py#L686-L689">schedule.py:686–689</a>); <code>_resolve_libraries</code> refuses one library for two modes: "a shared mutable library would leak one mode into another" (<a href="https://github.com/google-research/harness2/blob/1cfe254e8d25b15f37048c3730134686abe60335/harness2/core/schedule.py#L331-L345">schedule.py:331–345</a>). The CLI gives each benchmark, substrate, k, seed and tag its own root (<a href="https://github.com/google-research/harness2/blob/1cfe254e8d25b15f37048c3730134686abe60335/harness2/cli/_common.py#L75-L88">cli/_common.py:75–88</a>). The library docstring: "Roots are scoped per run and mode, so each sweep starts every domain empty." (<a href="https://github.com/google-research/harness2/blob/1cfe254e8d25b15f37048c3730134686abe60335/harness2/core/library.py#L21-L23">library.py:21–23</a>). The selector and the reflector use the <code>selector</code> channel (<a href="https://github.com/google-research/harness2/blob/1cfe254e8d25b15f37048c3730134686abe60335/harness2/core/schedule.py#L181-L189">schedule.py:181–189</a>; <code>prop=selector</code> at <a href="https://github.com/google-research/harness2/blob/1cfe254e8d25b15f37048c3730134686abe60335/harness2/core/schedule.py#L535">schedule.py:535</a>); the editors and composers use the <code>proposer</code> channel.</dd>
+<dt>Theory</dt><dd>T2 wrote one improver state 𝓡<sub>t</sub> = (Π, 𝓜<sub>ed</sub>, L<sub>t</sub>) and one fold over "a domain's whole stream of N tasks".</dd>
+<dt>Project 9</dt><dd>Limit 5, "The library stays inside one run setting", already stated the per-mode and per-run scope.</dd>
+<dt>Pattern</dt><dd><span class="tri">P = C ≠ T</span></dd>
+<dt>Conclusion</dt><dd>The fold is correct for one (domain, mode, run setting). With both modes, one stream gives two folds that share only the base runs. The paper's single editor model is a configuration; the code allows two models. The tab now says both.</dd>
+<dt>After</dt><dd><blockquote class="new">Code — The released code runs one fold for each domain, each mode and each run setting. […] With both modes, one stream of N tasks gives two folds that share only the base runs. Also, 𝓜<sub>ed</sub> is two channels: the proposer channel for the editors and composers, and the selector channel for the selector and the reflector (schedule.py:181–189, 535). The two can name different models.</blockquote></dd>
+</dl>
+</div>
+
+<div class="f" id="F7">
+<h3>F7. Prop T2.2: the restart holds in the core; two conditions stay outside it</h3>
+<dl>
+<dt>Paper</dt><dd>§2.3 (<a href="https://arxiv.org/pdf/2610.14224v1#page=7">p. 7</a>): "The next task starts from the common execution harness H₀ […] Model weights, stage instructions, and the decision rule remain fixed, while the library evolves." App. D.1 (<a href="https://arxiv.org/pdf/2610.14224v1#page=21">p. 21</a>): each rollout "runs with no memory of other tasks".</dd>
+<dt>Code</dt><dd><code>run_task</code> reads <code>adapter.base_harness()</code> for every task (<a href="https://github.com/google-research/harness2/blob/1cfe254e8d25b15f37048c3730134686abe60335/harness2/core/schedule.py#L617">schedule.py:617</a>). Base runs call <code>execute(task_id, None, rid)</code> (<a href="https://github.com/google-research/harness2/blob/1cfe254e8d25b15f37048c3730134686abe60335/harness2/core/schedule.py#L465">schedule.py:465</a>), and the adapter contract says "<code>harness_dir=None</code> means the unmodified base harness" (<a href="https://github.com/google-research/harness2/blob/1cfe254e8d25b15f37048c3730134686abe60335/harness2/core/spec.py#L224">spec.py:224</a>). The <code>claude_cli</code> editor runs with <code>--dangerously-skip-permissions</code> (<a href="https://github.com/google-research/harness2/blob/1cfe254e8d25b15f37048c3730134686abe60335/harness2/core/proposer.py#L216">proposer.py:216</a>) and with the process environment minus a short drop list (<a href="https://github.com/google-research/harness2/blob/1cfe254e8d25b15f37048c3730134686abe60335/harness2/core/proposer.py#L105-L124">proposer.py:105–124</a>).</dd>
+<dt>Theory</dt><dd>Prop T2.2: given (q<sub>t</sub>, 𝓡<sub>t</sub>), H*<sub>t</sub> does not depend on earlier adopted harnesses. The proof uses "the harness argument of Solve is the constant H₀".</dd>
+<dt>Project 9</dt><dd>Row 1 of "Where the code does level 2" (<code>schedule.py:617</code>) and limit 10 (all permissions). Agrees with the code.</dd>
+<dt>Pattern</dt><dd><span class="tri">T = P = C</span>, with conditions the theory did not state</dd>
+<dt>Conclusion</dt><dd>The proposition holds if (1) <code>base_harness()</code> returns the same tree for every task, and (2) no state passes between tasks outside the library. The package enforces neither: an editor with all permissions can write into the H₀ folder. The tab now names both conditions.</dd>
+<dt>After</dt><dd><blockquote class="new">Code — The core meets the premise of the proof. […] Two conditions stay with the adapter and the machine: base_harness() must return the same tree for every task, and no state may pass between tasks outside the library. The editor sessions run with all permissions and with the process environment minus a short drop list (proposer.py:105–124, 216), so the code does not stop an editor from writing outside its workspace, for example into the H₀ folder.</blockquote></dd>
+</dl>
+</div>
+
+<div class="f" id="F8">
+<h3>F8. Project 9, Fig. P2 step 1: wrong line number</h3>
+<dl>
+<dt>Code</dt><dd>The task loop of <code>run_domain</code> is at <a href="https://github.com/google-research/harness2/blob/1cfe254e8d25b15f37048c3730134686abe60335/harness2/core/schedule.py#L698">schedule.py:698</a> (<code>for i, tid in enumerate(task_ids, 1):</code>). Line <a href="https://github.com/google-research/harness2/blob/1cfe254e8d25b15f37048c3730134686abe60335/harness2/core/schedule.py#L686">686</a> starts the dictionary of per-mode libraries.</dd>
+<dt>Project 9</dt><dd>Fig. P2 step 1 cited <code>schedule.py:686</code> for "runs the tasks of one domain one after another". Limit 8 cites 686 for "one library per mode", which is correct and stays.</dd>
+<dt>Pattern</dt><dd><span class="tri">P ≠ C</span></dd>
+<dt>Before / after</dt><dd><code>schedule.py:686</code> → <code>schedule.py:698</code>. All other line citations of the Project 9 section matched the code; they did not change.</dd>
+</dl>
+</div>
+
+<h3>Other changes in round 1</h3>
+<ul>
+<li>Theory tab, T0: a new paragraph that links each formal item to <a href="harness2-projects.html#p9-theory">Project 9 through the theory</a>.</li>
+<li>Project 9 page: the new section <code>#p9-theory</code> with six tables (<code>#p9-t1</code> to <code>#p9-t6</code>), a nav link, one line in the <code>#i9</code> card, and three files added to the Sources list.</li>
+</ul>
+
+<h2 id="held">6. What held</h2>
+<p>15 rows hold as written. Examples, with all four sources in agreement:</p>
+<div class="tw"><table>
+<tr><th>Item</th><th>Paper</th><th>Code</th><th>Project 9</th></tr>
+<tr><td>T2 update: after NO_ENTRY, L<sub>t+1</sub> = L<sub>t</sub></td><td>§2.3 (<a href="https://arxiv.org/pdf/2610.14224v1#page=7">p. 7</a>): "When evidence is insufficient, reflection adds no new experience entry."</td><td><a href="https://github.com/google-research/harness2/blob/1cfe254e8d25b15f37048c3730134686abe60335/harness2/core/library.py#L120-L121">library.py:120–121</a>; <a href="https://github.com/google-research/harness2/blob/1cfe254e8d25b15f37048c3730134686abe60335/tests/test_workflow.py#L187">tests/test_workflow.py:187</a></td><td>Limit 6; Fig. P2 step 5</td></tr>
+<tr><td>T3.2: prefer <code>confounded</code></td><td>Prompt 6 (<a href="https://arxiv.org/pdf/2610.14224v1#page=36">p. 36</a>)</td><td><a href="https://github.com/google-research/harness2/blob/1cfe254e8d25b15f37048c3730134686abe60335/harness2/core/prompts.py#L1126-L1130">prompts.py:1126–1130</a>, same words</td><td>Fig. P1 step 9</td></tr>
+<tr><td>T3.3: "Adoption alone never establishes that an edit helped or will transfer."</td><td>Prompt 6 (<a href="https://arxiv.org/pdf/2610.14224v1#page=37">p. 37</a>)</td><td><a href="https://github.com/google-research/harness2/blob/1cfe254e8d25b15f37048c3730134686abe60335/harness2/core/prompts.py#L1145">prompts.py:1145</a></td><td>—</td></tr>
+<tr><td>T2.2 commentary: a copied fact is "a hypothesis here, not a fact"</td><td>Prompt 1 (<a href="https://arxiv.org/pdf/2610.14224v1#page=31">p. 31</a>)</td><td><a href="https://github.com/google-research/harness2/blob/1cfe254e8d25b15f37048c3730134686abe60335/harness2/core/prompts.py#L324">prompts.py:324</a></td><td>"Where the code does level 2", row 6</td></tr>
+<tr><td>T4: a hook "must not block valid completion"</td><td>Prompt 1 (<a href="https://arxiv.org/pdf/2610.14224v1#page=30">p. 30</a>)</td><td><a href="https://github.com/google-research/harness2/blob/1cfe254e8d25b15f37048c3730134686abe60335/harness2/core/prompts.py#L359-L360">prompts.py:359–360</a></td><td>—</td></tr>
+<tr><td>T6: a subagent is "a bad trade when the output is as big as the input"</td><td>Prompt 1 (<a href="https://arxiv.org/pdf/2610.14224v1#page=32">p. 32</a>)</td><td><a href="https://github.com/google-research/harness2/blob/1cfe254e8d25b15f37048c3730134686abe60335/harness2/core/prompts.py#L120">prompts.py:120</a></td><td>—</td></tr>
+<tr><td>T1.3: no stage reads the grader</td><td>App. D.2 (<a href="https://arxiv.org/pdf/2610.14224v1#page=21">p. 21</a>): "A guard refuses to hand over any working directory that contains a grader verdict, rubric, or score."</td><td><code>score()</code> is called only in <a href="https://github.com/google-research/harness2/blob/1cfe254e8d25b15f37048c3730134686abe60335/harness2/core/judge.py#L76">judge.py:76</a> and <a href="https://github.com/google-research/harness2/blob/1cfe254e8d25b15f37048c3730134686abe60335/harness2/cli/judge.py#L124">cli/judge.py:124</a>; tripwire <a href="https://github.com/google-research/harness2/blob/1cfe254e8d25b15f37048c3730134686abe60335/harness2/core/context.py#L454-L490">context.py:454–490</a></td><td>"What you write", <code>score</code> row</td></tr>
+</table></div>
+<p>15 rows hold with a condition. Seven of them got a Code paragraph on the Theory tab (F1, F2, F3, F5, F6 and F7; F6 covers two items). Eight got no edit, because the condition is a property of the code's file layout, of an adapter or of the agent framework, not an error in the model. They are stated only in the Project 9 tables:</p>
+<ul>
+<li><b>T1.1</b> (<a href="harness2-projects.html#p9-t1">#p9-t1</a>): the code stores a harness as files; which file holds which of the eight components depends on the substrate (on Codex, <code>AGENTS.md</code> holds c1, c3, c4 and c6, <a href="https://github.com/google-research/harness2/blob/1cfe254e8d25b15f37048c3730134686abe60335/harness2/core/prompts.py#L475">prompts.py:475</a>).</li>
+<li><b>T1.2</b> (<a href="harness2-projects.html#p9-t1">#p9-t1</a>): the turn and time limits are set by each adapter, not by the core. See <a href="#O1">O1</a>.</li>
+</ul>
+<p>And six in T3 to T6:</p>
+<ul>
+<li><b>T3.1</b> (<a href="harness2-projects.html#p9-t3">#p9-t3</a>): U<sub>q</sub> stays out of the observations only if the adapter lists every answer file in <code>leak_globs</code>. The tripwire matches seven fixed strings (<a href="https://github.com/google-research/harness2/blob/1cfe254e8d25b15f37048c3730134686abe60335/harness2/core/context.py#L419-L427">context.py:419–427</a>).</li>
+<li><b>T4.1</b> (<a href="harness2-projects.html#p9-t4">#p9-t4</a>): the package checks only the JSON shape of the hooks file (<a href="https://github.com/google-research/harness2/blob/1cfe254e8d25b15f37048c3730134686abe60335/harness2/core/tree.py#L216">tree.py:216</a>); what a hook can block is up to the agent framework.</li>
+<li><b>T4.2</b> (<a href="harness2-projects.html#p9-t4">#p9-t4</a>): the core sets no horizon n; the adapter's time limit is the horizon.</li>
+<li><b>T5.4</b> (<a href="harness2-projects.html#p9-t5">#p9-t5</a>): the NO_ENTRY gate checks that cue, lesson and evidence are present, not that they are true (<a href="https://github.com/google-research/harness2/blob/1cfe254e8d25b15f37048c3730134686abe60335/harness2/core/library.py#L43-L47">library.py:43–47</a>).</li>
+<li><b>T6, always-on cost</b> (<a href="harness2-projects.html#p9-t6">#p9-t6</a>): the code adds a hard cap of 24,000 characters for OpenCode and 8,000 for Codex (<a href="https://github.com/google-research/harness2/blob/1cfe254e8d25b15f37048c3730134686abe60335/harness2/substrate/opencode.py#L50">substrate/opencode.py:50</a>, <a href="https://github.com/google-research/harness2/blob/1cfe254e8d25b15f37048c3730134686abe60335/harness2/substrate/codex.py#L42">substrate/codex.py:42</a>).</li>
+<li><b>T6.1</b> (<a href="harness2-projects.html#p9-t6">#p9-t6</a>): in the code d &gt; 0 for every skill, because a skill whose name is not in always-on text fails validation (<a href="https://github.com/google-research/harness2/blob/1cfe254e8d25b15f37048c3730134686abe60335/harness2/core/tree.py#L292-L296">tree.py:292–296</a>).</li>
+</ul>
+
+<h2 id="open">7. Open items for round 2</h2>
+<p>Writing this page showed four items that round 1 did not cover. They are not fixed yet.</p>
+<div class="f" id="O1">
+<h3>O1. Rollout limits: the paper says 200 turns and 3,600 s; the code sets other values</h3>
+<p><b>Paper</b>, App. D.1 (<a href="https://arxiv.org/pdf/2610.14224v1#page=21">p. 21</a>): "Each rollout is capped at 200 model turns and 3,600 seconds (WorkBuddy-Bench uses its container timeout at twice the benchmark default)." <b>Code</b>: the JobBench adapter defaults to 2,400 s for OpenCode and 3,600 s for Codex (<a href="https://github.com/google-research/harness2/blob/1cfe254e8d25b15f37048c3730134686abe60335/harness2/benchmarks/jobbench.py#L499">benchmarks/jobbench.py:499</a>, used at <a href="https://github.com/google-research/harness2/blob/1cfe254e8d25b15f37048c3730134686abe60335/harness2/benchmarks/jobbench.py#L641">641</a>). I found no 200-turn cap in <code>harness2/</code> or <code>scripts/</code>; the JobBench OpenCode runner reads <code>AGENT_STEPS</code>, which is empty by default (<a href="https://github.com/google-research/harness2/blob/1cfe254e8d25b15f37048c3730134686abe60335/harness2/benchmarks/jb_opencode_runner.py#L92">benchmarks/jb_opencode_runner.py:92</a>). <b>Pattern</b>: Paper ≠ C. The Theory tab cites the paper's values as Paper (correct as a paper claim); <code>#p9-t1</code> already gives the code's 2,400 s. Proposed action: add one Code sentence to Def T1.2.</p>
+</div>
+<div class="f" id="O2">
+<h3>O2. T2 cites App. D.2 for "each domain's library starts empty"</h3>
+<p>App. D.2 (<a href="https://arxiv.org/pdf/2610.14224v1#page=21">p. 21</a>) says "Each benchmark domain has its own library directory". The words "starts empty" are in §3.1 (<a href="https://arxiv.org/pdf/2610.14224v1#page=7">p. 7</a>), for "each benchmark stream". Proposed action: cite both places.</p>
+</div>
+<div class="f" id="O3">
+<h3>O3. Def T1.4 still omits the history from the kernels</h3>
+<p>The paper conditions Propose on "the task, current harness, reference, earlier history, and library" (§2.2.1, <a href="https://arxiv.org/pdf/2610.14224v1#page=5">p. 5</a>), and the code passes the history to sequential editors and to all composers (F1). The definition, tagged "Model of Paper Eq. 1", writes π<sub>INV</sub>(· | q, H, e₀, L) without 𝓔. The round 1 Code paragraph states the difference, but the definition itself is narrower than the paper. Proposed action: add 𝓔 to the arguments of π<sub>INV</sub>, π<sub>DOM</sub> and κ.</p>
+</div>
+
+<div class="f" id="O4">
+<h3>O4. The Tutorial tab and the README repeat two of the round 1 errors</h3>
+<p>Round 1 covered the Theory tab and Project 9 only. The Tutorial tab of <code>harness2-learn.html</code> has the same two statements that F3 and F4 corrected: (1) in "Final selection (k &gt; 1)": "Picking an output from the unmodified harness is valid (Prompt 5)", with no note that the released code never offers a base run (F4); (2) in "Count the runs": "In both modes the first k runs are shared base runs, and the totals are the same: 4k runs and 3k counted sessions", which is correct per mode but does not say that running both modes gives 7k (F3). The README says "4k executor runs, 3k improver sessions" with no mode qualifier. Proposed action: add the code's behaviour to both Tutorial paragraphs and "per mode" to the README.</p>
+</div>
+
+<h2 id="checks">8. Checks and limits</h2>
+<h3>Checks run on the edited pages (24 Oct 2026)</h3>
+<ul>
+<li>180 internal links across the Learn page, the Project page and this page, 0 broken; 0 duplicate ids.</li>
+<li><code>node --check</code> passes on the Project page script.</li>
+<li>Headless Chromium: 0 JS errors at 1280 px and 390 px wide; no sideways scroll at 390 px.</li>
+<li>Learn page: 373 MathJax formulas, 0 errors.</li>
+</ul>
+<h3>Limits</h3>
+<ul>
+<li>The code was not run. All behaviour claims come from reading the source and the tests at <code>1cfe254</code>. A later commit can change any line number or behaviour.</li>
+<li>Run counts (7k, 14 runs) are calculated, not observed.</li>
+<li>The paper's text was extracted from the v1 PDF with <code>pypdf</code>. Quotes were compared with the extracted text; spacing in the extraction is irregular, so quotes on this page restore normal spacing.</li>
+<li>Values that appear only inside figures 5, 6, 8, 12 and 13 of the paper were not readable and are not used.</li>
+<li>The author of the two pages and of this check is the same AI agent. The method in §3 reduces that risk: the code, not the pages, decides each claim.</li>
+</ul>
+
+<h2 id="status">9. Status</h2>
+<p>Round 1 edits and this page are in the working tree of the site repository. They are not yet committed, by the user's rule: commit and push only after the user's OK. Round 2 will re-check only the text that round 1 added, and the open items O1 to O4. It stops early if it finds no discrepancy.</p>
+<p class="src">Contact: az9713@yahoo.com</p>
+</main>
+</div>
+</body>
+</html>

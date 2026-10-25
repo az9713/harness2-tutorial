@@ -25,6 +25,10 @@ Three animated figures step through the recursion: the two loops over a task str
 
 [`harness2-projects.html`](https://az9713.github.io/harness2-tutorial/harness2-projects.html) describes 10 projects that apply the Harness² method to a Claude Code setup: a hook compiler, a reflector hook with an experience library, a `/harness-step` skill, an always-on context auditor, a blind best-of-k selector, a skill A/B bench, an independent checker library, evolve-strong/deploy-cheap transfer, an adapter for the released code, and a domain harness for a repeated pipeline. Each has a diagram that maps it onto the Harness² stages, a file tree, snippets, cost, evidence and risks.
 
+## Verification report
+
+[`harness2-verification.html`](https://az9713.github.io/harness2-tutorial/harness2-verification.html) reports how the Theory tab and the Project 9 section were checked against the paper and the released code (commit `1cfe254`): the method, the four sources, each finding with its before and after text, and the open items for the next round.
+
 ## Resources
 
 | Resource | Link |
