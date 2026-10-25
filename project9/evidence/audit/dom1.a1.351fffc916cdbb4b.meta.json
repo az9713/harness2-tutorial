@@ -1,0 +1,11 @@
+{
+  "label": "dom1.a1",
+  "ok": true,
+  "channel": "claude_cli",
+  "model": "sonnet",
+  "effort": "high",
+  "attempts": 1,
+  "wall_s": 106.2,
+  "cost_usd": 0.27128500000000005,
+  "error": ""
+}

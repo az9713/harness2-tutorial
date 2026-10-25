@@ -1,0 +1,15 @@
+Void-row exclusion and parentheses/comma parsing all verified correct (912.00 unchanged when a void row is added). No other harness changes are warranted.
+
+<notes>
+Single change: fixed the formula bug in `scripts/summarize.py`.
+
+Moment that motivated it: in `context/rollouts/base1.md`, running the original script on `context/source/ledger.csv` crashed (`decimal.InvalidOperation`) because the script's line `Decimal(r["amount"])` can't parse `"1,250.00"` (thousands comma) or `(300.50)` (parenthetical negative). The agent happened to read the script, correctly diagnosed both the parsing bug *and* a deeper formula bug — the original logic only summed amounts that were `> 0`, silently discarding every negative row and never checking `status` for `void` at all, despite the task spec ("sum the signed amounts... skip void rows") requiring both. The agent hand-wrote a fix (comma-strip, parens-as-negative, void-skip) and got the correct `Total: 912.00`.
+
+This success was luck, not robustness: the crash is what forced inspection. On a ledger without commas/parentheses in the sample row, the same broken script would run cleanly and silently emit "sum of positive amounts" — exactly the failure mode documented in `context/library/harnesses/ledger-1/EXPERIENCE.md`, where base1 there got a wrong `105.25` transcribed verbatim into `answer.txt` because AGENTS.md told it "the script is the house method, don't compute it yourself" and the script never crashed. That library case is this task's direct analog (same AGENTS.md wording, same script skeleton), and its own verdict was explicit: the fix belongs in the script, not in the instruction telling the agent to trust it.
+
+I ported the equivalent fix into `context/harness/scripts/summarize.py` (strip commas, treat `(...)` as negative, skip rows where `status` trimmed/lowercased == `void`) and re-verified it against *this* workspace's actual `ledger.csv` (not the library's numbers) — confirmed by running it directly: `Total: 912.00`, matching the hand-computed signed sum (1250.00 − 300.50 − 49.50 + 12.00 = 912.00). Also re-verified with a synthetic row carrying `status=void` to confirm the exclusion actually fires.
+
+Left `AGENTS.md` and the four placeholder READMEs unchanged — the library's own ledger-1 experience recorded "no observed effect" for touching AGENTS.md once the script was correct, and the "do not compute it yourself, the script is the house method" instruction is correct procedure precisely *because* the script now actually implements the task's formula. No hook, skill, or subagent is justified here: there is only one rollout, it already shows an agent capable of reading and fixing a broken script competently when it crashes; the residual risk was a silent-wrong-answer path through a script bug, which a script-level fix eliminates directly rather than needing a verification layer wrapped around it.
+
+KEEP_BASE does not apply — the script fix is a real, evidence-traced change.
+</notes>

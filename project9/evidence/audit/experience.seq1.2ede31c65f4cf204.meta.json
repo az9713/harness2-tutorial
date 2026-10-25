@@ -1,0 +1,11 @@
+{
+  "label": "experience.seq1",
+  "ok": true,
+  "channel": "claude_cli",
+  "model": "sonnet",
+  "effort": "high",
+  "attempts": 1,
+  "wall_s": 136.8,
+  "cost_usd": 0.26632880000000003,
+  "error": ""
+}

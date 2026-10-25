@@ -1,0 +1,15 @@
+<notes>
+Change made: fixed `context/harness/scripts/summarize.py`, the deterministic "house method" helper that `AGENTS.md` instructs the agent to trust blindly ("Do not compute the total yourself. The script is the house method.").
+
+Moment that motivated it: in `context/rollouts/base1.md`, the agent followed AGENTS.md exactly — ran `scripts/summarize.py ledger.csv`, got `Total: 105.25`, and wrote it verbatim to `answer.txt` (confirmed in `context/deliverables/base1/answer.txt`). This is wrong per the task's own definition of reconciliation ("Sum the signed amounts. A value in parentheses is negative. Skip rows whose status is void."):
+
+- The old script was `sum(Decimal(r["amount"]) for r in rows if Decimal(r["amount"]) > 0)` — it only summed *positive* amounts, discarding negative ones entirely instead of summing the signed total. On the real `context/source/ledger.csv` (100.25 posted, -20.10 posted, 5.00 posted), the correct signed sum is 85.15, but the script returned 105.25 (dropping the -20.10 row completely). This is a deterministic, repeated failure: every rollout that obeys AGENTS.md's "do not compute it yourself" instruction and trusts this script will reproduce the same wrong number.
+- The old script also had no status filter at all, so a `void` row would have been included rather than skipped, contradicting the task's explicit rule.
+- I verified separately that Python's `Decimal` constructor does *not* accept accounting-style parentheses (`Decimal('(123.45)')` raises `decimal.ConversionSyntax`), so the old script would have crashed outright on any ledger using parenthesized negatives — which the task explicitly says is a valid input form, even though this particular instance's `ledger.csv` happens not to use that notation.
+
+Fix: rewrote the script to (1) strip a `(...)` wrapper and negate the value when present, (2) sum every row's signed amount, and (3) skip rows whose `status` (trimmed, case-insensitive) is `void`. Verified: on the real workspace `ledger.csv` it now prints `Total: 85.15` (was `105.25`); on a synthetic ledger with both a `void` parenthetical row and a non-void parenthetical row, it correctly excludes the void row and negates the other, producing `84.15`.
+
+I treated this as a domain-correctness fix (the script encodes the authoritative reconciliation formula from `task.md`, not a procedural/invocation concern), per the ENCODING guidance that names "a SCRIPT for a deterministic operation the runs hand-rolled and got wrong" as the preferred fix form — this is exactly that case, caught directly in the one available trajectory.
+
+No change to `AGENTS.md`: once the script matches the task's own definition, the existing instruction to trust the script and transcribe its output verbatim is the right practitioner behavior (it prevents manual-arithmetic slips) and needed no edit. No evidence in the single rollout motivated adding a skill, subagent, or hook — this is a single small deterministic computation with no recognizable recurring-trigger shape beyond the one script, so KEEP_BASE on every other component.
+</notes>

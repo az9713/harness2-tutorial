@@ -1,0 +1,122 @@
+{
+  "task_id": "ledger-2",
+  "domain": "bookkeeping",
+  "k": 1,
+  "seed": null,
+  "status": "ok",
+  "base": [
+    {
+      "label": "base1",
+      "run_id": "p9-cc-agg1/ledger-2/base1",
+      "run_dir": "<repo>/project9/runs/live/executions/p9-cc-agg1/ledger-2/base1"
+    }
+  ],
+  "modes": {
+    "seq": {
+      "mode": "seq",
+      "task_id": "ledger-2",
+      "k": 1,
+      "finals": [
+        "c1"
+      ],
+      "ok": true,
+      "fell_back": [],
+      "kept_base": [],
+      "stages": [
+        {
+          "label": "inv1",
+          "dim": "INV",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 1,
+          "usd": 0.27051980000000003,
+          "cached": false,
+          "notes": "Single change: fixed the formula bug in `scripts/summarize.py`.\n\nMoment that motivated it: in `context/rollouts/base1.md`, running the original script on `context/source/ledger.csv` crashed (`decimal.InvalidOperation`) because the script's line `Decimal(r[\"amount\"])` can't parse `\"1,250.00\"` (thousands comma) or `(300.50)` (parenthetical negative). The agent happened to read the script, correctly diagnosed both the parsing bug *and* a deeper formula bug \u2014 the original logic only summed amounts that were `> 0`, silently discarding every negative row and never checking `status` for `void` at all, despite the task spec (\"sum the signed amounts... skip void rows\") requiring both. The agent hand-wrote a fix (comma-strip, parens-as-negative, void-skip) and got the correct `Total: 912.00`.\n\nThis success was luck, not robustness: the crash is what forced inspection. On a ledger without commas/parentheses in the sample row, the same broken script would run cleanly and silently emit \"sum of positive amounts\" \u2014 exactly the failure mode documented in `context/library/harnesses/ledger-1/EXPERIENCE.md`, where base1 there got a wrong `105.25` transcribed verbatim into `answer.txt` because AGENTS.md told it \"the script is the house method, don't compute it yourself\" and the script never crashed. That library case is this task's direct analog (same AGENTS.md wording, same script skeleton), and its own verdict was explicit: the fix belongs in the script, not in the instruction telling the agent to trust it.\n\nI ported the equivalent fix into `context/harness/scripts/summarize.py` (strip commas, treat `(...)` as negative, skip rows where `status` trimmed/lowercased == `void`) and re-verified it against *this* workspace's actual `ledger.csv` (not the library's numbers) \u2014 confirmed by running it directly: `Total: 912.00`, matching the hand-computed signed sum (1250.00 \u2212 300.50 \u2212 49.50 + 12.00 = 912.00). Also re-verified with a synthetic row carrying `status=void` to confirm the exclusion actually fires.\n\nLeft `AGENTS.md` and the four placeholder READMEs unchanged \u2014 the library's own ledger-1 experience recorded \"no observed effect\" for touching AGENTS.md once the script was correct, and the \"do not compute it yourself, the script is the house method\" instruction is correct procedure precisely *because* the script now actually implements the task's formula. No hook, skill, or subagent is justified here: there is only one rollout, it already shows an agent capable of reading and fixing a broken script competently when it crashes; the residual risk was a silent-wrong-answer path through a script bug, which a script-level fix eliminates directly rather than needing a verification layer wrapped around it.\n\nKEEP_BASE does not apply \u2014 the script fix is a real, evidence-traced change.",
+          "error": ""
+        },
+        {
+          "label": "dom1",
+          "dim": "DOM",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 1,
+          "usd": 0.27128500000000005,
+          "cached": false,
+          "notes": "Change: fixed `scripts/summarize.py` (the \"house method\" AGENTS.md tells the agent to trust verbatim) so it correctly implements the task's own formula.\n\nMoment that motivated it: running the shipped script against `context/source/ledger.csv` crashes immediately \u2014\n`decimal.InvalidOperation: [<class 'decimal.ConversionSyntax'>]` \u2014 because `Decimal(\"1,250.00\")` can't parse a comma thousands-separator, and even if it could, the old line `sum(Decimal(r[\"amount\"]) for r in rows if Decimal(r[\"amount\"]) > 0)` silently drops every negative/parenthetical amount (a \"reconciliation\" that discards debits isn't a reconciliation). This is a repeated concrete failure: the rollout `context/rollouts/base1.md` hit the exact same crash (line 2 ERROR), read the script, diagnosed both the parentheses-parsing gap and the `> 0` filter, and hand-patched the script itself to get `Total: 912.00` \u2014 which matches the manual sum (1250 \u2212 300.50 \u2212 49.50 + 12 = 912.00) and is what `context/deliverables/base1/answer.txt` contains.\n\nWhy fix the script rather than the instructions: `context/library/harnesses/ledger-1/EXPERIENCE.md` documents the identical cue and lesson from an earlier ledger task \u2014 base_harness's script there implemented only the \"sum positives\" fragment, dropped negatives/parens/void entirely, and every rollout that trusted it unfixed wrote a wrong deterministic answer, while every rollout that patched the script first got it right. That entry's explicit lesson: fix belongs in the script, not in the \"trust the script\" instruction, and AGENTS.md's procedure itself showed \"no observed effect\" across candidates once the script was correct \u2014 so I left AGENTS.md untouched and copied/re-verified the library's `parse_amount` fix.\n\nOne gap in the library's fix that doesn't transfer blindly: ledger-1's sample amounts (100.25, \u221220.10, 5.00) never exercised a thousands-separator, so its `parse_amount` has no comma-stripping and would still crash on *this* workspace's `\"1,250.00\"` row. I re-verified against the current `ledger.csv` and added `.replace(\",\", \"\")` before the `Decimal()` call \u2014 confirmed by running the patched script directly against `context/source/ledger.csv`, which now prints `Total: 912.00` without the agent needing to touch the script at all. This removes the risk (visible but not realized in base1, since that agent happened to fix both bugs in one edit) that a future agent patches only the crash-causing parentheses issue while leaving the `> 0` filter in place, silently producing a wrong non-crashing total (1262.00) that looks plausible and gets trusted under the \"don't compute it yourself\" instruction.\n\nNo other component touched \u2014 `.codex/`, `sub_agents/`, `.agents/skills/`, `scripts/README.md` remain placeholder stubs with no trajectory evidence of use, consistent with ledger-1's own \"no observed effect\" verdict on those files.",
+          "error": ""
+        },
+        {
+          "label": "c1",
+          "dim": "COMPOSE",
+          "fell_back": false,
+          "kept_base": false,
+          "attempts": 1,
+          "usd": 0.27839359999999996,
+          "cached": false,
+          "notes": "revised -> scripts/summarize.py fix (merged from inv1+dom1) -> both pool rollouts (context/pool/inv1/rollout.md, context/pool/dom1/rollout.md) ran their independently-patched scripts and got `Total: 912.00` without the agent needing to hand-compute anything; base1 (context/rollouts/base1.md) hit `decimal.InvalidOperation` on the unfixed script's `Decimal(r[\"amount\"])` against `\"1,250.00\"` and had to diagnose+patch the script live mid-rollout to recover the same correct total \u2014 the base harness's script is broken on this exact input, not just in theory. Merged the two candidates' nearly-identical fixes (comma-strip, parens-as-negative, status!=void filter): kept dom1's `negative`-flag parse_amount structure (matches the library's own ledger-1/harness/scripts/summarize.py precedent verbatim except for the missing comma-strip there) but kept inv1's `r.get(\"status\", \"\")` instead of dom1's `r[\"status\"]`, since `.get` degrades safely if a future ledger lacks a status column while `r[\"status\"]` would KeyError. Re-ran the merged script against context/source/ledger.csv (got 912.00, matching the hand sum 1250.00\u2212300.50\u221249.50+12.00=912.00) and against a synthetic void row to confirm the exclusion fires.\nkept -> AGENTS.md unchanged -> both candidate decisions (context/decisions/inv1.md, context/decisions/dom1.md) and the library's context/library/harnesses/ledger-1/EXPERIENCE.md independently verdict \"no observed effect\" for touching AGENTS.md once the script itself is correct \u2014 the \"don't compute it yourself, the script is the house method\" instruction is correct procedure precisely because the script now implements the task's stated formula; neither pool rollout needed or benefited from any AGENTS.md change, and both left it byte-identical to base.\nkept -> placeholder stubs (.codex/README.md, sub_agents/README.md, .agents/skills/README.md, scripts/README.md) unchanged -> no rollout in base1, pool/inv1, or pool/dom1 ever invokes a skill, subagent, or hook; the library's ledger-1 entry recorded the identical stubs with the identical \"no observed effect\" verdict under the same AGENTS.md wording and task shape, so there is no trajectory evidence anywhere in this lineage that these components do anything.\nnot adopted (as a separate edit) -> inv1's exact parse_amount variant (`-Decimal(s[1:-1])` form) and dom1's exact `r[\"status\"]` lookup -> both are functionally equivalent to the merged version on every tested input; kept the more defensive `.get` form from inv1 and the library-matching structure from dom1 rather than picking one candidate wholesale, since neither rollout's trajectory showed a behavioral difference that would favor one literal diff over the other.",
+          "error": ""
+        }
+      ],
+      "similarity": null,
+      "ledger": {
+        "mode": "seq",
+        "task_id": "ledger-2",
+        "k": 1,
+        "R": 4,
+        "expected_R": 4,
+        "P": 3,
+        "session_attempts": 3,
+        "expected_P": 3,
+        "usd": 0.820198,
+        "rollout_usd": 0.0,
+        "session_usd": 0.820198,
+        "rollouts": [
+          "base1",
+          "inv1",
+          "dom1",
+          "c1"
+        ],
+        "sessions": [
+          "inv1",
+          "dom1",
+          "c1"
+        ]
+      },
+      "errors": []
+    }
+  },
+  "selections": {
+    "seq": {
+      "task_id": "ledger-2",
+      "mode": "seq",
+      "k": 1,
+      "chosen_id": "A",
+      "chosen_label": "c1",
+      "chosen_run_id": "p9-cc-seq1/ledger-2/c1",
+      "chosen_is_base": false,
+      "why": "trivial pool: single final at k=1; delivered without a selector session",
+      "id_map": {
+        "A": "c1"
+      },
+      "dropped": [],
+      "n_candidates": 1,
+      "ok": true,
+      "fallback": false,
+      "error": "",
+      "usd": 0.32072280000000003,
+      "experience": {
+        "cue": "a task harness hands the agent a small deterministic \"house method\" script to run over tabular/financial data, and the task statement's own formula (signed amounts, parenthetical negatives, exclusion filters) is more complete than what the shipped script implements.",
+        "lesson": "when AGENTS.md instructs the agent to trust a script's output rather than compute the value itself, verify the script actually implements every clause of the task's stated formula (sign conventions, exclusion filters, locale-style number formatting like thousands separators) by running it against the real input file before trusting the instruction layer \u2014 a broken script under a \"don't compute it yourself\" instruction produces silent wrong answers on inputs that don't happen to crash it, and the fix belongs in the script (scripts/summarize.py), not in the instruction text (AGENTS.md).",
+        "evidence": "base1 (context/rollouts/base1.md) crashed on the unfixed script and hand-patched it correctly to 912.00 \u2014 demonstrating the base script's formula gap was real, not hypothetical, on this exact input. The fixed script (inherited by all three pool candidates) then let dom1 and inv1 reach the correct total by just running it, with no crash and no hand computation. Both of this round's incremental edits to the fix (dom1's `.get` removal, inv1's restructuring) produced no observed behavioral difference, so they don't add to this lesson's evidence. c1 made no edit and happened to bypass the script entirely via mental math, which is a separate, unconfirmed risk (see c1 row) and is excluded from this lesson's evidential basis.",
+        "confidence": "medium \u2014 the crash-and-correct-hand-patch in base1 is direct, concrete evidence that script-formula gaps are the real failure mode in this task family; the \"fix belongs in the script\" direction is corroborated by two independent prior-round candidates (inv1, dom1) converging on the same fix with no rollout ever needing an AGENTS.md change. Confidence isn't high because this round itself contributed no new contrastive evidence \u2014 the fix predates the pool, and the pool's own edits (dom1, inv1 tweaks) were both no-observed-effect.",
+        "edits": "component: scripts/summarize.py (core fix: comma-stripping, parentheses-as-negative parsing, status!=void filter)\ncandidates: c1, dom1, inv1 (all inherited; none of this round's edits introduced it \u2014 it was already present in `context/harness`, the round's starting point, per decisions/c1.md item 1 describing an earlier merge of inv1+dom1 fixes)\nchange: replaces base_harness's broken one-liner (`sum(Decimal(r[\"amount\"]) for r in rows if Decimal(r[\"amount\"]) > 0)`, which crashes on `\"1,250.00\"` and silently drops negative/parenthetical rows) with a `parse_amount` helper plus a `status != \"void\"` filter.\nobserved: context/rollouts/base1.md (run against unfixed base_harness) crashes with `decimal.InvalidOperation` on row `\"1,250.00\"`, forcing the agent to hand-diagnose and hand-patch the script mid-rollout to reach `Total: 912.00`. All three pool rollouts (c1.md, dom1.md, inv1.md), running against the pre-fixed script, either get `Total: 912.00` straight from the script (dom1, inv1) or never even need to run it because the answer is obviously right by inspection (c1). No pool rollout hits the crash or the silent-wrong-answer path.\nverdict: helped \u2014 but this is evidence from a prior round's edit baked into the starting harness, not something any candidate in *this* pool contributed.\n\ncomponent: scripts/summarize.py \u2014 status-lookup safety (`r.get(\"status\", \"\")` vs `r[\"status\"]`)\ncandidates: dom1 (changed `.get(\"status\", \"\")` to `r[\"status\"]`, removing the safe default)\nchange: drops the dict `.get` default, so a row missing a `status` key would now raise `KeyError` instead of being treated as not-void.\nobserved: context/pool/dom1/rollout.md still prints `Total: 912.00` \u2014 the actual `ledger.csv` always has a `status` column, so the removed default is never exercised either way.\nverdict: no observed effect\n\ncomponent: scripts/summarize.py \u2014 parse_amount restructuring (flag variable vs early-return form)\ncandidates: inv1 (rewrote the `negative`-flag version into an equivalent early-return version, renamed `raw`\u2192`s`)\nchange: purely stylistic restructuring of the same parsing logic (strip, replace commas, detect `(...)`, negate).\nobserved: context/pool/inv1/rollout.md runs the script and gets `Total: 912.00`, identical to dom1's and the unmodified version's output \u2014 no behavioral difference on any tested input.\nverdict: no observed effect\n\ncomponent: scripts/summarize.py \u2014 c1 (no change)\ncandidates: c1\nchange: none \u2014 c1's harness.diff is empty; byte-identical to `context/harness`.\nobserved: c1's rollout (context/rollouts/c1.md) never runs the script at all. It reads `ledger.csv` directly and hand-computes 1250.00 \u2212 300.50 \u2212 49.50 + 12.00 = 912.00, violating AGENTS.md step 3 (\"Do not compute the total yourself. The script is the house method\"). It reaches the same numeric answer only because this ledger is small enough to eyeball correctly; nothing in the harness enforced or even detected the bypass.\nverdict: confounded \u2014 the correct output says nothing about whether the harness's instruction-following guarantee holds; a single rollout is the only evidence, and the one real risk this run exposed (procedure bypass) didn't affect the final artifact, which is why both \"fixed\" and \"unchanged\" harnesses looked identical at selection time.\n\ncomponent: .agents/skills/README.md, .codex/README.md, sub_agents/README.md, scripts/README.md (extension-point placeholder stubs)\ncandidates: c1, dom1, inv1 (identical across all three, inherited unchanged from context/harness)\nchange: none this round \u2014 stub files describing unused extension mechanisms (skills, codex hooks, sub-agents).\nobserved: no rollout in base1, c1, dom1, or inv1 ever references a skill, hook, or sub-agent.\nverdict: no observed effect\n\ncomponent: AGENTS.md\ncandidates: c1, dom1, inv1 (unchanged across all, including base_harness)\nchange: none\nobserved: identical instructions followed (or, in c1's case, silently bypassed) across all rollouts; no candidate proposed touching it.\nverdict: no observed effect"
+      },
+      "trivial": true,
+      "evidence": "deliverable",
+      "chosen_run_dir": "<repo>/project9/runs/live/executions/p9-cc-seq1/ledger-2/c1",
+      "chosen_tree_is_base": false,
+      "harness_fingerprint": "a100d0d1d4e853d9"
+    }
+  },
+  "errors": []
+}

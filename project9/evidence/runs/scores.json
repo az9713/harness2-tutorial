@@ -1,0 +1,44 @@
+[
+  {
+    "task": "ledger-1",
+    "run": "base1",
+    "score": 0.0,
+    "expected": "Total: 85.15",
+    "got": "Total: 105.25"
+  },
+  {
+    "task": "ledger-1",
+    "run": "seq final (c1)",
+    "score": 1.0,
+    "expected": "Total: 85.15",
+    "got": "Total: 85.15"
+  },
+  {
+    "task": "ledger-2",
+    "run": "base1",
+    "score": 1.0,
+    "expected": "Total: 912.00",
+    "got": "Total: 912.00"
+  },
+  {
+    "task": "ledger-2",
+    "run": "seq final (c1)",
+    "score": 1.0,
+    "expected": "Total: 912.00",
+    "got": "Total: 912.00"
+  },
+  {
+    "task": "ledger-3",
+    "run": "base1",
+    "score": 1.0,
+    "expected": "Total: 20.00",
+    "got": "Total: 20.00"
+  },
+  {
+    "task": "ledger-3",
+    "run": "seq final (c1)",
+    "score": 1.0,
+    "expected": "Total: 20.00",
+    "got": "Total: 20.00"
+  }
+]
