@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>Project 9 Run Replay</title>
+<style>
+:root{--bg:#0f172a;--card:#1e293b;--text:#e2e8f0;--text2:#cbd5e1;--muted:#94a3b8;--orange:#fb923c;--teal:#2dd4bf;--b1:#1e293b;--b2:#334155;--red:#f87171;--green:#4ade80}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 system-ui,-apple-system,"Segoe UI",sans-serif}
+main{max-width:980px;margin:0 auto;padding:24px 16px 48px}
+h1{font-size:2rem;margin:0 0 4px}
+h2{font-size:1.4rem;margin:40px 0 12px;padding-top:12px;border-top:1px solid var(--b2)}
+h2.st{font-size:1.1rem;margin:0 0 6px;padding:0;border:0;color:var(--teal)}
+p,li{color:var(--text2)}
+a{color:var(--teal)}
+.sub{color:var(--muted);margin:0 0 20px}
+.card{background:var(--card);border:1px solid var(--b2);border-radius:10px;padding:16px 20px;margin:16px 0}
+.warn{border-color:#f8717166}
+code{font-family:ui-monospace,Consolas,monospace;font-size:.88em;background:#0b1222;border:1px solid var(--b2);border-radius:4px;padding:1px 5px;color:#fde68a;overflow-wrap:anywhere}
+pre{background:#0b1222;border:1px solid var(--b2);border-radius:8px;padding:12px 14px;overflow:auto;font-size:13px;line-height:1.45;color:#e2e8f0;white-space:pre-wrap;overflow-wrap:anywhere;margin:10px 0}
+.tw{overflow-x:auto;margin:12px 0}
+table{border-collapse:collapse;width:100%;font-size:13.5px}
+th,td{border:1px solid var(--b2);padding:6px 9px;text-align:left;vertical-align:top}
+th{background:#172033;color:var(--text)}
+td{color:var(--text2)}
+td code{font-size:.85em}
+.anim{background:var(--card);border:1px solid var(--b2);border-radius:10px;padding:12px 14px;margin:16px 0}
+.sv{overflow-x:auto}
+.anim svg{display:block;width:100%;min-width:640px;height:auto}
+.anim g,.anim path,.anim text{transition:opacity .35s}
+.hid{opacity:0}
+.nd rect{fill:#0b1222;stroke:#334155;stroke-width:1.5;transition:stroke .35s,fill .35s}
+.nd text{fill:#64748b;font:12px system-ui,sans-serif;transition:fill .35s}
+.nd text.b{font-weight:600}
+.nd text.f{font:9.5px ui-monospace,Consolas,monospace}
+.nd.on rect{stroke:#2dd4bf}.nd.on text{fill:#cbd5e1}.nd.on text.b{fill:#e2e8f0}
+.nd.now rect{stroke:#fb923c;stroke-width:2.5;fill:#26324a}.nd.now text{fill:#e2e8f0}
+.ed{fill:none;stroke:#334155;stroke-width:1.6;transition:stroke .35s,opacity .35s}
+.ed.on{stroke:#2dd4bf}.ed.now{stroke:#fb923c;stroke-dasharray:6 4;animation:flow .8s linear infinite}
+.ed.l2{stroke-dasharray:3 4}
+@keyframes flow{to{stroke-dashoffset:-20}}
+.lbl{fill:#94a3b8;font:11.5px system-ui,sans-serif}
+.gr{fill:none;stroke:#94a3b8;stroke-dasharray:5 4}
+.score{font:600 13px system-ui,sans-serif;fill:#fde68a}
+.ln rect{fill:#0b1222;stroke:#334155;stroke-width:1.2}
+.ln text{fill:#64748b;font:11.5px system-ui,sans-serif}
+.ln.now rect{stroke:#fb923c;fill:#26324a}.ln.now text{fill:#e2e8f0}
+.ok-t{fill:#4ade80;font:600 11px system-ui,sans-serif}
+.ctrl{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:10px}
+.ctrl button{background:#0b1222;color:var(--text);border:1px solid var(--b2);border-radius:6px;padding:4px 12px;font:inherit;font-size:14px;cursor:pointer}
+.ctrl button:hover,.ctrl button:focus-visible{border-color:var(--teal);outline:none}
+.ctrl .ct{margin-left:auto;color:var(--muted);font-size:13px}
+.step{margin-top:12px;border-top:1px solid var(--b2);padding-top:12px}
+.step p{margin:0 0 8px}
+.tags{display:grid;grid-template-columns:max-content minmax(0,1fr);gap:4px 12px;font-size:13.5px;margin-top:8px}
+.tags dt{color:var(--orange);font-weight:600}
+.tags dd{margin:0;color:var(--text2);min-width:0}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:13px;color:var(--muted);margin:6px 0 0}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;border:2px solid;vertical-align:-2px;margin-right:4px}
+@media (prefers-reduced-motion:reduce){.ed.now{animation:none}.anim *{transition:none!important}}
+</style>
+</head>
+<body>
+<main>
+<p class="sub"><a href="harness2-projects.html#p9-run">← Project 9: run the build</a> · <a href="index.html">Learn Harness²</a></p>
+<h1>Project 9 run, step by step</h1>
+<p class="sub">One live run of <code>project9/</code> through the released harness2 code (commit <code>1cfe254</code>). Each step names the harness2 function that ran, the paper stage, and the harness files it touched.</p>
+
+<div class="card">
+<p><b>The run.</b> Task <code>ledger-1</code> only (<code>--tasks 1</code>), budget k = 1, sequential mode, in WSL, on 2026-10-25. Claude Code with Haiku did the task runs. Sonnet did the editor, composer and reflector sessions. The run made 8 model calls and took 2 min 37 s. The estimated cost at API prices was $0.46 ($0.016 for 4 runs, $0.448 for 4 sessions). The 4 task runs report <code>"apiKeySource": "none"</code>, which is the Claude subscription login. The 4 sessions ran in the same shell, where the guard found no billing variable. Nothing was billed.</p>
+<p><b>The sources.</b> Every excerpt comes from the run folder <code>project9/runs/t1/live/</code>: <code>executions/*/stream.jsonl</code> (task runs), <code>audit/*.meta.json</code> (sessions), <code>runs/p9-cc-agg1/ledger-1/summary.json</code>, the harness and context folders, and the library. Clock times are the times when each output file was written. Durations come from <code>duration_ms</code> (runs) and <code>wall_s</code> (sessions).</p>
+</div>
+
+<div class="anim" id="replay">
+<div class="sv"><svg viewBox="0 0 890 490" role="img" aria-label="Animated replay of the Project 9 run through the harness2 pipeline"></svg></div>
+<div class="legend"><span><i style="border-color:#fb923c"></i>active in this step</span><span><i style="border-color:#2dd4bf"></i>done earlier</span><span><i style="border-color:#334155"></i>not reached yet</span></div>
+<div class="ctrl"><button data-a="reset">⟲ Reset</button><button data-a="prev">◀ Back</button><button data-a="play">▶ Play</button><button data-a="next">Next ▶</button><span class="ct"></span></div>
+<div class="step" aria-live="polite">
+<h2 id="s-title" class="st"></h2>
+<p id="s-cap"></p>
+<pre id="s-ex"></pre>
+<dl class="tags">
+<dt>harness2 code</dt><dd id="s-code"></dd>
+<dt>Paper stage</dt><dd id="s-stage"></dd>
+<dt>Harness files</dt><dd id="s-comp"></dd>
+<dt>Time</dt><dd id="s-time"></dd>
+<dt>Est. cost</dt><dd id="s-cost"></dd>
+</dl>
+</div>
+</div>
+
+<h2 id="table">All steps in one table</h2>
+<p>The same 17 steps as the animation. Line numbers are in the installed package at commit <code>1cfe254</code> (<code>harness2/core/…</code>) and in this repository (<code>project9/…</code>).</p>
+<div class="tw"><table id="steps"><thead><tr><th>#</th><th>Step</th><th>harness2 code</th><th>Paper stage</th><th>Harness files</th><th>Time</th><th>Est. cost</th></tr></thead><tbody></tbody></table></div>
+
+<h2 id="limits">What the record does not show</h2>
+<ul>
+<li><b>Tool calls inside the sessions.</b> The editor, composer and reflector sessions run with <code>--output-format json</code>. The record keeps each session's mission (<code>*.mission.md</code>), reply (<code>*.response.md</code>), duration and cost, but not the tool calls inside it. The 4 task runs use <code>stream-json</code>, so their tool calls are complete.</li>
+<li><b>Exact start times.</b> The record has end times (file write times) and durations, not start times. The run start, ≈ 08:15:34, is the end time minus the 2 min 37 s total, which includes the <code>uv</code> start-up.</li>
+<li><b>Level 2 in this run.</b> With one task, the library is written but no editor reads it. Step 17 shows the read from the earlier 3-task run in <code>project9/runs/live/</code>.</li>
+<li><b>The Windows shims.</b> This run was in WSL, so the two Windows shims in <code>adapter.py</code> (<code>fcntl</code> stand-in at line 22, <code>read_tree</code> replacement at line 36) did not run. On native Windows, the <code>read_tree</code> replacement runs in steps 3 and 7, and the <code>fcntl</code> stand-in runs in step 15.</li>
+<li><b>A tie, not a gain.</b> The base run and the final both scored 1. In base1, Haiku did not obey the harness and calculated the total itself. In an earlier live run of the same task, base1 wrote <code>Total: 105.25</code> and scored 0. One run per arm cannot show that the edits made the harness better; the reflector also rated its own confidence "low".</li>
+</ul>
+<p class="sub">Data: <code>project9/runs/t1/live/</code> (git ignores it; run <code>python run.py --tasks 1 --out runs/t1</code> to make your own). Code: <a href="https://github.com/google-research/harness2/tree/1cfe254e8d25b15f37048c3730134686abe60335">google-research/harness2 at 1cfe254</a>.</p>
+</main>
+<script>
+(function(){
+function box(id,x,y,lines){
+  var w=100,h=56,s='<g class="nd" id="'+id+'"><rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" rx="7"/>';
+  lines.forEach(function(t,i){s+='<text x="'+(x+w/2)+'" y="'+(y+18+i*15)+'" text-anchor="middle"'+(i===0?' class="b"':i===2?' class="f"':'')+'>'+t+'</text>'});
+  return s+'</g>';
+}
+function edge(id,d,c){return '<path class="ed'+(c?' '+c:'')+'" id="'+id+'" d="'+d+'" marker-end="url(#ah)"/>'}
+var g='<defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#64748b"/></marker></defs>';
+g+='<text class="lbl" x="120" y="22">LEVEL 1 — one task (recursion.py, run_sequential)</text><text class="lbl" x="560" y="350">LEVEL 2 — selection.py, library.py</text>';
+g+=box('n-run',10,30,['run.py','guard, adapter','run.py:98'])+box('n-task',10,150,['run_task','ledger-1','schedule.py:566']);
+g+=box('n-h0',120,150,['H₀','base harness','schedule.py:617'])+box('n-base',230,150,['Reference','base1 · Haiku','schedule.py:430']);
+g+=box('n-inv',340,60,['INV editor','inv1 · Sonnet','recursion.py:483'])+box('n-dom',340,240,['DOM editor','dom1 · Sonnet','recursion.py:483']);
+g+=box('n-pinv',450,60,['Probe run','inv1 · Haiku','recursion.py:518'])+box('n-pdom',450,240,['Probe run','dom1 · Haiku','recursion.py:518']);
+g+=box('n-comp',560,150,['Compose','c1 · Sonnet','recursion.py:541'])+box('n-rc1',670,150,['Composed run','c1 · Haiku','recursion.py:559']);
+g+=box('n-sel',780,150,['Select','trivial, k = 1','selection.py:360']);
+g+=box('n-refl',780,276,['Reflector','Sonnet','selection.py:454'])+box('n-lib',670,276,['Library','bookkeeping','library.py:106'])+box('n-sum',560,276,['summary.json','+ scores.json','schedule.py:289']);
+g+='<text class="ok-t hid" id="v-inv" x="390" y="132" text-anchor="middle">✓ validated</text><text class="ok-t hid" id="v-dom" x="390" y="312" text-anchor="middle">✓ validated</text>';
+g+=edge('e-run','M60 86 V146')+edge('e-h0','M110 178 H116')+edge('e-base','M220 178 H226');
+g+=edge('e-inv','M330 170 C334 170 332 88 336 88')+edge('e-dom','M330 186 C334 186 332 268 336 268');
+g+=edge('e-pinv','M440 88 H446')+edge('e-pdom','M440 268 H446');
+g+=edge('e-ci','M550 88 C580 88 610 104 610 146')+edge('e-cd','M550 268 C580 268 610 252 610 210');
+g+=edge('e-rc1','M660 178 H666')+edge('e-sel','M770 178 H776')+edge('e-refl','M830 206 V272');
+g+=edge('e-lib','M780 304 H774')+edge('e-sum','M670 304 H664')+edge('e-l2','M762 332 V362 H390 V300','l2');
+g+='<text class="lbl hid" id="l2-t" x="400" y="378">task 2 editors read the library (earlier run)</text>';
+g+='<rect class="gr" x="10" y="388" width="870" height="38" rx="8"/><text class="lbl" x="22" y="411">Grader in run.py — runs after the method; no harness2 step sees it</text>';
+g+='<text class="score hid" id="sc-b" x="470" y="412">base1: Total: 85.15 → 1</text><text class="score hid" id="sc-c" x="690" y="412">c1: Total: 85.15 → 1</text>';
+g+='<g class="ln" id="ln-exec"><rect x="10" y="438" width="429" height="40" rx="7"/><text x="22" y="462">adapter.execute() → claude -p --model haiku (task runs)</text></g>';
+g+='<g class="ln" id="ln-sess"><rect x="451" y="438" width="429" height="40" rx="7"/><text x="463" y="462">ClaudeProposer._claude_cli → claude -p, Sonnet (sessions)</text></g>';
+var R=document.getElementById('replay');R.querySelector('svg').innerHTML=g;
+
+var S=[
+{t:'Start the driver',n:['run'],
+cap:'You start <code>run.py --tasks 1 --out runs/t1</code> in WSL. The guard looks for 4 variables that bill outside the subscription and finds none. <code>LedgerAdapter</code> writes <code>sources/ledger-1/ledger.csv</code>. <code>ClaudeProposer</code> becomes the editor channel, and it keeps a record of each session in <code>audit/</code>.',
+ex:'$ uv run --no-project --python 3.12 \\\n    --with "harness2 @ git+https://github.com/google-research/harness2@1cfe254…" \\\n    python run.py --tasks 1 --out runs/t1\n\nguard: ANTHROPIC_API_KEY, ANTHROPIC_AUTH_TOKEN,\n       CLAUDE_CODE_USE_VERTEX, CLAUDE_CODE_USE_BEDROCK → none set',
+code:'<code>project9/run.py:98–101</code> guard · <code>run.py:105</code> LedgerAdapter · <code>run.py:107</code> ClaudeProposer · <code>run.py:118</code> calls run_domain',
+stage:'Setup (not a paper stage)',comp:'None',time:'Start ≈ 08:15:34',cost:'$0'},
+{t:'Open the domain library',n:['task'],e:['run'],
+cap:'<code>run_domain</code> makes one library for sequential mode, at <code>library/k1/seq/bookkeeping/</code>. Before task 1 it calls <code>retain([])</code>, so the library has 0 entries. In the paper this is the empty library 𝓡₁.',
+ex:'library/k1/seq/bookkeeping/   0 entries (the folder does not exist yet)',
+code:'<code>harness2/core/schedule.py:669</code> run_domain · <code>schedule.py:686</code> Library(root, domain, surface) · <code>schedule.py:701</code> lib.retain(task_ids[:0]) · <code>library.py:101</code>',
+stage:'Level 2: library 𝓡₁ = ∅',comp:'None',time:'≈ 08:15:34',cost:'$0'},
+{t:'Read the starting harness H₀',n:['h0'],e:['h0'],
+cap:'<code>run_task</code> reads <code>project9/h0/</code> into a tree of files. Only files on the Codex surface count, because the adapter\'s layout returns <code>CODEX_SURFACE</code>. H₀ has two real files. Each has one defect: <code>AGENTS.md</code> says to copy the script output without a check, and the script keeps only amounts &gt; 0.',
+ex:'AGENTS.md (7 lines)\n  1. Run `python3 scripts/summarize.py ledger.csv`.\n  2. Write the one line that the script prints to `answer.txt`, exactly as printed.\n  3. Do not compute the total yourself. The script is the house method.\n\nscripts/summarize.py (8 lines), line 7\n  total = sum((Decimal(r["amount"]) for r in rows if Decimal(r["amount"]) > 0), Decimal(0))',
+code:'<code>schedule.py:566</code> run_task · <code>schedule.py:617</code> read_tree(surface, adapter.base_harness()) · <code>tree.py:127</code> · <code>project9/adapter.py:120</code> base_harness · <code>adapter.py:82</code> surface()',
+stage:'H₀, the base harness',comp:'<code>AGENTS.md</code> (the one always-on file of the Codex layout, <code>substrate/codex.py:41</code>; in this layout it holds the C1–C4 content) · <code>scripts/summarize.py</code> (C7, script)',time:'≈ 08:15:34',cost:'$0'},
+{t:'Reference run base1',n:['base'],e:['base'],lane:'exec',
+cap:'<code>_roll_bases</code> calls <code>adapter.execute</code> with no harness folder, so it uses H₀. <code>_workspace</code> copies the ledger, copies <code>AGENTS.md</code> to <code>CLAUDE.md</code>, and copies <code>scripts/</code>. Claude Code (Haiku) gets the task prompt. The script printed 105.25. Haiku saw the conflict with the task text, wrote 85.15 itself, and asked the user which total to use.',
+ex:'[ACTION] Bash  ls -la && ls -la scripts && cat ledger.csv && cat scripts/summarize.py\n[ACTION] Bash  python3 -I scripts/summarize.py ledger.csv\n[OBSERVATION] Total: 105.25\n[ACTION] Write answer.txt  "Total: 85.15"\n[ACTION] message: I wrote `Total: 85.15` to `answer.txt`. This does not match the\n  house script, so please decide which total you want.',
+code:'<code>schedule.py:625</code> _roll_bases → <code>schedule.py:465</code> adapter.execute(task_id, None, rid) · <code>adapter.py:140</code> execute · <code>adapter.py:127</code> _workspace · <code>adapter.py:151–156</code> claude -p',
+stage:'Reference execution e₀',comp:'<code>AGENTS.md</code> → <code>CLAUDE.md</code> · <code>scripts/summarize.py</code> (read, run)',time:'Ended 08:15:52 · 15.7 s · 4 turns',cost:'$0.0043'},
+{t:'Build the editor evidence',n:['inv','dom'],
+cap:'For each editor, <code>_run_stage</code> builds a context folder. It holds the task text, the ledger, the current harness, the full base1 trajectory and the base1 deliverable. <code>adapter.trajectory</code> makes the trajectory from <code>stream.jsonl</code>. The library is empty, so no <code>library/</code> folder is copied. A leak check rejects files named <code>expected*</code> or <code>answer_key*</code>. The mission is the propose prompt plus a map of this folder.',
+ex:'context/inv1/\n  task.md                   the task prompt\n  source/ledger.csv         copy of the task file\n  harness/                  H₀ (AGENTS.md, scripts/, 4 placeholder READMEs)\n  rollouts/base1.md         [ACTION]/[OBSERVATION] lines of base1\n  deliverables/base1/answer.txt\n(no library/ — 0 entries)',
+code:'<code>recursion.py:135</code> _run_stage · <code>context.py:105</code> build · <code>context.py:219</code> _write_rollout → <code>adapter.py:163</code> trajectory · <code>context.py:161–164</code> library copy (skipped) · <code>context.py:399</code> leak check · <code>context.py:521</code> mission · <code>prompts.py:824</code> propose',
+stage:'Input to Propose',comp:'None changed',time:'≈ 08:15:53',cost:'$0'},
+{t:'Propose: the INV and DOM editors',n:['inv','dom'],e:['inv','dom'],lane:'sess',
+cap:'Two Sonnet sessions run at the same time, one for each scope. INV looks at how the agent worked. DOM looks at what a bookkeeper knows. Each session edits the files in <code>context/harness/</code> and writes notes. Both found the same moment in base1, and both rewrote the two files.',
+ex:'inv1 notes: "The answer was right only because the agent ignored the harness.\n  The old `AGENTS.md` told it to write the buggy script\'s output verbatim."\n\ndom1 notes: "Left as is, this harness sets up every run for the same conflict.\n  Another solver could obey `AGENTS.md` and deliver the wrong total."\n\nAGENTS.md:            7 → 8 lines (inv1), 7 → 10 lines (dom1)\nscripts/summarize.py: 8 → 59 lines (inv1), 8 → 18 lines (dom1)',
+code:'<code>recursion.py:483–513</code> inv1 and dom1 in a 2-worker pool · <code>proposer.py:126</code> Proposer.call · <code>adapter.py:224</code> ClaudeProposer._claude_cli · <code>adapter.py:219</code> env() (no Vertex)',
+stage:'Propose (INV and DOM)',comp:'<code>AGENTS.md</code> · <code>scripts/summarize.py</code>',time:'inv1 ended 08:16:26 · 32.8 s; dom1 ended 08:16:17 · 23.0 s',cost:'$0.0962 + $0.0922'},
+{t:'Validate each proposal',n:['inv','dom'],v:1,
+cap:'The core reads each edited folder back and checks it in <code>_accept_tree</code>: the size cap for the always-on file (8,000 characters), the skill and hook rules, that scripts compile, and that script references exist. Then come the adapter check (<code>AGENTS.md</code> is not empty) and a check for grader verdicts. Both proposals passed on attempt 1. If a check fails, the error goes back to the session for one more attempt (<code>STAGE_ATTEMPTS = 2</code>). A second failure falls back to the current harness.',
+ex:'inv1: attempts 1, fell_back false, kept_base false\ndom1: attempts 1, fell_back false, kept_base false',
+code:'<code>recursion.py:212</code> read_tree · <code>recursion.py:108</code> _accept_tree · <code>tree.py:336</code> validate · <code>adapter.py:123</code> validate_tree · <code>recursion.py:129</code> no grader verdicts',
+stage:'Gate between Propose and Probe (code only)',comp:'All files of each proposal',time:'—',cost:'$0'},
+{t:'Probe: run each candidate',n:['pinv','pdom'],e:['pinv','pdom'],lane:'exec',
+cap:'<code>_roll_many</code> writes each candidate to <code>harnesses/inv1</code> and <code>harnesses/dom1</code>, and runs each one once with Haiku on the same task. inv1 ran its new script with the answer path. dom1 ran its script and then wrote <code>answer.txt</code> itself. Both wrote 85.15, and neither run had a conflict.',
+ex:'inv1  [ACTION] Bash  python3 scripts/summarize.py ledger.csv answer.txt && cat answer.txt\n      [OBSERVATION] rows summed=3 void skipped=0 | Total: 85.15 | Total: 85.15\n\ndom1  [ACTION] Bash  python3 -I scripts/summarize.py ledger.csv\n      [OBSERVATION] Total: 85.15\n      [ACTION] Write answer.txt  "Total: 85.15"',
+code:'<code>recursion.py:518</code> _roll_many · <code>recursion.py:260</code> _roll · <code>tree.py:156</code> write_tree · <code>adapter.py:140</code> execute',
+stage:'Probe',comp:'Candidate <code>AGENTS.md</code> and <code>scripts/summarize.py</code> (run)',time:'inv1 ended 08:16:38 · 10.4 s · 5 turns; dom1 ended 08:16:37 · 9.3 s · 5 turns',cost:'$0.0038 + $0.0038'},
+{t:'Compose c1',n:['comp'],e:['ci','cd'],lane:'sess',
+cap:'A third Sonnet session gets the base run, both candidates (harness, diff and run) in <code>context/c1/pool/</code>, and both editors\' notes in <code>context/c1/decisions/</code>. At k = 1 its job is the aggregate prompt. It writes each decision as kept, revised or dropped, with the run moment that supports it.',
+ex:'kept -> script fix (INV `summarize.py`: signed sum, parentheses negative, void skipped …)\n  -> In base1 the script printed 105.25 because it sums only amounts `> 0`.\nrevised -> script zero-total normalisation (`quantize` plus `+ 0`, so no `-0.00`)\nrevised -> `AGENTS.md`, merged from both candidates and kept short\ndropped -> dom1\'s script rewrite as the base script, and dom1\'s longer `AGENTS.md` prose\ndropped -> any skill, hook or subagent',
+code:'<code>recursion.py:530–533</code> round pool · <code>recursion.py:536–540</code> prompts.aggregate because k == 1 · <code>recursion.py:541</code> _run_stage(label="c1", dim="COMPOSE") · <code>prompts.py:893</code>',
+stage:'Compose',comp:'<code>AGENTS.md</code>: 10 lines · <code>scripts/summarize.py</code>: 60 lines (inv1\'s script plus a zero-total line)',time:'Ended 08:17:14 · 31.4 s',cost:'$0.1179'},
+{t:'Run the composed harness',n:['rc1'],e:['rc1'],lane:'exec',
+cap:'<code>_roll</code> runs c1 once. Haiku read the ledger and the script, ran the script with the answer path, and checked the total by hand. This run is the deliverable of the task.',
+ex:'[ACTION] Bash  python3 scripts/summarize.py ledger.csv answer.txt && cat answer.txt\n[OBSERVATION] rows summed=3 void skipped=0 | Total: 85.15 | Total: 85.15\n[ACTION] message: Cross-check: 100.25 + (−20.10) + 5.00 = 85.15.\n  The script and the hand sum agree.',
+code:'<code>recursion.py:559</code> _roll(…, "c1", …) · <code>adapter.py:140</code> execute',
+stage:'Composed run (the deliverable)',comp:'c1 <code>AGENTS.md</code> → <code>CLAUDE.md</code> · c1 <code>scripts/summarize.py</code> (run)',time:'Ended 08:17:27 · 11.3 s · 6 turns',cost:'$0.0042'},
+{t:'Check the budget',n:['rc1'],
+cap:'The ledger counts runs and sessions. It asserts R = 4k and P = 3k. Here k = 1, so R = 4 (base1, inv1, dom1, c1) and P = 3 (inv1, dom1, c1). The reflector session is not in this count.',
+ex:'{"R": 4, "expected_R": 4, "P": 3, "expected_P": 3,\n "rollouts": ["base1", "inv1", "dom1", "c1"],\n "sessions": ["inv1", "dom1", "c1"], "session_usd": 0.306277}',
+code:'<code>recursion.py:565</code> → <code>ledger.py:89</code> assert_identity',
+stage:'Budget (paper §2.2.2)',comp:'None',time:'08:17:27',cost:'$0'},
+{t:'Select the final',n:['sel'],e:['sel'],
+cap:'At k = 1 the pool has one final, c1. <code>trivial_selection</code> takes it without a selector session, so this step makes no model call. It writes <code>selection/seq1/selection.json</code>.',
+ex:'chosen_label: c1   chosen_is_base: false   n_candidates: 1\nwhy: "trivial pool: single final at k=1; delivered without a selector session"',
+code:'<code>schedule.py:513</code> selection_pool · <code>schedule.py:514–517</code> trivial_selection · <code>selection.py:360</code>',
+stage:'Final selection (no selector at k = 1)',comp:'None',time:'08:17:27',cost:'$0'},
+{t:'Reflect on the task',n:['refl'],e:['refl'],lane:'sess',
+cap:'<code>reflect_adoption</code> builds a new evidence folder, <code>reflection/seq1/</code>, with the chosen harness, the base harness, all four runs and the notes. A fourth Sonnet session, the Experience Reflector, gives each changed file a verdict and writes one lesson. It rated both files "confounded", because every candidate changed both files together.',
+ex:'scripts/summarize.py   verdict: confounded\nAGENTS.md              verdict: confounded\nplaceholder READMEs    verdict: no observed effect\n\nlesson: "In AGENTS.md, do not tell the solver to copy a helper\'s output without\n  checking it. … Edit the prose rule and the script together …"\nconfidence: "low. There is one rollout per arm and all four deliverables are\n  the same `Total: 85.15`."',
+code:'<code>schedule.py:529–538</code> · <code>selection.py:402</code> reflect_adoption · <code>selection.py:454</code> _distil · <code>prompts.py:1105</code> experience',
+stage:'Experience Reflector (level 2)',comp:'Reads all candidate trees; changes none',time:'Ended 08:18:10 · 32.3 s',cost:'$0.1416'},
+{t:'Update the library',n:['lib'],e:['lib'],
+cap:'<code>Library.add</code> stores the chosen tree c1 and <code>EXPERIENCE.md</code> in <code>harnesses/ledger-1/</code>. <code>rebuild_index</code> writes <code>INDEX.md</code>. The next task in this domain gets a copy of this library. This is paper Eq. 4: 𝓡₂ = Update(𝓡₁, H★₁, 𝓓₁).',
+ex:'## `harnesses/ledger-1/`\n- harness: `harnesses/ledger-1/harness/` — 1 scripts; 1,059 always-on chars\n- why:     `harnesses/ledger-1/EXPERIENCE.md`\n- cue:     A harness ships a helper script together with an always-on rule to\n           trust it blindly …',
+code:'<code>schedule.py:555–563</code> · <code>library.py:106</code> add · <code>library.py:154</code> rebuild_index',
+stage:'Library update (level 2)',comp:'c1 <code>AGENTS.md</code> and <code>scripts/summarize.py</code> (copied into the library)',time:'08:18:11',cost:'$0'},
+{t:'Write the task summary',n:['sum'],e:['sum'],
+cap:'<code>_write_summary</code> writes <code>summary.json</code> with the stages, the ledger and the selection, under a file lock. <code>run_domain</code> prints the task status.',
+ex:'runs/p9-cc-agg1/ledger-1/summary.json   status: ok\n1 done, 0 failed',
+code:'<code>schedule.py:661–665</code> · <code>schedule.py:289</code> _write_summary (lock: <code>fcntl</code>; on native Windows, <code>adapter.py:22</code>)',
+stage:'Record (not a paper stage)',comp:'None',time:'08:18:11',cost:'$0'},
+{t:'Score after the run',n:['sum'],sc:1,
+cap:'<code>run.py</code> reads <code>summary.json</code> and scores the base run and the final with <code>adapter.score</code>. This grader is in <code>project9/</code>, not in harness2, and no harness2 step saw it. Both runs wrote 85.15, so both scored 1. The edits did not change the score in this run, because Haiku had already set the script aside in base1.',
+ex:'ledger-1  base1                  score 1   got Total: 85.15\nledger-1  seq final (c1)         score 1   got Total: 85.15',
+code:'<code>project9/run.py:126</code> scores · <code>run.py:64</code> · <code>adapter.py:192</code> score',
+stage:'After the method (the paper\'s grader role)',comp:'<code>answer.txt</code> only',time:'08:18:11 · run total 2 min 37 s',cost:'$0'},
+{t:'Level 2: the next task reads the library',n:['lib','dom','inv'],e:['l2'],l2:1,
+cap:'This step comes from the earlier 3-task run in <code>project9/runs/live/</code>, not from <code>runs/t1</code>. For task 2, <code>run_domain</code> calls <code>retain(["ledger-1"])</code>, and <code>context.build</code> copies the library into each editor\'s folder as <code>context/library/</code>. The ledger-2 INV editor opened the ledger-1 lesson and used it.',
+ex:'context/inv1/library/INDEX.md\ncontext/inv1/library/harnesses/ledger-1/EXPERIENCE.md\ncontext/inv1/library/harnesses/ledger-1/harness/\n\nledger-2 inv1 note: "That library case is this task\'s direct analog (same AGENTS.md\n  wording, same script skeleton), and its own verdict was explicit: the fix belongs\n  in the script, not in the instruction telling the agent to trust it."',
+code:'<code>schedule.py:701</code> retain · <code>schedule.py:499</code> mode_lib.context_dir() · <code>context.py:161–164</code> copy to <code>context/library/</code>',
+stage:'Level 2: editors read 𝓡₂',comp:'Library copy of ledger-1 <code>AGENTS.md</code>, <code>scripts/summarize.py</code>, <code>EXPERIENCE.md</code>',time:'Earlier run (runs/live)',cost:'In that run'}
+];
+
+var NODES=['run','task','h0','base','inv','dom','pinv','pdom','comp','rc1','sel','refl','lib','sum'];
+var EDGES=['run','h0','base','inv','dom','pinv','pdom','ci','cd','rc1','sel','refl','lib','sum','l2'];
+function cls(id,c){var e=document.getElementById(id);e.classList.remove('on','now','hid');if(c)e.classList.add(c)}
+function render(i){
+  var s=S[i],seenN={},seenE={};
+  for(var j=0;j<i;j++){(S[j].n||[]).forEach(function(k){seenN[k]=1});(S[j].e||[]).forEach(function(k){seenE[k]=1})}
+  NODES.forEach(function(k){cls('n-'+k,s.n.indexOf(k)>=0?'now':seenN[k]?'on':'')});
+  EDGES.forEach(function(k){var now=(s.e||[]).indexOf(k)>=0;cls('e-'+k,now?'now':seenE[k]&&k!=='l2'?'on':k==='l2'?'hid':'')});
+  cls('l2-t',s.l2?'':'hid');
+  var val=i>=6&&i<16;cls('v-inv',val?'':'hid');cls('v-dom',val?'':'hid');
+  cls('sc-b',i===15?'':'hid');cls('sc-c',i===15?'':'hid');
+  cls('ln-exec',s.lane==='exec'?'now':'');cls('ln-sess',s.lane==='sess'?'now':'');
+  document.getElementById('s-title').textContent=(i+1)+'. '+s.t;
+  document.getElementById('s-cap').innerHTML=s.cap;
+  document.getElementById('s-ex').textContent=s.ex;
+  ['code','stage','comp','time','cost'].forEach(function(k){document.getElementById('s-'+k).innerHTML=s[k]});
+}
+var i=0,tm=null,ct=R.querySelector('.ct'),pl=R.querySelector('[data-a=play]'),n=S.length;
+function go(j){i=Math.max(0,Math.min(n-1,j));render(i);ct.textContent='Step '+(i+1)+' of '+n}
+function stop(){clearInterval(tm);tm=null;pl.textContent='▶ Play'}
+R.querySelector('.ctrl').addEventListener('click',function(e){
+  var a=e.target.getAttribute('data-a');if(!a)return;
+  if(a==='play'){
+    if(tm){stop();return}
+    if(i>=n-1)go(0);
+    pl.textContent='❚❚ Pause';
+    tm=setInterval(function(){if(i>=n-1){stop();return}go(i+1)},5000);
+  }else{stop();go(a==='next'?i+1:a==='prev'?i-1:0)}
+});
+go(0);
+
+var tb=document.querySelector('#steps tbody');
+S.forEach(function(s,j){var tr=document.createElement('tr');tr.innerHTML='<td>'+(j+1)+'</td><td>'+s.t+'</td><td>'+s.code+'</td><td>'+s.stage+'</td><td>'+s.comp+'</td><td>'+s.time+'</td><td>'+s.cost+'</td>';tb.appendChild(tr)});
+})();
+</script>
+</body>
+</html>

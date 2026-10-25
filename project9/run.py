@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 from pathlib import Path
 
 from adapter import TASKS, ClaudeProposer, LedgerAdapter
@@ -92,6 +93,12 @@ def main(argv=None) -> int:
     ap.add_argument("--no-library", action="store_true", help="library off (limit 8)")
     ap.add_argument("--dry", action="store_true", help="no model calls; scripted editors")
     args = ap.parse_args(argv)
+
+    # Live runs must use the Claude subscription login: no API key, no Vertex, no Bedrock.
+    billed = [v for v in ("ANTHROPIC_API_KEY", "ANTHROPIC_AUTH_TOKEN",
+                          "CLAUDE_CODE_USE_VERTEX", "CLAUDE_CODE_USE_BEDROCK") if os.environ.get(v)]
+    if billed and not args.dry:
+        raise SystemExit(f"Unset {', '.join(billed)}: these bill outside the Claude subscription.")
 
     # A separate root for --no-library: execute() and the session cache reuse by run_id.
     root = (args.out / (("dry" if args.dry else "live") + ("-nolib" * args.no_library))).resolve()

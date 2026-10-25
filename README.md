@@ -27,7 +27,7 @@ Three animated figures step through the recursion: the two loops over a task str
 
 ## Project 9 build
 
-[`project9/`](project9/) is a working build of Project 9: a harness2 adapter whose executor is Claude Code, with three ledger tasks and a dry run that makes no model calls. [How to run it in WSL, Git Bash and PowerShell](https://az9713.github.io/harness2-tutorial/harness2-projects.html#p9-run).
+[`project9/`](project9/) is a working build of Project 9: a harness2 adapter whose executor is Claude Code, with three ledger tasks and a dry run that makes no model calls. [How to run it in WSL, Git Bash and PowerShell](https://az9713.github.io/harness2-tutorial/harness2-projects.html#p9-run). [`harness2-p9-run.html`](https://az9713.github.io/harness2-tutorial/harness2-p9-run.html) replays one live run in 17 animated steps and maps each step to the harness2 function, the paper stage and the harness files.
 
 ## Verification report
 
