@@ -64,6 +64,10 @@ td.c{text-align:center;color:var(--teal)}
 .b-full{color:#4ade80;border-color:#4ade8088}.b-part{color:#2dd4bf;border-color:#2dd4bf88}.b-loop{color:#fde68a;border-color:#fde68a88}.b-one{color:#fb923c;border-color:#fb923c88}.b-comp{color:#94a3b8;border-color:#94a3b888}
 .rec{background:#172033;border:1px solid var(--b2);border-radius:8px;padding:8px 14px;margin:12px 0}
 .pt{fill:#fb923c;font:600 12px system-ui,sans-serif;letter-spacing:.04em}
+.calc-in{display:flex;flex-wrap:wrap;gap:10px 18px;margin:6px 0}
+.calc-in label{display:flex;flex-direction:column;gap:4px;font-size:14px;color:var(--text2)}
+.calc-in input,.calc-in select{background:#0b1222;color:var(--text);border:1px solid var(--b2);border-radius:6px;padding:4px 8px;font:inherit;font-size:14px;width:170px}
+.calc-in input:focus-visible,.calc-in select:focus-visible{border-color:var(--teal);outline:none}
 @media (prefers-reduced-motion:reduce){.ed.now{animation:none}.fig *{transition:none!important}}
 @media (max-width:860px){.wrap{grid-template-columns:1fr}nav{position:static;max-height:none;border-right:0;border-bottom:1px solid var(--b2);padding:0 0 12px}}
 </style>
@@ -78,7 +82,18 @@ td.c{text-align:center;color:var(--teal)}
 <div class="grp">Recursion</div>
 <a href="#rec">What "recursive" means</a>
 <a href="#rank">Ranked by recursiveness</a>
+<a href="#l2">Which projects show level 2</a>
 <a href="#minimal">The minimal full build</a>
+<div class="grp">Project 9 in depth</div>
+<a href="#p9">Overview</a>
+<a href="#p9-terms">Ten terms</a>
+<a href="#p9-split">What you write</a>
+<a href="#p9-task">One task, step by step</a>
+<a href="#p9-stream">Task to task: level 2</a>
+<a href="#p9-proof">Where the code does level 2</a>
+<a href="#p9-short">Where it falls short</a>
+<a href="#p9-decide">Decide and estimate</a>
+<a href="#p9-build">Build plan</a>
 <div class="grp">A. Build a harness</div>
 <a href="#i1">1. Hook compiler</a>
 <a href="#i2">2. Reflector + library</a>
@@ -112,8 +127,8 @@ td.c{text-align:center;color:var(--teal)}
 <span style="--c:#4ade80">Reflect / library (Prompt 6)</span>
 <span style="--c:#94a3b8">Your files, or a step outside Harness²</span>
 </div>
-<p>Each section has the same parts: <b>what it is</b>, <b>the mapping</b> onto Harness², a <b>diagram</b>, <b>the build</b> (file tree and short snippets), and four facts: cost, evidence, risk, first step. The snippets are sketches to hand to an agent. They are not tested code. Ideas 1 and 4 also have a step-through animation, because the earlier answer recommended them as the starting points.</p>
-<div class="card warn"><p><b>One fact changes how most of these ideas are built.</b> The released code (<code>google-research/harness2</code>) runs its executor on two substrates only: OpenCode and Codex (<code>harness2/substrate/opencode.py</code>, <code>codex.py</code>). Its <code>claude_cli</code> channel runs the <i>editors</i> through the Claude CLI, not the executor (<code>harness2/core/proposer.py</code>). So ideas 1–8 and 10 re-implement the method inside Claude Code by hand, and only idea 9 uses the released code directly.</p></div>
+<p>Each section has the same parts: <b>what it is</b>, <b>the mapping</b> onto Harness², a <b>diagram</b>, <b>the build</b> (file tree and short snippets), and four facts: cost, evidence, risk, first step. The snippets are sketches to hand to an agent. They are not tested code. Ideas 1 and 4 also have a step-through animation, because the earlier answer recommended them as the starting points. Project 9 has its own walkthrough, <a href="#p9">Project 9 in depth</a>, with two animations, for readers who are new to Harness².</p>
+<div class="card warn"><p><b>One fact changes how most of these ideas are built.</b> The released code (<code>google-research/harness2</code>) runs its executor on two substrates only: OpenCode and Codex (<code>harness2/substrate/opencode.py</code>, <code>codex.py</code>). Its <code>claude_cli</code> channel runs the <i>editors</i> through the Claude CLI, not the executor (<code>harness2/core/proposer.py</code>). So ideas 1–8 and 10 re-implement the method inside Claude Code by hand, and only idea 9 uses the released code directly. One detail keeps a Claude Code executor possible in idea 9: the core of the package uses only a substrate's name and its file layout, and the adapter's own <code>execute()</code> runs the task (see <a href="#p9-short">where project 9 falls short</a>).</p></div>
 
 <h2 id="blocks">Building blocks</h2>
 <h3>The eight components, in Claude Code terms</h3>
@@ -208,7 +223,7 @@ td.c{text-align:center;color:var(--teal)}
 <p class="src">Fig. R2 — The ladder. Higher steps have more of the method's feedback. The dashed line marks the upgrade of section "The minimal build": idea 2 rewired so that editors read the library, plus idea 3 with two chained steps.</p>
 <div class="tw"><table>
 <tr><th>Rank</th><th>Project</th><th>Level 1 (step feeds step)</th><th>Level 2 (task feeds improver)</th><th>Verdict</th><th>What would raise it</th></tr>
-<tr><td>1</td><td><a href="#i9">9. Adapter for the released code</a></td><td>Yes, in sequential mode (<code>run_sequential</code>)</td><td>Yes: the library is copied into every editor's context</td><td><span class="badge b-full">Full</span> as published</td><td>Nothing; this is the reference implementation</td></tr>
+<tr><td>1</td><td><a href="#i9">9. Adapter for the released code</a></td><td>Yes, in sequential mode with k ≥ 2 (<code>run_sequential</code>). The CLI default is parallel mode.</td><td>Yes: the library is copied into every editor's context</td><td><span class="badge b-full">Full</span> as published</td><td>Nothing; this is the reference implementation</td></tr>
 <tr><td>2</td><td><a href="#i10">10. Domain harness</a></td><td>Yes, if improved tasks use sequential k ≥ 2</td><td>Yes, if the library feeds the editors</td><td><span class="badge b-full">Full</span> with k ≥ 2</td><td>The config shown uses k = 1: set k = 2 on improved tasks</td></tr>
 <tr><td>3</td><td><a href="#i8">8. Evolve strong, deploy cheap</a></td><td>As idea 3, in the evolve phase</td><td>Yes, in the evolve phase</td><td><span class="badge b-full">Full</span> while evolving</td><td>The deploy phase freezes the harness on purpose</td></tr>
 <tr><td>4</td><td><a href="#i3">3. /harness-step</a></td><td>No at k = 1; yes if steps are chained</td><td>Only with a library that the next run's editors read</td><td><span class="badge b-part">Partial</span></td><td>Chain two steps; add the rewired reflector</td></tr>
@@ -220,6 +235,21 @@ td.c{text-align:center;color:var(--teal)}
 <tr><td>10</td><td><a href="#i7">7. Checker library</a></td><td>No</td><td>No</td><td><span class="badge b-comp">Component</span></td><td>It supplies evidence to every probe</td></tr>
 </table></div>
 <p>Why the order inside the top group: idea 9 is first because the released code implements both loops, and both are verified in the code. Ideas 10 and 8 reach both loops only if your build uses sequential k ≥ 2 and gives the library to the editors. Inside the bottom group the order does not express a difference in recursion; all three are parts of a step.</p>
+
+<h2 id="l2">Which projects show level 2</h2>
+<p>Level 2 has one test: does the improver of a later task read what an earlier task produced? The table applies only that test. The ranking above is stricter, because "full" needs both levels. So a project can show level 2 at k = 1, where it has no level-1 chain.</p>
+<div class="card key"><p><b>A numbering trap.</b> "Idea 5 — Two levels of recursion" is the fifth of the seven core ideas on the <a href="harness2-learn.html">Learn page</a>. Project 5 on this page is the blind selector, a component with no recursion. The two lists use separate numbers.</p></div>
+<div class="tw"><table>
+<tr><th>Project</th><th>Shows level 2?</th><th>Condition</th><th>Who reads the library</th></tr>
+<tr><td><a href="#p9">9. Adapter for the released code</a></td><td><span class="badge b-full">Yes, as published</span></td><td>None. The CLI builds a library for every run. Level 2 works in both modes and at every k, from the second task of a domain.</td><td>Every editor and composer session: the package copies the library into its evidence folder (<code>harness2/core/context.py:164</code>). The executor never gets it.</td></tr>
+<tr><td><a href="#i10">10. Domain harness</a></td><td><span class="badge b-full">Yes, by design</span></td><td>The library must feed the editors, as the config does. k = 1 is enough for level 2; k ≥ 2 adds the level-1 chain.</td><td>The editors of the next task (<code>library/&lt;domain&gt;/</code>).</td></tr>
+<tr><td><a href="#i8">8. Evolve strong, deploy cheap</a></td><td><span class="badge b-full">Yes, in the evolve phase</span></td><td>The evolve phase uses ideas 2 and 3 in their level-2 forms. The deploy phase freezes the harness, so level 2 stops there.</td><td>The evolve-phase editors; then the consolidation step.</td></tr>
+<tr><td><a href="#i3">3. /harness-step</a></td><td><span class="badge b-part">Only when wired</span></td><td>Add idea 2's reflector, and the editor line "read <code>library/INDEX.md</code>".</td><td>The editors, after the change.</td></tr>
+<tr><td><a href="#i2">2. Reflector + library</a></td><td><span class="badge b-loop">No, as designed</span></td><td>Its level-2 variant moves the library to the editors of idea 3.</td><td>As designed: the working agent, which makes it memory (C3). Variant: the editors.</td></tr>
+<tr><td><a href="#i1">1. Hook compiler</a></td><td><span class="badge b-one">No</span></td><td>It would need each mining round's editor to read the hook entries of earlier rounds.</td><td>—</td></tr>
+<tr><td>4, 5, 6, 7</td><td><span class="badge b-comp">No</span></td><td>Idea 4 is one step. Ideas 5, 6 and 7 are parts of a step.</td><td>—</td></tr>
+</table></div>
+<p>The cheapest way to see level 2 on disk is the demo of the released code (path A in <a href="#p9-decide">the decision guide</a>): it makes no model calls, and a test in the repository checks the level-2 path. The smallest version that you build yourself is <a href="#minimal">the minimal build</a> below. The paper measures the effect of level 2 with one ablation: without the library, scores fall 3.1 points on WorkBuddy-Bench and 1.8 on JobBench (Table 3).</p>
 
 <h2 id="minimal">The minimal build that shows both levels</h2>
 <p>The smallest project that shows both loops combines two ideas: idea 3 with two chained steps (sequential k = 2), and idea 2 rewired so that the reflector writes to a library that the <i>editors</i> of the next task read. Run it on two tasks of the same kind. Fig. R3 steps through it.</p>
@@ -252,6 +282,245 @@ td.c{text-align:center;color:var(--teal)}
 <div><b>Level-2 evidence</b>A task-2 editor note that names the task-1 entry, and the difference against the empty-library re-run.</div>
 <div><b>Limit</b>One task pair gives one contrast, with no noise estimate. The paper averages three runs per score; treat a single pair as a demonstration, not a measurement.</div>
 </div>
+
+<!-- ============ PROJECT 9 IN DEPTH ============ -->
+<h2 id="p9">Project 9 in depth: the released code as a level-2 engine</h2>
+<p class="sub">This part needs no Harness² background. It explains what the package does, shows where its code does level 2, lists its limits, and ends with a decision guide, a cost calculator and a build plan. The code facts come from <code>google-research/harness2</code> at commit <code>1cfe254</code> (13 Oct 2026). I read the code on 24 Oct 2026 and did not run it.</p>
+<div class="card key"><p><b>Project 9 in five sentences.</b> Harness² improves the files around an AI agent (its prompts, skills and scripts), not the model. Google released the method as a Python package, <code>harness2</code>. Project 9 uses that package as the engine: you write one adapter class that tells it how to list, run and read your tasks. The package then runs both levels of the method, and level 2 needs no extra work, because the package keeps one library per group of tasks and gives it to the editing sessions of every later task. The main limits: Linux only, OpenCode or Codex as the shipped agents, 4k agent runs per task, and a library that only grows and stays inside one run setting.</p></div>
+
+<h3 id="p9-terms">Ten terms, in the order the package uses them</h3>
+<div class="tw"><table>
+<tr><th>#</th><th>Term</th><th>Plain meaning</th><th>In the package</th></tr>
+<tr><td>1</td><td>Task</td><td>One job for the agent, with its input files. Example from the demo: "Sum every signed amount in ledger.csv. Return Total: with two decimal places."</td><td><code>tasks()</code>, <code>task_prompt()</code>, <code>task_files()</code></td></tr>
+<tr><td>2</td><td>Domain</td><td>A group of tasks of one kind, for example "accounting". Each domain has its own library.</td><td><code>domain_of()</code></td></tr>
+<tr><td>3</td><td>Executor</td><td>The agent that does the task.</td><td>OpenCode or Codex in the release; anything that your <code>execute()</code> starts</td></tr>
+<tr><td>4</td><td>Harness</td><td>The files that shape the executor: system prompt, guardrails, memory, tool guidance, subagents, skills, scripts and plugins (eight components).</td><td>A folder; <code>harness2/core/tree.py</code> validates it</td></tr>
+<tr><td>5</td><td>H₀</td><td>The starting harness. Every task starts from it again.</td><td><code>base_harness()</code></td></tr>
+<tr><td>6</td><td>Run</td><td>One execution of the task with one harness. A run leaves a trajectory (the log of actions and results) and a deliverable (the output).</td><td><code>execute()</code>, <code>trajectory()</code>, <code>deliverable_text()</code></td></tr>
+<tr><td>7</td><td>Improver</td><td>The model sessions that edit harness files. They never do the task. Four roles: editor (INV for how the agent works, DOM for domain knowledge), composer, selector, reflector.</td><td>Channel <code>claude_cli</code> or <code>opencode</code> (<code>harness2/core/spec.py</code>, <code>CHANNELS</code>)</td></tr>
+<tr><td>8</td><td>k</td><td>The budget per task: 4k executor runs and 3k editor and composer sessions.</td><td><code>--k</code>; <code>harness2/core/ledger.py</code></td></tr>
+<tr><td>9</td><td>Library</td><td>A folder per domain. Each entry is a harness that an earlier task adopted, with an <code>EXPERIENCE.md</code> file that holds one lesson.</td><td><code>harness2/core/library.py</code></td></tr>
+<tr><td>10</td><td>Level 1, level 2</td><td>Level 1: rounds of editing inside one task. Level 2: the library carries what one task learned to the editors of later tasks.</td><td><code>recursion.py</code>; <code>schedule.py</code> with <code>library.py</code></td></tr>
+</table></div>
+
+<h3 id="p9-split">What you write and what the package does</h3>
+<div class="tw"><table>
+<tr><th>You write</th><th>Details</th></tr>
+<tr><td>The adapter class</td><td>The methods <code>tasks</code>, <code>domain_of</code>, <code>task_prompt</code>, <code>task_files</code>, <code>execute</code>, <code>delivered</code>, <code>trajectory</code>, <code>deliverable_text</code>, <code>base_harness</code>, <code>validate_tree</code>, <code>score</code>, and optionally <code>deliverable_files</code> (<code>BenchmarkAdapter</code> in <code>harness2/core/spec.py</code>). Its docstring: "Implement these and the whole method works."</td></tr>
+<tr><td>A <code>BenchSpec</code></td><td>Name, runs folder, install mode, prompts, channels, and <code>leak_globs</code>: patterns for grader files (rubrics, tests, expected outputs). The evidence builder refuses to put a matching file in front of an improver (<code>assert_no_leak_paths</code> in <code>context.py</code>).</td></tr>
+<tr><td>A <code>BenchPrompts</code></td><td>A description of the work. It must not contain the words benchmark, evaluation, grader, rubric or score (<code>spec.py:121</code>): it describes the work, not its measurement.</td></tr>
+<tr><td>The H₀ folder</td><td>The starting harness, in the file layout of the substrate (OpenCode: <code>systemprompt.md</code>, <code>guardrails.md</code>, <code>LongTermMEMORY.md</code>, <code>tool_descriptions/tool_guidance.md</code>, <code>skills/</code>, <code>scripts/</code>; Codex: <code>AGENTS.md</code>, <code>.agents/skills/</code>, <code>.codex/hooks.json</code>).</td></tr>
+<tr><td><code>score</code> (optional for the method)</td><td>Your grader. The package calls it "only after selection committed". <code>None</code> means the judge failed, "which is not a zero". The method itself never reads a score.</td></tr>
+<tr><td>A short driver script</td><td>The <code>harness2</code> CLI accepts only <code>--bench jb</code>, <code>wb</code> or <code>lab</code> (<code>harness2/cli/_common.py:30</code>). For your own adapter, call <code>run_domain</code> or <code>run_sweep</code> from Python, as <code>harness2/cli/demo.py</code> does.</td></tr>
+</table></div>
+<p>The package does the rest: the task order, the base runs, the editors, the probe runs, the composers, the selector, the reflector, the library, the budget ledger, resume after a crash, and the reports.</p>
+<div class="fig"><div class="sv"><svg data-fig="f9" role="img" aria-label="Adapter for the released harness2 code"></svg></div></div>
+<p class="src">Fig. 9 — You write the grey boxes on the left. The package supplies the method. The executor is whatever your <code>execute()</code> starts.</p>
+
+<h3 id="p9-task">One task, step by step</h3>
+<p>Fig. P1 follows one task through the package in sequential mode at k = 2. The example is the package's own demo task <code>ledger-1</code>: a CSV file with the amounts 100.25, −20.10 and 5.00. The starting harness has a script that adds only the positive amounts, which is the error the method must find. No grader tells the method that the answer is wrong. The editors see it in the evidence.</p>
+<div class="fig" id="a9t">
+<div class="sv"><svg role="img" aria-label="Animated walk through one task inside the harness2 package"></svg></div>
+<div class="ctrl"><button data-a="reset">⟲ Reset</button><button data-a="prev">◀ Back</button><button data-a="play">▶ Play</button><button data-a="next">Next ▶</button><span class="ct"></span></div>
+<p class="cap" aria-live="polite"></p>
+</div>
+<p class="src">Fig. P1 — One task in sequential mode, k = 2. Teal: executor runs. Orange: editors. Blue: probe runs. Purple: composers. Yellow: selector. Green: reflector and library. The dashed arrows are the library: it reaches every editor and composer, never the executor. Source: <code>run_task</code> and <code>_run_one_mode</code> in <code>harness2/core/schedule.py</code>; <code>run_sequential</code> in <code>recursion.py</code>; <code>selection.py</code>; the demo in <code>harness2/demo.py</code>.</p>
+
+<h3 id="p9-stream">From task to task: level 2</h3>
+<p>Fig. P2 shows three tasks of one domain in stream order. Watch two things. First, every task starts from the same H₀: the package does not install the harness of the earlier task. Second, the library changes only when the reflector writes a supported lesson. Task 2 shows the case where it does not.</p>
+<div class="fig" id="a9s">
+<div class="sv"><svg role="img" aria-label="Animated stream of three tasks showing the library across tasks"></svg></div>
+<div class="ctrl"><button data-a="reset">⟲ Reset</button><button data-a="prev">◀ Back</button><button data-a="play">▶ Play</button><button data-a="next">Next ▶</button><span class="ct"></span></div>
+<p class="cap" aria-live="polite"></p>
+</div>
+<p class="src">Fig. P2 — Level 2 over three tasks of one domain. Task 2's NO_ENTRY is an illustration of the rule; the demo itself has two tasks, and both write a lesson. Source: <code>run_domain</code> in <code>harness2/core/schedule.py</code>; <code>Library</code> in <code>library.py</code>; Prompt 6 in <code>prompts.py</code>.</p>
+
+<h3 id="p9-proof">Where the code does level 2</h3>
+<p>Level 2 needs eight things to be true. Each one is a line of code that you can read.</p>
+<div class="tw"><table>
+<tr><th>#</th><th>What must be true</th><th>The code that does it</th><th>Where</th></tr>
+<tr><td>1</td><td>Each task starts from H₀</td><td><code>run_task</code> reads <code>adapter.base_harness()</code> again for every task</td><td><code>schedule.py:617</code></td></tr>
+<tr><td>2</td><td>A task sees only entries of earlier tasks</td><td><code>lib.retain(task_ids[: i - 1])</code> before each task</td><td><code>schedule.py:701</code></td></tr>
+<tr><td>3</td><td>The improver gets the library</td><td><code>lib_dir = mode_lib.context_dir()</code>, passed to every editor and composer stage</td><td><code>schedule.py:499</code>; <code>recursion.py</code></td></tr>
+<tr><td>4</td><td>The library lands in the editor's evidence folder</td><td><code>shutil.copytree(library_dir, dest / "library")</code></td><td><code>context.py:164</code></td></tr>
+<tr><td>5</td><td>The executor does not get it</td><td><code>execute()</code> receives only the harness folder; the evidence builder is the only path to the library</td><td><code>_roll</code> in <code>recursion.py</code></td></tr>
+<tr><td>6</td><td>A copied fact is a hypothesis</td><td>Prompt text: "an earlier task's mapping or threshold is a hypothesis here, not a fact"</td><td><code>prompts.py:324</code></td></tr>
+<tr><td>7</td><td>Only a supported lesson is stored</td><td><code>mode_lib.add(...)</code> runs only if the lesson has a cue, a lesson and evidence</td><td><code>schedule.py:555</code>; <code>library.py:120</code></td></tr>
+<tr><td>8</td><td>The index matches the disk</td><td><code>rebuild_index</code> writes <code>INDEX.md</code> with one block per entry</td><td><code>library.py:154</code></td></tr>
+</table></div>
+<p>Two tests in the repository check this path. <code>test_complete_evidence_and_library_prefix</code> runs the two-task demo and asserts that the evidence folder of task <code>ledger-2</code>'s first editor, <code>demo-oc-seq2/ledger-2/context/inv1/library/harnesses/</code>, holds exactly <code>ledger-1</code> (<code>tests/test_workflow.py:126–127</code>). <code>test_no_entry_stays_out_of_library_on_resume</code> asserts that NO_ENTRY leaves the library empty (<code>tests/test_workflow.py:187</code>).</p>
+<p>The library on disk (<code>harness2/core/library.py</code>, <code>harness2/cli/_common.py</code>):</p>
+<pre><code>&lt;runs_root&gt;/library/&lt;bench&gt;/k&lt;k&gt;-&lt;substrate&gt;[-s&lt;seed&gt;]/
+  agg/  seq/                           # one library per mode
+    &lt;domain&gt;/
+      INDEX.md                         # rebuilt from disk after each add
+      harnesses/&lt;task&gt;/harness/...     # the FULL adopted tree, not a summary
+      harnesses/&lt;task&gt;/EXPERIENCE.md   # why it was picked, edit rows, one lesson</code></pre>
+<p>What an editor finds in its evidence folder (<code>harness2/core/context.py</code>). Only the parts that exist are listed to it.</p>
+<pre><code>context/task.md                  the task as the agent received it
+context/source/                  the input files, minus the leak_globs matches
+context/rollouts/&lt;label&gt;.md      full trajectories of the runs so far
+context/deliverables/&lt;label&gt;/    what each run produced
+context/harness/                 the harness to edit; the editor edits it in place
+context/pool/&lt;label&gt;/            candidates with their diffs (composers)
+context/decisions/               notes of earlier edits and compositions
+context/library/INDEX.md         earlier tasks in this domain (from the 2nd task)</code></pre>
+<p>The <code>EXPERIENCE.md</code> that the demo would write for <code>ledger-1</code>. The layout is from <code>Library.add</code>; the text is from the scripted reflector and selector in <code>harness2/demo.py</code>. Two values are placeholders, because they depend on the selector's pick and on the harness census.</p>
+<pre><code># ledger-1
+
+- adopted: `c1`  (run `demo-oc-seq2/ledger-1/c1`)       # or c2: the selector's pick
+- components: &lt;census of the tree&gt;; &lt;n&gt; always-on chars
+
+## Why this was chosen
+The signed total matches the source ledger.
+
+## What each edit did
+component: scripts/summarize.py
+candidates: inv1
+change: dropped the positive-only filter from the amount sum
+observed: the probe total included the credits the base run omitted
+verdict: helped
+
+## Transferable lesson
+- **cue**: When a ledger includes credits and debits
+- **lesson**: Include both signs when summing in scripts/summarize.py.
+- **evidence**: The scripts/summarize.py row -- removing the positive-only filter changed the probe total to include the credits omitted by the base trajectory.
+- **confidence**: high for this observed arithmetic contrast</code></pre>
+
+<h3 id="p9-short">Where it falls short</h3>
+<p>Project 9 implements both levels. The limits below decide whether it fits your tasks. Each row gives the evidence, what it means for you, and what to do.</p>
+<div class="tw"><table>
+<tr><th>#</th><th>Limit</th><th>Evidence</th><th>What it means for you</th><th>What to do</th></tr>
+<tr><td>1</td><td>The level-1 chain is off by default</td><td><code>MODES_DEFAULT = "parallel"</code> (<code>harness2/cli/_common.py:34</code>). Parallel mode is one generation of width k (paper §2.2.2).</td><td>A default run shows level 2, but not a level-1 chain.</td><td>Use sequential mode with k ≥ 2.</td></tr>
+<tr><td>2</td><td>Linux only</td><td>The README: "Use Linux, Python 3.12, and uv". <code>_write_summary</code> runs <code>import fcntl</code> (<code>schedule.py:294</code>), a module that Windows does not have.</td><td>On native Windows, every task ends with an exception when it writes its summary. The demo fails the same way.</td><td>Use WSL 2, a Linux VM or a container.</td></tr>
+<tr><td>3</td><td>No Claude Code executor ships</td><td>The substrates are <code>harness2/substrate/opencode.py</code> and <code>codex.py</code> only. But the core uses only <code>substrate.name</code> and <code>substrate.surface()</code>, and the demo runs plain Python inside its own <code>execute()</code>.</td><td>You write the executor for Claude Code, inside your adapter.</td><td>Path C below. Reuse the Codex file layout and map it onto <code>CLAUDE.md</code> and <code>.claude/</code> in <code>execute()</code>. This is my reading; it is not tested.</td></tr>
+<tr><td>4</td><td>The CLI knows three benchmarks</td><td><code>BENCHES = ("jb", "wb", "lab")</code> (<code>harness2/cli/_common.py:30</code>); <code>harness2-judge</code> and <code>harness2-report</code> use the same list.</td><td>Your adapter cannot use the <code>harness2</code> command.</td><td>Write a driver of about 40 lines, as <code>harness2/cli/demo.py</code> does (sketch in the build plan).</td></tr>
+<tr><td>5</td><td>The library stays inside one run setting</td><td>One library root per benchmark, substrate, k and seed (<code>library_root_for</code>); one library per mode (<code>_resolve_libraries</code> refuses to share one); one folder per domain. The CLI passes <code>tag=""</code> (<code>run_sweep.py:168</code>).</td><td>What a k = 1 run learned does not reach a k = 2 run, another domain, or a new <code>HARNESS2_RUNS_DIR</code>. The paper found that a library from another benchmark helps (Fig. 7 right: +0.6, +0.5, +2.9 on Code, Web, Office); the CLI cannot do this.</td><td>From Python, <code>library.root_for(..., tag="shared")</code> returns one root for every k ("an explicit <code>tag</code> opts into sharing one library across runs").</td></tr>
+<tr><td>6</td><td>NO_ENTRY stores nothing</td><td><code>schedule.py:555</code>, <code>library.py:120</code>; the test at <code>tests/test_workflow.py:187</code>.</td><td>The paper's update (Eq. 4) takes the adopted harness. In the code, a task with no supported lesson leaves no example harness either. A strict reflector gives a small library.</td><td>Read <code>reflection/&lt;mode&gt;&lt;k&gt;/edits.md</code> of those tasks: the reflector's edit rows are written there when it returns an <code>&lt;edits&gt;</code> block, also when no lesson is stored (<code>_distil</code> in <code>selection.py</code>).</td></tr>
+<tr><td>7</td><td>The library only grows</td><td><code>library.py</code> has no merge, retire or ranking step. Appendix G lists library management as future work.</td><td>Each editor reads an <code>INDEX.md</code> with one block per earlier task of the domain. The context cost grows with the length of the domain's stream.</td><td>Cap tasks per domain (<code>--max-tasks</code> caps per domain), or split a large domain into smaller ones.</td></tr>
+<tr><td>8</td><td>No switch turns the library off</td><td>The CLI builds a library root for every run (<code>run_sweep.py:148</code>), and <code>run_domain</code> creates one library per mode (<code>schedule.py:686</code>). I found no flag that disables it.</td><td>You cannot repeat the paper's library ablation (Table 3) on your tasks from the CLI, so you cannot measure what level 2 gives you.</td><td>Call <code>run_task(..., libraries=None)</code> for the same tasks into a separate runs folder, and compare the judged scores.</td></tr>
+<tr><td>9</td><td>Selection never returns the base</td><td><code>selection_pool</code> holds only the k finals: "there is no abstention by construction" (<code>selection.py:93</code>). At k = 1, <code>trivial_selection</code> delivers the one final with no selector session (<code>schedule.py:514</code>).</td><td>If every refined harness is worse than H₀, the package still delivers a refined output. This differs from the paper's Prompt 5, which accepts a base pick, and from <a href="#minimal">the minimal build</a>, whose selector may pick a base run.</td><td>Score the base runs too: <code>harness2-judge --bases</code> writes <code>base_judged.json</code> for the shipped benchmarks; for your adapter, call your <code>score()</code> on the base run folders.</td></tr>
+<tr><td>10</td><td>All permissions and open network by default</td><td>The <code>claude_cli</code> editor runs <code>claude --dangerously-skip-permissions</code> (<code>proposer.py:216</code>). Executor network access is unrestricted and Codex runs with its sandbox disabled. A Codex run downloaded its JobBench rubric without an instruction to do so (<code>docs/EXPERIMENTS.md</code>).</td><td>An editor or the executor can change files outside the task, or read answers online.</td><td>Run in a container or VM with no secrets. Block the hosts that serve answers. Put every answer file in <code>leak_globs</code>.</td></tr>
+<tr><td>11</td><td>The improver does not change itself</td><td>The prompts and the editor model stay fixed; only the library changes (paper §2).</td><td>Level 2 improves what the editors read, not how they edit. A weak editor prompt stays weak for the whole stream.</td><td>Change prompts between runs, by hand, with a separate runs folder.</td></tr>
+<tr><td>12</td><td>The demo proves the path, not the learning</td><td><code>DemoProposer</code> edits by a fixed script and does not read the library (<code>harness2/demo.py</code>).</td><td>The demo shows that entry 1 reaches task 2's editors. It cannot show that an editor uses it.</td><td>In a model-backed run, look for editor notes that name a library entry (<code>context/decisions/</code>, and the stage notes in <code>summary.json</code>).</td></tr>
+</table></div>
+
+<h3 id="p9-decide">Decide: should you build project 9?</h3>
+<p>Answer the questions in Fig. P3 from left to right. Every path starts with the demo, because it costs nothing and proves that the setup works.</p>
+<div class="fig"><div class="sv"><svg data-fig="d9" role="img" aria-label="Decision flow for project 9"></svg></div></div>
+<p class="src">Fig. P3 — The decision flow. "4k times" is the number of executor runs per task at budget k.</p>
+<div class="tw"><table>
+<tr><th>Path</th><th>When</th><th>You write</th><th>Per task</th><th>What you get</th></tr>
+<tr><td>A. Demo</td><td>Always, first</td><td>Nothing</td><td>No model calls; plain Python runs</td><td>Level 2 on disk: task 2's editors get task 1's entry</td></tr>
+<tr><td>B. Adapter, OpenCode or Codex executor</td><td>Linux or WSL; the executor need not be Claude Code</td><td>Adapter, <code>BenchSpec</code>, H₀ folder, driver</td><td>4k runs, 3k sessions, 1 reflector, 1 selector if k &gt; 1</td><td>Both levels, as published. The editors can still be Claude, through the <code>claude_cli</code> channel.</td></tr>
+<tr><td>C. Adapter, Claude Code executor</td><td>The agent under test must be Claude Code</td><td>Path B, plus an <code>execute()</code> that runs <code>claude -p</code> and a <code>trajectory()</code> that reads its stream</td><td>As path B</td><td>Both levels. The executor part is yours and untested by the authors.</td></tr>
+<tr><td>D. Build it by hand</td><td>No Linux; a task with side effects; or you want no Python package</td><td>Prompts, scripts and a library folder (<a href="#minimal">minimal build</a> or <a href="#i10">idea 10</a>)</td><td>8 runs at k = 2</td><td>Both levels, by your own code. You also own every check listed above.</td></tr>
+</table></div>
+<p>The calculator gives the run and session counts for a planned stream. It uses the package's own rules: k base runs per task are shared by both modes; each mode then adds 3k runs and 3k counted sessions; a selector runs only when k &gt; 1; a reflector runs once per mode after a successful selection.</p>
+<div class="card" id="calc">
+<div class="calc-in">
+<label for="cN">Tasks in the stream (N)<input type="number" id="cN" min="1" max="100000" value="10"></label>
+<label for="cK">Budget k<input type="number" id="cK" min="1" max="20" value="1"></label>
+<label for="cM">Mode<select id="cM"><option value="agg">parallel (CLI default)</option><option value="seq">sequential</option><option value="both">both</option></select></label>
+<label for="cT">Minutes per executor run<input type="number" id="cT" min="0" max="600" value="10"></label>
+</div>
+<div class="facts" id="cOut" aria-live="polite"></div>
+<p class="src">These are lower bounds. An invalid edit gets one retry (<code>STAGE_ATTEMPTS = 2</code>), and a failed model call one more attempt (<code>TRANSPORT_ATTEMPTS = 2</code>). The hours assume one run at a time; the package runs two at a time inside a phase (<code>PHASE_WIDTH = 2</code>) and can run domains side by side (<code>--workers</code>). A library-off comparison (limit 8) doubles the count for the tasks you compare.</p>
+</div>
+
+<h3 id="p9-build">Build plan</h3>
+<div class="card warn"><p><b>Warning before step 1.</b> The editors run with all permissions, and the executor has open network access (limit 10). Do every step in a container or VM that holds no secrets.</p></div>
+<ol>
+<li><b>Set up Linux.</b> Use WSL 2 or a Linux VM with Python 3.12 and <code>uv</code>. Clone <code>google-research/harness2</code>.</li>
+<li><b>Run the demo (path A).</b> Run <code>uv venv --python 3.12 .venv</code>, <code>source .venv/bin/activate</code>, <code>uv pip install -e '.[render]'</code>, then <code>harness2-demo --output runs/demo --k 2</code>. Check that <code>runs/demo/demo.json</code> reports 2 tasks done and 0 failed. Then open <code>runs/demo/runs/demo-oc-seq2/ledger-2/context/inv1/library/INDEX.md</code>: it must list <code>harnesses/ledger-1/</code>. That file is level 2.</li>
+<li><b>Copy the demo adapter.</b> <code>harness2/demo.py</code> is 163 lines and implements every required method for a toy task. Start your adapter from it.</li>
+<li><b>Write H₀.</b> Put the harness that your agent uses today into a folder, in the layout of the substrate you chose. Keep the always-on files under the cap: 24,000 characters for the OpenCode layout, 8,000 for the Codex layout (<code>harness2/substrate/opencode.py</code>, <code>codex.py</code>).</li>
+<li><b>Write the executor part.</b> <code>execute()</code> must be idempotent by <code>run_id</code> (<code>spec.py</code> docstring). <code>trajectory()</code> must return the <code>[ACTION]</code> / <code>[OBSERVATION]</code> / <code>[ERROR]</code> grammar. <code>validate_tree()</code> must raise <code>ValueError</code> with a clear message, because the message goes back to the editor as retry feedback.</li>
+<li><b>Fence the answers.</b> List every rubric, test and expected output in <code>leak_globs</code>. Describe the work in <code>BenchPrompts</code> without the five banned words.</li>
+<li><b>Run a small stream.</b> Pick 3 tasks of one domain. Run sequential mode at k = 1 first: 4 runs, 3 sessions and 1 reflector per task. Read every <code>EXPERIENCE.md</code> before you spend more.</li>
+<li><b>Check level 2.</b> Open task 2's <code>context/inv1/library/</code> and the editor notes. A note that names a library entry is the level-2 evidence of the <a href="#rec">recursion check table</a>.</li>
+<li><b>Measure it.</b> Run the same tasks again with <code>libraries=None</code> into a separate runs folder, score both, and compare. Then raise k to 2 in sequential mode to add the level-1 chain.</li>
+</ol>
+<p>The adapter skeleton (method bodies omitted). Copy the bodies from <code>harness2/demo.py</code>.</p>
+<pre><code># mytasks.py  (skeleton)
+from pathlib import Path
+
+from harness2.core.spec import BenchPrompts, BenchSpec, ChannelSpec
+
+
+class MyTasksAdapter:
+    spec: BenchSpec   # leak_globs=("grader/**", "expected/**")
+                      # channels: ChannelSpec("claude_cli", "&lt;bare model id&gt;")
+    substrate = None  # OpencodeSubstrate(), CodexSubstrate(), or path C below
+
+    def tasks(self, split="all") -&gt; list[str]: ...
+    def domain_of(self, task_id: str) -&gt; str: ...
+    def task_prompt(self, task_id: str) -&gt; str: ...
+    def task_files(self, task_id: str) -&gt; Path | None: ...
+    def execute(self, task_id, harness_dir, run_id, *, timeout=None) -&gt; Path: ...
+    def delivered(self, run_dir: Path) -&gt; bool: ...
+    def trajectory(self, run_dir: Path, *, obs_trunc: int) -&gt; str: ...
+    def deliverable_text(self, run_dir: Path) -&gt; str: ...
+    def base_harness(self) -&gt; Path: ...
+    def validate_tree(self, tree: dict[str, str]) -&gt; None: ...
+    def score(self, run_dir: Path, task_id: str) -&gt; dict | None: ...</code></pre>
+<p>The driver, modelled on <code>harness2/cli/demo.py</code>. It runs one domain in stream order and threads the library forward.</p>
+<pre><code># run_mine.py
+from pathlib import Path
+
+from harness2.core.proposer import Proposer
+from harness2.core.schedule import run_domain
+from mytasks import MyTasksAdapter
+
+adapter = MyTasksAdapter(Path("runs/mine"))
+prop = Proposer(adapter.spec.channels["proposer"])
+tasks = adapter.tasks()[:3]                    # 3 tasks of one domain
+result = run_domain(adapter.domain_of(tasks[0]), tasks, 1,
+                    adapter=adapter, prop=prop,
+                    runs_root=adapter.spec.runs_root,
+                    library_root=Path("runs/mine/library/k1"),
+                    modes=("seq",))
+print(result["done"], "done,", result["failed"], "failed")</code></pre>
+<p>Path C, an untested sketch: a Claude Code executor inside the adapter. It reuses the Codex file layout, because that layout has one always-on file, a skills folder and a hooks file, as Claude Code does. Check the hook JSON format and the CLI flags against your installed versions.</p>
+<pre><code># path C sketch (untested)
+import json
+import shutil
+import subprocess
+from pathlib import Path
+
+from harness2.substrate.codex import CODEX_SURFACE
+
+
+class ClaudeCodeLayout:          # the core needs only .name and .surface()
+    name = "cc"
+
+    def surface(self):
+        return CODEX_SURFACE     # AGENTS.md, .agents/skills/, .codex/hooks.json
+
+
+def execute(self, task_id, harness_dir, run_id, *, timeout=None):
+    run_dir = self.root / "executions" / run_id
+    stream = run_dir / "stream.jsonl"
+    if stream.is_file():                       # idempotent by run_id
+        return run_dir
+    ws = run_dir / "workspace"
+    shutil.copytree(self.task_files(task_id), ws)
+    h = Path(harness_dir or self.base_harness())
+    shutil.copy(h / "AGENTS.md", ws / "CLAUDE.md")
+    for src, dst in ((".agents/skills", ".claude/skills"), ("scripts", "scripts")):
+        if (h / src).is_dir():
+            shutil.copytree(h / src, ws / dst)
+    if (h / ".codex/hooks.json").is_file():    # map to the "hooks" key
+        (ws / ".claude").mkdir(exist_ok=True)
+        hooks = json.loads((h / ".codex/hooks.json").read_text())
+        (ws / ".claude/settings.json").write_text(json.dumps(hooks))
+    with open(stream, "w") as out:
+        subprocess.run(["claude", "-p", self.task_prompt(task_id),
+                        "--output-format", "stream-json", "--verbose",
+                        "--dangerously-skip-permissions"],   # sandbox only
+                       cwd=ws, stdout=out, timeout=timeout or 3600)
+    return run_dir</code></pre>
+<p>The matching <code>trajectory()</code> reads <code>stream.jsonl</code> and writes one <code>[ACTION]</code> line per tool call and one <code>[OBSERVATION]</code> or <code>[ERROR]</code> line per tool result (the <code>is_error</code> field), with each observation cut at <code>obs_trunc</code> characters. The parsing loop of idea 6's <code>metrics.py</code> is a starting point.</p>
 
 <!-- ============ IDEA 1 ============ -->
 <h2 id="i1">1. Hook compiler from repeated failures</h2>
@@ -661,46 +930,14 @@ claude -p "$TASK" --model sonnet  # deploy phase, in frozen/</code></pre>
 
 <!-- ============ IDEA 9 ============ -->
 <h2 id="i9">9. An adapter for the released code</h2>
-<p class="rec"><span class="badge b-full">Full, as published</span> <b>Is it recursive?</b> Yes, both levels, as published. Sequential mode chains k passes: <code>current_harness = comp.tree</code> at the end of each round (<code>harness2/core/recursion.py</code>). The library folder is copied into every editor's context (<code>harness2/core/context.py</code>). This is the reference against which the other projects are ranked.</p>
-<p><b>What it is.</b> Use the released <code>harness2</code> package as the engine, with your own task type. You write one adapter class. The package then gives you the full method: parallel and sequential recursion, the ledger, the library, the blind selector and the reports.</p>
-<h3>The mapping onto Harness²</h3>
-<div class="tw"><table>
-<tr><th>Package piece</th><th>What you supply</th></tr>
-<tr><td><code>BenchmarkAdapter</code> (<code>harness2/core/spec.py</code>)</td><td>The methods <code>tasks</code>, <code>domain_of</code>, <code>task_prompt</code>, <code>task_files</code>, <code>execute</code>, <code>delivered</code>, <code>trajectory</code>, <code>deliverable_text</code>, <code>base_harness</code>, <code>validate_tree</code>, <code>score</code> (and optionally <code>deliverable_files</code>). The docstring: "Implement these and the whole method works."</td></tr>
-<tr><td><code>BenchSpec</code></td><td>Name, runs folder, install mode, prompts, channels, and <code>leak_globs</code>: patterns for grader files (rubrics, tests, expected outputs). The context builder asserts that none of them reach the editors (<code>harness2/core/context.py</code>).</td></tr>
-<tr><td><code>score</code></td><td>Your grader. The package calls it "only after selection committed"; <code>None</code> means the judge failed, "which is not a zero".</td></tr>
-<tr><td>Substrate (executor)</td><td>OpenCode or Codex. A Claude Code executor needs a new substrate (protocol in <code>harness2/substrate/base.py</code>) that maps c1–c8 onto <code>CLAUDE.md</code>, <code>.claude/agents</code>, <code>.claude/skills</code>, scripts and hooks.</td></tr>
-<tr><td>Editor channel</td><td><code>claude_cli</code> or <code>opencode</code> (<code>harness2/core/spec.py</code>, <code>CHANNELS</code>).</td></tr>
-</table></div>
-<div class="fig"><div class="sv"><svg data-fig="f9" role="img" aria-label="Adapter for the released harness2 code"></svg></div></div>
-<p class="src">Fig. 9 — You write the grey boxes on the left. The package supplies the method; the executor is OpenCode or Codex unless you add a substrate.</p>
-<h3>The build</h3>
-<pre><code># harness2/benchmarks/mytasks.py  (skeleton; method bodies omitted)
-from pathlib import Path
-
-from harness2.core.spec import BenchSpec
-
-
-class MyTasksAdapter:
-    spec: BenchSpec  # leak_globs=("grader/**", "expected/**")
-    substrate = None  # an OpencodeSubstrate or a CodexSubstrate
-
-    def tasks(self, split="all") -&gt; list[str]: ...
-    def domain_of(self, task_id: str) -&gt; str: ...
-    def task_prompt(self, task_id: str) -&gt; str: ...
-    def task_files(self, task_id: str) -&gt; Path | None: ...
-    def execute(self, task_id, harness_dir, run_id, *, timeout=None): ...
-    def delivered(self, run_dir: Path) -&gt; bool: ...
-    def trajectory(self, run_dir: Path, *, obs_trunc: int) -&gt; str: ...
-    def deliverable_text(self, run_dir: Path) -&gt; str: ...
-    def base_harness(self) -&gt; Path: ...
-    def validate_tree(self, tree: dict[str, str]) -&gt; None: ...
-    def score(self, run_dir: Path, task_id: str) -&gt; dict | None: ...</code></pre>
+<p class="rec"><span class="badge b-full">Full, as published</span> <b>Is it recursive?</b> Yes, both levels are implemented. Level 2 runs in both modes and at every k: the library folder is copied into the evidence folder of every editor and composer (<code>harness2/core/context.py:164</code>). The level-1 chain runs only in sequential mode with k ≥ 2: <code>current_harness = comp.tree</code> at the end of each round (<code>harness2/core/recursion.py:562</code>). The CLI default is parallel mode (<code>harness2/cli/_common.py:34</code>). This is the reference against which the other projects are ranked.</p>
+<p><b>What it is.</b> Use the released <code>harness2</code> package as the engine, with your own task type. You write one adapter class and a short driver script. The package then gives you the full method: parallel and sequential recursion, the ledger, the library, the blind selector and the reports.</p>
+<div class="card key"><p><b>Full walkthrough.</b> <a href="#p9">Project 9 in depth</a> explains this project for a reader who is new to Harness²: ten terms, what you write, two step-through animations (one task, then three tasks), the eight code lines that do level 2, twelve limits, a decision guide with a cost calculator, and a build plan with code sketches.</p></div>
 <div class="facts">
-<div><b>Cost</b>4k executor runs and 3k editor sessions per task, plus a selector and a reflector. API spend for both the executor and the editors.</div>
-<div><b>Evidence</b>This is the code that produced the paper's tables, so the method runs exactly as published.</div>
-<div><b>Risk</b>On Windows it needs WSL. The <code>claude_cli</code> channel runs <code>claude --dangerously-skip-permissions -p</code>: run it only in a sandbox (a container or VM with no secrets). The README refers to a <code>.env.example</code> that the repository does not contain.</div>
-<div><b>First step</b>In WSL, run the package's demo on its own benchmark first, so you know the setup works before you write an adapter.</div>
+<div><b>Cost</b>Per task and mode: 4k executor runs and 3k editor and composer sessions, plus 1 reflector, plus 1 selector when k &gt; 1. At k = 1 no selector session runs (<code>trivial_selection</code>). API spend for both the executor and the improver.</div>
+<div><b>Evidence</b>The release of the paper's authors. Its tests check the level-2 path on disk (<code>tests/test_workflow.py:108–127</code>). Paper: without the library, −3.1 on WorkBuddy-Bench and −1.8 on JobBench (Table 3).</div>
+<div><b>Risk</b>Linux only (WSL on Windows). The <code>claude_cli</code> channel runs <code>claude --dangerously-skip-permissions -p</code>: run it only in a sandbox (a container or VM with no secrets). The README refers to a <code>.env.example</code> that the repository does not contain.</div>
+<div><b>First step</b>In WSL, run <code>harness2-demo --output runs/demo --k 2</code> and open task 2's <code>context/inv1/library/INDEX.md</code> (<a href="#p9-build">build plan</a>, step 2).</div>
 </div>
 
 <!-- ============ IDEA 10 ============ -->
@@ -744,7 +981,7 @@ class MyTasksAdapter:
 <h2 id="sources">Sources</h2>
 <ul>
 <li>Paper: Xu et al., Harness²: Recursive Agent Harnessing for an Open World, arXiv:2610.14224v1, 9 Oct 2026. Tables 1–3, 5, 6; Figs. 7, 9, 10, 14; Prompts 1, 3, 5, 6; Appendices G, H. <a href="https://arxiv.org/pdf/2610.14224">arxiv.org/pdf/2610.14224</a></li>
-<li>Code: <a href="https://github.com/google-research/harness2">github.com/google-research/harness2</a>, read without running it: <code>harness2/core/spec.py</code>, <code>ledger.py</code>, <code>context.py</code>, <code>proposer.py</code>, <code>report.py</code>, <code>prompts.py</code>; <code>harness2/substrate/</code>.</li>
+<li>Code: <a href="https://github.com/google-research/harness2">github.com/google-research/harness2</a>, read without running it: <code>harness2/core/spec.py</code>, <code>ledger.py</code>, <code>context.py</code>, <code>proposer.py</code>, <code>report.py</code>, <code>prompts.py</code>; <code>harness2/substrate/</code>. For <a href="#p9">Project 9 in depth</a>, commit <code>1cfe254</code> (13 Oct 2026), read on 24 Oct 2026: also <code>harness2/core/schedule.py</code>, <code>recursion.py</code>, <code>library.py</code>, <code>selection.py</code>, <code>tree.py</code>, <code>harness2/demo.py</code>, <code>harness2/cli/_common.py</code>, <code>run_sweep.py</code>, <code>demo.py</code>, <code>harness2/config.py</code>, <code>tests/test_workflow.py</code>, <code>README.md</code> and <code>docs/EXPERIMENTS.md</code>. Line numbers refer to that commit.</li>
 <li>Theory references (T1.8, T2.2, T3, T4, T5.4, T6.1): the Theory tab of <a href="harness2-learn.html#theory">Learn Harness²</a>.</li>
 <li>Claude Code features used in the snippets: hooks (<code>PreToolUse</code>, <code>SessionStart</code>, <code>SessionEnd</code>; exit code 2 blocks a tool call), skills, subagents, and headless mode (<code>claude -p</code>, <code>--output-format stream-json</code>, <code>--model</code>, <code>--allowedTools</code>, <code>--permission-mode</code>). Check the flags against your installed version.</li>
 </ul>
@@ -892,7 +1129,7 @@ var FIG={
   ['y',15,95,130,'ext',['Your task type','inputs + grader']],
   ['ad',175,95,140,'ext',['Your adapter','tasks · execute ·','trajectory · score']],
   ['co',345,25,170,'comp',['harness2 core','recursion · ledger','library · selection']],
-  ['su',345,165,170,'ref',['Substrate','OpenCode or Codex','(executor)']],
+  ['su',345,165,170,'ref',['Executor','your execute(): OpenCode,','Codex or claude -p']],
   ['ed',545,25,150,'prop',['Editors via the','claude_cli channel','Prompts 1, 3, 5, 6']],
   ['sb',545,165,150,'ext',['Sandbox','WSL, container,','no secrets']],
   ['rp',725,95,120,'refl',['Reports','+ library']]],
@@ -916,10 +1153,62 @@ var FIG={
   ['i10',665,60,175,'refl',['10. Domain harness','full stream']],
   ['i8',665,170,175,'ref',['8. Evolve strong,','deploy cheap']],
   ['i9',440,255,175,'ext',['9. Released code','alternative engine']]],
-  e:[['i7','i3'],['i2','i3'],['i5','i3'],['i7','i6'],['i3','i10'],['i6','i8'],['i9','i10',{dash:1,d:'M615 278 H850 V83 H843'}]]}
+  e:[['i7','i3'],['i2','i3'],['i5','i3'],['i7','i6'],['i3','i10'],['i6','i8'],['i9','i10',{dash:1,d:'M615 278 H850 V83 H843'}]]},
+ a9t:{w:860,h:330,t:[[15,22,'ONE TASK INSIDE THE PACKAGE — SEQUENTIAL MODE, k = 2 (DEMO TASK ledger-1)','pt'],[465,119,'level 1: round 2 edits c1, not H₀','el'],[155,243,'for the next task','el']],n:[
+  ['h0',15,40,120,'ext',['H₀','base_harness()','read for every task']],
+  ['b',160,40,120,'ref',['Base runs','base1, base2','print 105.25']],
+  ['r1',305,40,150,'prop',['Round 1','INV1 + DOM1 edit','a copy of H₀']],
+  ['p1',480,40,120,'probe',['Probe runs','inv1, dom1','print 85.15']],
+  ['c1',625,40,220,'comp',['Composer c1','keeps, revises or drops edits','checkpoint c1 runs once']],
+  ['lib',15,150,265,'refl',['Library (read only)','copied into context/library/','of every editor and composer']],
+  ['r2',305,150,150,'prop',['Round 2','INV2 + DOM2 edit c1','read every earlier run']],
+  ['p2',480,150,120,'probe',['Probe runs','inv2, dom2']],
+  ['c2',625,150,220,'comp',['Composer c2','checkpoint c2 runs once']],
+  ['ad',15,255,265,'refl',['Library.add','only with cue, lesson, evidence','harness tree + EXPERIENCE.md']],
+  ['rf',305,255,295,'refl',['Reflector (Prompt 6)','one verdict row per changed component','one lesson, or NO_ENTRY']],
+  ['se',625,255,220,'sel',['Selector (k > 1 only)','blind pick: c1 or c2']]],
+  e:[['h0','b'],['b','r1'],['r1','p1'],['p1','c1'],['c1','r2',{d:'M735 101 V125 H380 V146'}],['r2','p2'],['p2','c2'],['c2','se',{d:'M735 196 V253'}],['se','rf'],['rf','ad'],['lib','r1',{dash:1,d:'M280 170 H292 V71 H303'}],['lib','r2',{dash:1}],['ad','lib',{dash:1}]],
+  steps:[[['h0'],[],'<b>The task starts from H₀.</b> <code>run_task</code> reads <code>adapter.base_harness()</code> again for every task (<code>schedule.py:617</code>). In the demo, H₀ holds <code>scripts/summarize.py</code>, which adds only the amounts above zero.'],
+   [['b'],[0],'<b>Base runs.</b> The executor runs the task k = 2 times with H₀ (<code>base1</code>, <code>base2</code>). Both print <code>Total: 105.25</code>. The signed total of the ledger is 85.15. No score is computed here: <code>score()</code> runs only after selection.'],
+   [['r1','lib'],[1,10],'<b>Round 1: propose.</b> Two editor sessions each get an evidence folder: the task, the input files, the full base trajectories, the harness to edit and, from the second task of a domain, <code>context/library/</code>. INV edits how the agent works; DOM edits domain knowledge. An invalid edit gets one retry; then the stage falls back to the current harness.'],
+   [['p1'],[2],'<b>Probe.</b> Each candidate harness runs the task once (<code>inv1</code>, <code>dom1</code>). In the demo, the editor removed the positive-only filter, so the probe prints <code>Total: 85.15</code>.'],
+   [['c1'],[3],'<b>Compose.</b> The composer reads every run and both candidates with their diffs. It keeps, revises or drops each edit and writes checkpoint <code>c1</code>, which runs once.'],
+   [['r2'],[4,11],'<b>Round 2 — level 1.</b> The editors of round 2 edit <code>c1</code>, not H₀ (<code>current_harness = comp.tree</code>, <code>recursion.py:562</code>), and they read every earlier run of this task. The library is in their folder again.'],
+   [['p2','c2'],[5,6],'<b>Probe and compose again.</b> Probes <code>inv2</code> and <code>dom2</code> run; then composer <code>c2</code> writes checkpoint c2, which runs once. Count: 2 base + 2 + 1 + 2 + 1 = 8 runs = 4k, and 6 editor and composer sessions = 3k (<code>ledger.py</code>).'],
+   [['se'],[7],'<b>Select.</b> The candidates are the k finals, <code>c1</code> and <code>c2</code>; the base runs are not in the pool (<code>selection.py:93</code>). The selector sees anonymised outputs and picks one. At k = 1 there is one final and no selector session.'],
+   [['rf'],[8],'<b>Reflect.</b> The reflector (Prompt 6) reads the whole record: H₀, every candidate diff, the decisions and the trajectories. It writes one verdict row per changed component (helped, hurt, no observed effect, confounded) and at most one lesson, or NO_ENTRY.'],
+   [['ad'],[9,12],'<b>Update — level 2 starts.</b> If the lesson has a cue, a lesson and evidence, <code>Library.add</code> stores the adopted harness tree and <code>EXPERIENCE.md</code>, and rebuilds <code>INDEX.md</code> (<code>schedule.py:555</code>). With NO_ENTRY, nothing is stored. The next task of this domain reads the new entry.']]},
+ a9s:{w:860,h:350,t:[[15,22,'LEVEL 2 — THREE TASKS OF ONE DOMAIN, IN STREAM ORDER','pt'],[318,254,'NO_ENTRY: nothing stored','el'],[15,340,'The executor never reads the library: execute() gets only the harness folder.','el']],n:[
+  ['h0',15,40,830,'ext',['H₀ — the same base harness enters every task: adapter.base_harness()']],
+  ['t1',15,110,260,'prop',['Task 1: editors + composers','library empty: nothing to copy']],
+  ['t2',300,110,260,'prop',['Task 2: editors + composers','read entry 1; copy and re-check']],
+  ['t3',585,110,260,'prop',['Task 3: editors + composers','read entry 1 only']],
+  ['f1',15,185,260,'refl',['Reflector: a lesson','cue + lesson + evidence']],
+  ['f2',300,185,260,'refl',['Reflector: NO_ENTRY','no reusable contrast found']],
+  ['f3',585,185,260,'refl',['Reflector: a lesson','cue + lesson + evidence']],
+  ['L1',15,270,260,'refl',['Library after task 1','entry 1']],
+  ['L2',300,270,260,'refl',['Library after task 2','entry 1 (no change)']],
+  ['L3',585,270,260,'refl',['Library after task 3','entries 1 and 3']]],
+  e:[['h0','t1'],['h0','t2'],['h0','t3'],['t1','f1'],['f1','L1'],['L1','L2'],['L1','t2',{dash:1}],['t2','f2'],['L2','L3'],['L2','t3',{dash:1}],['t3','f3'],['f3','L3']],
+  steps:[[['h0'],[],'<b>One domain, in order.</b> <code>run_domain</code> runs the tasks of one domain one after another (<code>schedule.py:686</code>); other domains can run side by side. Every task starts from H₀: the package never installs the harness that an earlier task adopted.'],
+   [['t1'],[0],'<b>Task 1.</b> The library is empty, so <code>context_dir()</code> returns <code>None</code> and the editors get no library folder (<code>library.py:79</code>). The task runs the full level-1 step of Fig. P1.'],
+   [['f1','L1'],[3,4],'<b>Reflect and store.</b> The reflector writes a supported lesson. <code>Library.add</code> stores entry 1: the full adopted harness tree and its <code>EXPERIENCE.md</code>. <code>INDEX.md</code> is rebuilt.'],
+   [['t2'],[1,6],'<b>Task 2 — level 2.</b> Before the task, <code>lib.retain</code> keeps only entries of earlier tasks (<code>schedule.py:701</code>). The editors and composers get <code>context/library/</code> with entry 1. Prompt 1: copy a component into <code>context/harness/</code> if it fits, and treat its workspace facts as "a hypothesis here, not a fact".'],
+   [['f2','L2'],[5,7],'<b>NO_ENTRY.</b> The reflector finds no concrete, reusable contrast. Nothing is stored: not the lesson, and not the adopted harness (<code>schedule.py:555</code>; <code>test_no_entry_stays_out_of_library_on_resume</code>). The library carries forward unchanged.'],
+   [['t3'],[2,9],'<b>Task 3 reads entry 1 only.</b> Task 2 left no entry, so the editors of task 3 see the same library as the editors of task 2.'],
+   [['f3','L3'],[8,10,11],'<b>Entry 3.</b> The library gains its second entry. After N tasks it holds at most N entries. No step merges or retires entries; the paper lists library management as future work (Appendix G).']]},
+ d9:{w:860,h:220,n:[
+  ['A',15,40,150,'ext',['Path A first:','harness2-demo']],
+  ['q0',190,40,150,'ext',['Linux, WSL','or a Linux VM?']],
+  ['q1',365,40,170,'ext',['Task safe to run','4k times?']],
+  ['q2',560,40,140,'ext',['Executor must be','Claude Code?']],
+  ['B',725,40,120,'ref',['Path B','OpenCode, Codex']],
+  ['D',190,160,345,'prop',['Path D: build it by hand','minimal build or idea 10']],
+  ['C',560,160,285,'ref',['Path C: your execute()','runs claude -p']]],
+  e:[['A','q0'],['q0','q1',{t:'yes',x:343,y:56}],['q1','q2',{t:'yes',x:538,y:56}],['q2','B',{t:'no',x:704,y:56}],['q2','C',{t:'yes',x:635,y:130}],['q0','D',{t:'no',x:270,y:130}],['q1','D',{t:'no',x:455,y:130}]]}
 };
 document.querySelectorAll('svg[data-fig]').forEach(function(svg){var id=svg.getAttribute('data-fig');draw(svg,id,FIG[id])});
-['a1','a4','am'].forEach(function(id){
+['a1','a4','am','a9t','a9s'].forEach(function(id){
   var R=document.getElementById(id),F=FIG[id],S=F.steps,n=S.length,i=0,tm=null;
   draw(R.querySelector('svg'),id,F);
   var cap=R.querySelector('.cap'),ct=R.querySelector('.ct'),pl=R.querySelector('[data-a=play]');
@@ -939,6 +1228,24 @@ document.querySelectorAll('svg[data-fig]').forEach(function(svg){var id=svg.getA
   });
   go(0);
 });
+(function(){
+  var ids=['cN','cK','cM','cT'],el={};
+  ids.forEach(function(i){el[i]=document.getElementById(i)});
+  var out=document.getElementById('cOut');
+  function n(v){return Math.round(v).toLocaleString('en-US')}
+  function run(){
+    var N=Math.max(1,Math.floor(+el.cN.value)||1),k=Math.max(1,Math.floor(+el.cK.value)||1),m=el.cM.value,t=Math.max(0,+el.cT.value||0);
+    var nm=m==='both'?2:1,runs=N*(k+nm*3*k),ses=N*nm*3*k,sel=k>1?N*nm:0,ref=N*nm;
+    var l1=m!=='agg'&&k>=2?'Yes: sequential mode with k ≥ 2.':'No: it needs sequential mode and k ≥ 2.';
+    var l2=N>=2?'Yes, from the second task of each domain.':'No: a domain needs at least 2 tasks.';
+    out.innerHTML='<div><b>Executor runs</b>'+n(runs)+' ('+n(k)+' base + '+n(nm*3*k)+' per task)</div>'+
+      '<div><b>Improver sessions</b>'+n(ses+sel+ref)+': '+n(ses)+' editor and composer, '+n(sel)+' selector, '+n(ref)+' reflector</div>'+
+      '<div><b>Executor time, one run at a time</b>'+(runs*t/60).toFixed(1)+' h</div>'+
+      '<div><b>Level-1 chain</b>'+l1+'</div><div><b>Level 2</b>'+l2+'</div>';
+  }
+  ids.forEach(function(i){el[i].addEventListener('input',run)});
+  run();
+})();
 })();
 </script>
 </body>
