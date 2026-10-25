@@ -94,6 +94,7 @@ td.c{text-align:center;color:var(--teal)}
 <a href="#p9-short">Where it falls short</a>
 <a href="#p9-decide">Decide and estimate</a>
 <a href="#p9-build">Build plan</a>
+<a href="#p9-run">Run the build</a>
 <a href="#p9-theory">Through the theory</a>
 <div class="grp">A. Build a harness</div>
 <a href="#i1">1. Hook compiler</a>
@@ -394,7 +395,7 @@ verdict: helped
 <tr><th>#</th><th>Limit</th><th>Evidence</th><th>What it means for you</th><th>What to do</th></tr>
 <tr><td>1</td><td>The level-1 chain is off by default</td><td><code>MODES_DEFAULT = "parallel"</code> (<code>harness2/cli/_common.py:34</code>). Parallel mode is one generation of width k (paper §2.2.2).</td><td>A default run shows level 2, but not a level-1 chain.</td><td>Use sequential mode with k ≥ 2.</td></tr>
 <tr><td>2</td><td>Linux only</td><td>The README: "Use Linux, Python 3.12, and uv". <code>_write_summary</code> runs <code>import fcntl</code> (<code>schedule.py:294</code>), a module that Windows does not have.</td><td>On native Windows, every task ends with an exception when it writes its summary. The demo fails the same way.</td><td>Use WSL 2, a Linux VM or a container.</td></tr>
-<tr><td>3</td><td>No Claude Code executor ships</td><td>The substrates are <code>harness2/substrate/opencode.py</code> and <code>codex.py</code> only. But the core uses only <code>substrate.name</code> and <code>substrate.surface()</code>, and the demo runs plain Python inside its own <code>execute()</code>.</td><td>You write the executor for Claude Code, inside your adapter.</td><td>Path C below. Reuse the Codex file layout and map it onto <code>CLAUDE.md</code> and <code>.claude/</code> in <code>execute()</code>. This is my reading; it is not tested.</td></tr>
+<tr><td>3</td><td>No Claude Code executor ships</td><td>The substrates are <code>harness2/substrate/opencode.py</code> and <code>codex.py</code> only. But the core uses only <code>substrate.name</code> and <code>substrate.surface()</code>, and the demo runs plain Python inside its own <code>execute()</code>.</td><td>You write the executor for Claude Code, inside your adapter.</td><td>Path C below. Reuse the Codex file layout and map it onto <code>CLAUDE.md</code> and <code>.claude/</code> in <code>execute()</code>. This was my reading; <a href="#p9-run"><code>project9/</code></a> now tests it.</td></tr>
 <tr><td>4</td><td>The CLI knows three benchmarks</td><td><code>BENCHES = ("jb", "wb", "lab")</code> (<code>harness2/cli/_common.py:30</code>); <code>harness2-judge</code> and <code>harness2-report</code> use the same list.</td><td>Your adapter cannot use the <code>harness2</code> command.</td><td>Write a driver of about 40 lines, as <code>harness2/cli/demo.py</code> does (sketch in the build plan).</td></tr>
 <tr><td>5</td><td>The library stays inside one run setting</td><td>One library root per benchmark, substrate, k and seed (<code>library_root_for</code>); one library per mode (<code>_resolve_libraries</code> refuses to share one); one folder per domain. The CLI passes <code>tag=""</code> (<code>run_sweep.py:168</code>).</td><td>What a k = 1 run learned does not reach a k = 2 run, another domain, or a new <code>HARNESS2_RUNS_DIR</code>. The paper found that a library from another benchmark helps (Fig. 7 right: +0.6, +0.5, +2.9 on Code, Web, Office); the CLI cannot do this.</td><td>From Python, <code>library.root_for(..., tag="shared")</code> returns one root for every k ("an explicit <code>tag</code> opts into sharing one library across runs").</td></tr>
 <tr><td>6</td><td>NO_ENTRY stores nothing</td><td><code>schedule.py:555</code>, <code>library.py:120</code>; the test at <code>tests/test_workflow.py:187</code>.</td><td>The paper's update (Eq. 4) takes the adopted harness. In the code, a task with no supported lesson leaves no example harness either. A strict reflector gives a small library.</td><td>Read <code>reflection/&lt;mode&gt;&lt;k&gt;/edits.md</code> of those tasks: the reflector's edit rows are written there when it returns an <code>&lt;edits&gt;</code> block, also when no lesson is stored (<code>_distil</code> in <code>selection.py</code>).</td></tr>
@@ -482,7 +483,7 @@ result = run_domain(adapter.domain_of(tasks[0]), tasks, 1,
                     library_root=Path("runs/mine/library/k1"),
                     modes=("seq",))
 print(result["done"], "done,", result["failed"], "failed")</code></pre>
-<p>Path C, an untested sketch: a Claude Code executor inside the adapter. It reuses the Codex file layout, because that layout has one always-on file, a skills folder and a hooks file, as Claude Code does. Check the hook JSON format and the CLI flags against your installed versions.</p>
+<p>A tested build of path C is in <a href="#p9-run"><code>project9/</code></a> (next section). Path C, an untested sketch: a Claude Code executor inside the adapter. It reuses the Codex file layout, because that layout has one always-on file, a skills folder and a hooks file, as Claude Code does. Check the hook JSON format and the CLI flags against your installed versions.</p>
 <pre><code># path C sketch (untested)
 import json
 import shutil
@@ -522,6 +523,96 @@ def execute(self, task_id, harness_dir, run_id, *, timeout=None):
                        cwd=ws, stdout=out, timeout=timeout or 3600)
     return run_dir</code></pre>
 <p>The matching <code>trajectory()</code> reads <code>stream.jsonl</code> and writes one <code>[ACTION]</code> line per tool call and one <code>[OBSERVATION]</code> or <code>[ERROR]</code> line per tool result (the <code>is_error</code> field), with each observation cut at <code>obs_trunc</code> characters. The parsing loop of idea 6's <code>metrics.py</code> is a starting point.</p>
+
+<h3 id="p9-run">Run the build: <code>project9/</code></h3>
+<p>The folder <a href="https://github.com/az9713/harness2-tutorial/tree/main/project9"><code>project9/</code></a> in this site's repository is a working build of path C: a harness2 adapter whose executor is Claude Code (<code>claude -p</code>). The editors are Claude too, through the package's <code>claude_cli</code> channel. It uses the package at commit <code>1cfe254</code> without changes to the package.</p>
+<div class="tw"><table>
+<tr><th>File</th><th>What it does</th></tr>
+<tr><td><code>adapter.py</code></td><td>The adapter <code>LedgerAdapter</code>: three ledger tasks in one domain, <code>bookkeeping</code>; the Claude Code executor in <code>execute()</code>; the <code>stream-json</code> parser in <code>trajectory()</code>; the grader in <code>score()</code>. Also <code>ClaudeProposer</code>, the editor channel on your own Claude login, and two shims for native Windows.</td></tr>
+<tr><td><code>run.py</code></td><td>The driver. It calls <code>run_domain</code> (or <code>run_task</code> with the library off), then scores every base run and every selected final from the task summaries.</td></tr>
+<tr><td><code>h0/AGENTS.md</code>, <code>h0/scripts/summarize.py</code></td><td>H₀, in the Codex layout. <code>AGENTS.md</code> tells the agent to run the script and not to compute the total itself. The script has three defects on purpose: it drops negative amounts, it cannot read <code>(300.50)</code> or <code>1,250.00</code>, and it does not skip void rows.</td></tr>
+</table></div>
+<p>All three tasks have the same prompt: "Reconcile ledger.csv. Sum the signed amounts. A value in parentheses is negative. Skip rows whose status is void. Write one line, <code>Total: &lt;amount&gt;</code> with two decimal places, to answer.txt." The expected totals stay in <code>adapter.py</code>. They never enter a task folder or an evidence folder. The sessions run with all permissions, so this is not a guarantee (limit 10); in the live runs below, no executor stream and no editor session names <code>adapter.py</code>.</p>
+<div class="tw"><table>
+<tr><th>Task</th><th>What the ledger contains</th><th>H₀'s script gives</th><th>Correct</th></tr>
+<tr><td><code>ledger-1</code></td><td>100.25, −20.10, 5.00</td><td><code>Total: 105.25</code> (drops the credit)</td><td><code>Total: 85.15</code></td></tr>
+<tr><td><code>ledger-2</code></td><td>"1,250.00", (300.50), −49.50, 12.00</td><td>A crash: <code>decimal.InvalidOperation</code></td><td><code>Total: 912.00</code></td></tr>
+<tr><td><code>ledger-3</code></td><td>40.00, −15.25, 999.99 void, (4.75), "2,000.00" void</td><td>A crash: <code>decimal.InvalidOperation</code></td><td><code>Total: 20.00</code></td></tr>
+</table></div>
+<p>How the harness reaches Claude Code. The core needs only a layout name and a surface, so the build reuses <code>CODEX_SURFACE</code> (limit 3). For each run, <code>execute()</code> makes a fresh workspace and copies <code>AGENTS.md</code> to <code>CLAUDE.md</code>, <code>scripts/</code> as is, <code>.agents/skills/</code> to both <code>.agents/skills/</code> (the paths that <code>AGENTS.md</code> names) and <code>.claude/skills/</code>, and <code>.codex/hooks.json</code> to <code>.claude/settings.json</code> (the same hook schema). Every executor and editor session gets <code>--setting-sources project --strict-mcp-config --no-session-persistence</code>, so user-scope settings, hooks, skills and MCP servers stay out. Your user-level <code>CLAUDE.md</code> does not stay out (see the Windows table below).</p>
+
+<h4>Before you start</h4>
+<div class="card warn"><p><b>Warning.</b> The executor and the editors run with <code>--dangerously-skip-permissions</code> and open network access (limit 10). A live run can change files that your user account can write. Run it in WSL, a VM or a container that holds no secrets. The dry run makes no model calls and has no such risk.</p></div>
+<ol>
+<li>Install <code>git</code> and <a href="https://docs.astral.sh/uv/"><code>uv</code></a> in the environment that you use. <code>uv</code> downloads Python 3.12 if it is not there.</li>
+<li>For a live run, log in to Claude Code in that same environment. WSL has its own login, separate from Windows: run <code>claude auth status</code> there and look for <code>"loggedIn": true</code>. If it is false, run <code>claude auth login</code>.</li>
+<li>Clone the repository: <code>git clone https://github.com/az9713/harness2-tutorial</code>, then go to <code>harness2-tutorial/project9</code>.</li>
+</ol>
+<p>Each shell uses one <code>uv run</code> command. It installs the package at the pinned commit into a cached environment and runs the driver; there is no virtual environment to make or activate. Run <code>--dry</code> first.</p>
+
+<h4>WSL (or any Linux)</h4>
+<pre><code>cd harness2-tutorial/project9
+H2="harness2 @ git+https://github.com/google-research/harness2@1cfe254e8d25b15f37048c3730134686abe60335"
+uv run --no-project --python 3.12 --with "$H2" python run.py --dry
+uv run --no-project --python 3.12 --with "$H2" python run.py
+uv run --no-project --python 3.12 --with "$H2" python run.py --no-library</code></pre>
+<p>WSL is the path that the package supports. A clone on the Windows drive (<code>/mnt/c/...</code>) works; a clone in the WSL home folder is faster on disk.</p>
+
+<h4>Git Bash (native Windows)</h4>
+<pre><code>cd harness2-tutorial/project9
+H2="harness2 @ git+https://github.com/google-research/harness2@1cfe254e8d25b15f37048c3730134686abe60335"
+uv run --no-project --python 3.12 --with "$H2" python run.py --dry
+uv run --no-project --python 3.12 --with "$H2" python run.py</code></pre>
+
+<h4>PowerShell (native Windows)</h4>
+<pre><code>Set-Location harness2-tutorial\project9
+$H2 = "harness2 @ git+https://github.com/google-research/harness2@1cfe254e8d25b15f37048c3730134686abe60335"
+uv run --no-project --python 3.12 --with $H2 python run.py --dry
+uv run --no-project --python 3.12 --with $H2 python run.py</code></pre>
+<p>To call the WSL copy from Git Bash or PowerShell, put the WSL commands in one line:</p>
+<pre><code>wsl -d Ubuntu -- bash -lc 'cd /mnt/c/&lt;path&gt;/project9 &amp;&amp; uv run --no-project --python 3.12 --with "harness2 @ git+https://github.com/google-research/harness2@1cfe254e8d25b15f37048c3730134686abe60335" python run.py --dry'</code></pre>
+
+<h4>What native Windows needs, and what it still lacks</h4>
+<div class="tw"><table>
+<tr><th>Problem on Windows</th><th>Evidence</th><th>What <code>adapter.py</code> does</th></tr>
+<tr><td>No <code>fcntl</code> module</td><td><code>_write_summary</code> runs <code>import fcntl</code> and <code>fcntl.flock</code> (<code>schedule.py:294</code>, <code>298</code>, <code>328</code>)</td><td>Puts a stand-in <code>fcntl</code> in <code>sys.modules</code> that takes a 1-byte <code>msvcrt.locking</code> lock. It is correct for one process. For several workers, use WSL.</td></tr>
+<tr><td>Harness paths with <code>\</code></td><td><code>read_tree</code> builds keys with <code>str(p.relative_to(d))</code> (<code>tree.py:140</code>). On Windows every edit came back as off the surface: "these files are off the editable surface and were not applied: .agents\skills\README.md, …", and all three stages fell back to H₀.</td><td>Replaces <code>tree.read_tree</code> with the same function on <code>as_posix()</code> paths.</td></tr>
+<tr><td>Your <code>~/.claude/CLAUDE.md</code> still loads</td><td>A native test session with <code>--setting-sources project</code> quoted a line of the user-level <code>CLAUDE.md</code>. The same session listed 15 skills: the probe skill and built-in ones, none of the user's.</td><td>Nothing. On native Windows, your user <code>CLAUDE.md</code> enters every executor and editor session. In WSL this does not happen if <code>~/.claude/CLAUDE.md</code> does not exist there.</td></tr>
+</table></div>
+
+<h4>Options</h4>
+<div class="tw"><table>
+<tr><th>Option</th><th>Default</th><th>Meaning</th></tr>
+<tr><td><code>--dry</code></td><td>off</td><td>No model calls. The executor runs the harness script directly and writes a <code>stream.jsonl</code> in Claude Code's shape; scripted editors replace the script and write a lesson. Then the driver asserts that each task's first editor saw exactly the library entries of the earlier tasks, as <code>tests/test_workflow.py:126–127</code> does for the demo.</td></tr>
+<tr><td><code>--k</code></td><td>1</td><td>The budget per task. Sequential mode at k = 1: 4 executor runs, 3 editor sessions and 1 reflector per task, no selector (<code>schedule.py:514</code>).</td></tr>
+<tr><td><code>--mode</code></td><td><code>sequential</code></td><td><code>parallel</code>, <code>sequential</code> or <code>both</code>. Use <code>sequential</code> with k ≥ 2 for a level-1 chain (limit 1).</td></tr>
+<tr><td><code>--tasks</code></td><td>3</td><td>Run only the first N tasks.</td></tr>
+<tr><td><code>--no-library</code></td><td>off</td><td>Run each task with <code>libraries=None</code>, for the comparison of limit 8. The output goes to its own folder, <code>live-nolib/</code> (or <code>dry-nolib/</code>), because <code>execute()</code> and the session cache reuse results by <code>run_id</code>.</td></tr>
+<tr><td><code>--out</code></td><td><code>project9/runs</code></td><td>The output folder. The runs go to the subfolders <code>dry/</code>, <code>live/</code>, <code>dry-nolib/</code> and <code>live-nolib/</code>.</td></tr>
+<tr><td><code>P9_EXECUTOR_MODEL</code>, <code>P9_IMPROVER_MODEL</code></td><td><code>haiku</code>, <code>sonnet</code></td><td>Environment variables. Any model name that <code>claude --model</code> accepts.</td></tr>
+</table></div>
+
+<h4>Where to look after a run</h4>
+<pre><code>runs/live/runs/scores.json                                 score of every base run and final
+runs/live/runs/p9-cc-seq1/&lt;task&gt;/context/inv1/library/     what the task's first editor got (level 2)
+runs/live/runs/p9-cc-seq1/&lt;task&gt;/harnesses/c1/             the final harness of the task
+runs/live/library/k1/seq/bookkeeping/INDEX.md              the library after the stream
+runs/live/library/k1/seq/bookkeeping/harnesses/&lt;task&gt;/EXPERIENCE.md
+runs/live/executions/p9-cc-seq1/&lt;task&gt;/c1/stream.jsonl     the raw Claude Code stream
+runs/live/audit/                                           every editor session, with its cost</code></pre>
+<h4>Results of the first runs (24 Oct 2026)</h4>
+<p>Executor <code>haiku</code>, editors <code>sonnet</code>, sequential mode, k = 1, three tasks. The cost column is the sum of the <code>total_cost_usd</code> values that Claude Code reported: an estimate at API prices. These runs used a Claude subscription login (<code>"apiKeySource": "none"</code> in every run), so they counted against the subscription's usage limits and were not billed. With <code>ANTHROPIC_API_KEY</code> set, the same runs are billed to the API account at about these amounts.</p>
+<div class="tw"><table>
+<tr><th>Run</th><th>Where</th><th>Model calls</th><th>Estimated cost at API prices</th><th>Base runs correct</th><th>Finals correct</th></tr>
+<tr><td>Dry</td><td>Git Bash, PowerShell, WSL</td><td>0</td><td>$0</td><td>0 of 3</td><td>3 of 3 (scripted editors); level-2 check passed in each shell</td></tr>
+<tr><td>Live, library on</td><td>WSL</td><td>12 executor runs, 12 editor and reflector sessions</td><td>$0.42 + $3.31 = $3.73</td><td>2 of 3</td><td>3 of 3</td></tr>
+<tr><td>Live, library off</td><td>WSL</td><td>12 executor runs, 9 editor sessions (no reflector without a library)</td><td>$0.49 + $2.89 = $3.38</td><td>2 of 3</td><td>3 of 3</td></tr>
+</table></div>
+<p><b>Level 1 works with a Claude Code executor.</b> On <code>ledger-1</code>, the base run followed <code>AGENTS.md</code> and wrote <code>Total: 105.25</code>. No grader result reached the editors. From the trajectory and the source file alone, the editors <code>inv1</code> and <code>dom1</code> each rewrote <code>scripts/summarize.py</code>, and the final run wrote <code>Total: 85.15</code>. The editors also added the parentheses rule and the void rule, which <code>ledger-1</code> does not need, because the task prompt states them. They did not add the thousands separator.</p>
+<p><b>Level 2 reached the editors.</b> The first editor of <code>ledger-2</code> got exactly the entry <code>ledger-1</code>. Its note (<code>context/c1/decisions/inv1.md</code>) names <code>context/library/harnesses/ledger-1/EXPERIENCE.md</code> as the same failure mode, and it checks the fix against the total of this ledger, not against the numbers of the library entry. This is the level-2 evidence of <a href="#p9-build">step 8</a> of the build plan. After the stream, the library holds 3 entries.</p>
+<p><b>The library comparison measures nothing on these tasks.</b> The base runs got 2 of 3 right with and without the library. On <code>ledger-2</code> and <code>ledger-3</code> the H₀ script crashed with <code>decimal.InvalidOperation</code>. The executor then read the script, edited it in its workspace, ran it again and wrote the correct total, although <code>AGENTS.md</code> says "Do not compute the total yourself". A crash shows the defect to the executor; a wrong total that the script prints without an error (<code>ledger-1</code>) does not. A useful comparison needs more tasks, and defects that give a wrong result with no error.</p>
+<p><b>A defect in my first driver, found and corrected.</b> The first library-off run used the same <code>executions/</code> folder as the library-on run. Because <code>execute()</code> is idempotent by <code>run_id</code> and the run ids were the same, it reused the library-on executor runs, so its scores were not a comparison. I discarded it (9 editor sessions, $2.81 estimated at API prices). <code>run.py</code> now gives <code>--no-library</code> its own folder, <code>live-nolib/</code>. The estimated cost of the three live runs at API prices was $9.92.</p>
+<p><b>Not tested.</b> A live run on native Windows (Git Bash and PowerShell ran the dry run only). k ≥ 2, the selector, and parallel mode. The mapping of skills and hooks: no editor added a skill or a hook in these runs.</p>
 
 <h3 id="p9-theory">Project 9 through the theory</h3>
 <p>The <a href="harness2-learn.html#theory">Theory tab</a> of the tutorial describes Harness² as a formal model. This part checks each formal item of its chapters T1 to T6 against the released code at commit <code>1cfe254</code>, and names the Project 9 object that the item describes. I read the code and the repository tests. I did not run them. The first column gives the evidence tag that the Theory tab uses: Paper, Code, Literature or Model. File paths are relative to <code>harness2/core/</code> unless they start with another folder.</p>

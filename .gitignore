@@ -1,3 +1,5 @@
 *.pdf
 transcript.txt
 .impeccable/
+project9/runs/
+__pycache__/
