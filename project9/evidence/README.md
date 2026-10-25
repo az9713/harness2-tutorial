@@ -5,7 +5,7 @@ This folder holds the smallest set of output files of one live Project 9 run tha
 ## The run
 
 - Command: `python run.py` in WSL (sequential mode, k = 1, library on, 3 tasks: `ledger-1`, `ledger-2`, `ledger-3`).
-- Time: 2026-10-24. The first output file was written at 21:26 and the last at 21:46, local time. Git does not keep file times.
+- Time: 2026-10-24, local time. The first task run ended at 21:26 and the last file was written at 21:46. Git does not keep file times.
 - Executor: Claude Code `claude -p`, model `claude-haiku-4-5-20251001`, 12 task runs.
 - Editors and reflector: Claude Code `claude -p`, model alias `sonnet`, 12 sessions.
 - Login: the Claude subscription. Every task-run log shows `"apiKeySource": "none"`.
@@ -54,7 +54,7 @@ For each of the 3 tasks:
 - **Model runs do not repeat exactly.** A new live run gives different text, and its scores can be different.
 - **The base scores of `ledger-2` and `ledger-3` do not measure H₀.** In both tasks, run `base1` edited `scripts/summarize.py` during the run (the Edit tool) and then wrote the correct total. H₀'s script stops with `decimal.InvalidOperation` on these ledgers.
 - **Run `c1` of `ledger-2` did not call the script.** It read the ledger and wrote the total itself. So the Probe check of step 3 links the run to its harness only for the other 11 runs.
-- **The library did not change a score.** A control run with the library off (`--no-library`) gave the same 6 scores. That run is not in this folder.
+- **The library did not change a score.** A control run with the library off (`--no-library`) gave the same 6 scores. That run is not in this folder. On `ledger-2` and `ledger-3`, `base1` and `c1` scored 1 in both runs, so this control cannot show an effect there.
 
 ## Which files are here, and which are not
 

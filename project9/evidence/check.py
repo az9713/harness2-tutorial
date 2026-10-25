@@ -104,7 +104,7 @@ def check_level1(task: str) -> None:
         assert (meta["channel"], meta["model"]) == ("claude_cli", "sonnet"), meta
         assert abs(meta["cost_usd"] - stage["usd"]) < 1e-6, (meta["cost_usd"], stage["usd"])
         assert stage["notes"][:200] in text(E / "audit" / f"{sess}.response.md")
-    ok(f"{task}: Propose and Compose: sessions inv1 (INV), dom1 (DOM), c1 (COMPOSE) ran on Sonnet; "
+    ok(f"{task}: Propose and Compose: sessions inv1 (INV), dom1 (DOM), c1 (COMPOSE) ran with model alias sonnet; "
        f"their replies and costs match summary.json")
 
     ledger = run_dir(task, "base1") / "workspace/ledger.csv"
