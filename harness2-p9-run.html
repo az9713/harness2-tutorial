@@ -32,11 +32,14 @@ td code{font-size:.85em}
 .anim g,.anim path,.anim text{transition:opacity .35s}
 .hid{opacity:0}
 .nd rect{fill:#0b1222;stroke:#334155;stroke-width:1.5;transition:stroke .35s,fill .35s}
-.nd text{fill:#64748b;font:12px system-ui,sans-serif;transition:fill .35s}
+.nd text{fill:#64748b;font:12px system-ui,sans-serif;text-anchor:middle;transition:fill .35s}
 .nd text.b{font-weight:600}
 .nd text.f{font:9.5px ui-monospace,Consolas,monospace}
 .nd.on rect{stroke:#2dd4bf}.nd.on text{fill:#cbd5e1}.nd.on text.b{fill:#e2e8f0}
 .nd.now rect{stroke:#fb923c;stroke-width:2.5;fill:#26324a}.nd.now text{fill:#e2e8f0}
+.nd text.v{font-size:11.5px;opacity:0;transition:opacity .35s,fill .35s}.nd.on text.v,.nd.now text.v{opacity:1}
+.nd text.v.bad{fill:#fb923c;font-weight:600}.nd text.v.good{fill:#4ade80;font-weight:600}
+.wide{width:min(1290px,calc(100vw - 32px));position:relative;left:50%;transform:translateX(-50%)}
 .ed{fill:none;stroke:#334155;stroke-width:1.6;transition:stroke .35s,opacity .35s}
 .ed.on{stroke:#2dd4bf}.ed.now{stroke:#fb923c;stroke-dasharray:6 4;animation:flow .8s linear infinite}
 .ed.l2{stroke-dasharray:5 4}
@@ -77,104 +80,147 @@ td code{font-size:.85em}
 <main>
 <p class="sub"><a href="harness2-projects.html#p9-run">← Project 9: run the build</a> · <a href="index.html">Learn Harness²</a></p>
 <h1>Project 9 run, step by step</h1>
-<p class="sub">One live run of <code>project9/</code> through the released harness2 code (commit <code>1cfe254</code>). Each step names the harness2 function that ran, the paper stage, and the harness files it touched.</p>
+<p class="sub">Two live runs of <code>project9/</code> through the released harness2 code (commit <code>1cfe254</code>), shown as two animations. Each step names the harness2 function that ran, the paper stage, the harness files it touched, and the values it produced.</p>
 
+<div class="card">
+<p><b>Two runs, two animations.</b> Both runs did task <code>ledger-1</code> with budget k = 1, sequential mode and harness2 commit <code>1cfe254</code>, in WSL. They are different in the number of tasks and in the result.</p>
+<ul>
+<li><b><a href="#t1">Animation 1, run <code>t1</code></a></b>: 1 task. base1 and c1 both wrote the correct total and scored 1, so the result is a tie. Level 2 stops at the library, because no task comes after <code>ledger-1</code>.</li>
+<li><b><a href="#live">Animation 2, run <code>live</code></a></b>: 3 tasks, and the animation shows task <code>ledger-1</code>. base1 wrote a wrong total and scored 0. c1 wrote the correct total and scored 1. Step 17 shows the next task, <code>ledger-2</code>, as it reads the library.</li>
+</ul>
+</div>
+
+<h2 id="levels">The two recursions</h2>
+<p>Each animation has two frames. Each frame is one recursion of the paper, and each has its own loop, drawn as a dashed arrow.</p>
+<ul>
+<li><b style="color:#2dd4bf">Level 1, the teal frame: inside one task.</b> It starts from the base harness H₀ and runs it once (base1). Two editors propose changes (inv1, dom1), each change runs once as a probe, and a composer merges them into c1. That is one round. With a budget of k, sequential mode runs k rounds, and round t + 1 starts from the harness c<sub>t</sub> of round t (the dashed loop at the top). Both runs had k = 1, so each made one round and did not take the loop.</li>
+<li><b style="color:#fb923c">Level 2, the orange frame: across tasks.</b> After the task, the reflector reads the whole record and writes one lesson. The library stores the lesson and the chosen harness. The next task in the domain does not start from c1: it starts again from H₀ (<code>schedule.py:617</code>). Its editors get a copy of the library and can reuse what worked (the dashed loop at the bottom, step 17).</li>
+</ul>
+<p>The frame of the active level lights up in each step, and the step card names the level.</p>
+
+<h2 id="read">How to read the values</h2>
+<p>Each box shows the stage, the label that harness2 gives it, the model, and the values of that stage. The values in a box appear when the animation reaches its step. Example, from the Composed run box of animation 2: <code>Total: 85.15</code>, <code>$0.047 · 21.6 s</code>.</p>
+<ul>
+<li><b><code>Total: 85.15</code></b>: the line that the run wrote to <code>answer.txt</code>. The task asks for the signed sum of the ledger: 100.25 − 20.10 + 5.00 = 85.15. Green means that the line is correct. Orange means that it is wrong: <code>Total: 105.25</code> is 100.25 + 5.00, because the H₀ script drops the negative amount.</li>
+<li><b><code>$0.047</code></b>: the cost of that one call at API prices, as Claude Code reports it. For a task run it is <code>total_cost_usd</code> in the last line of <code>stream.jsonl</code>. For a session it is <code>cost_usd</code> in <code>audit/*.meta.json</code>. The Claude subscription paid for the runs, so these numbers are estimates, not charges. Animation 1 shows 4 decimal places, because its task runs cost less than $0.01 each.</li>
+<li><b><code>21.6 s</code></b>: how long the call took. For a task run it is <code>duration_ms</code> in <code>stream.jsonl</code> (21,625 ms). For a session it is <code>wall_s</code> in <code>audit/*.meta.json</code>.</li>
+<li><b>"ran the c1 script"</b>: the run called <code>python3 scripts/summarize.py ledger.csv</code> with the script of its own harness. Its log shows that call.</li>
+<li><b>"AGENTS.md: 7 → 8"</b> (animation 1): the line count of the file before and after the edit.</li>
+<li><b>"byte-equal to inv1"</b> (animation 2): the two editors wrote the same <code>scripts/summarize.py</code>, byte for byte, without seeing each other's work.</li>
+<li><b>"R = 4 runs, P = 3"</b>: the run count that harness2 records. R is the number of task runs (base1, inv1, dom1, c1). P is the number of editor sessions (inv1, dom1, c1). The reflector session is counted separately.</li>
+<li><b>"1 script, 299 chars"</b>: the size of the stored harness, from the library index. It has 1 script, and its <code>AGENTS.md</code> has 299 characters. Claude Code loads that file as <code>CLAUDE.md</code> in every run, so it is "always-on" text. In animation 1 the number is 1,059, because the composer rewrote <code>AGENTS.md</code>.</li>
+<li><b>"$1.21 for ledger-1"</b> (animation 2): $0.137 for the 4 task runs plus $1.071 for the 4 sessions (3 editor sessions and the reflector). In animation 1 the box shows $0.46: $0.016 for the 4 task runs plus $0.448 for the 4 sessions.</li>
+<li><b>The small grey line at the bottom of each box</b> (for example <code>recursion.py:559</code>): the place in the harness2 code where the stage runs.</li>
+</ul>
+
+<h2 id="t1">Animation 1: run t1, a tie</h2>
 <div class="card">
 <p><b>The run.</b> Task <code>ledger-1</code> only (<code>--tasks 1</code>), budget k = 1, sequential mode, in WSL, on 2026-10-25. Claude Code with Haiku did the task runs. Sonnet did the editor, composer and reflector sessions. The run made 8 model calls and took 2 min 37 s. The estimated cost at API prices was $0.46 ($0.016 for 4 runs, $0.448 for 4 sessions). The 4 task runs report <code>"apiKeySource": "none"</code>, which is the Claude subscription login. The 4 sessions ran in the same shell, where the guard found no billing variable. Nothing was billed.</p>
 <p><b>The sources.</b> Every excerpt comes from the run folder <code>project9/runs/t1/live/</code>: <code>executions/*/stream.jsonl</code> (task runs), <code>audit/*.meta.json</code> (sessions), <code>runs/p9-cc-agg1/ledger-1/summary.json</code>, the harness and context folders, and the library. Clock times are the times when each output file was written. Durations come from <code>duration_ms</code> (runs) and <code>wall_s</code> (sessions).</p>
 </div>
 
-<h2 id="levels">The two recursions</h2>
-<p>The diagram has two frames. Each frame is one recursion of the paper, and each has its own loop, drawn as a dashed arrow.</p>
-<ul>
-<li><b style="color:#2dd4bf">Level 1, the teal frame: inside one task.</b> It starts from the base harness H₀ and runs it once (base1). Two editors propose changes (inv1, dom1), each change runs once as a probe, and a composer merges them into c1. That is one round. With a budget of k, sequential mode runs k rounds, and round t + 1 starts from the harness c<sub>t</sub> of round t (the dashed loop at the top). This run had k = 1, so it made one round and did not take the loop.</li>
-<li><b style="color:#fb923c">Level 2, the orange frame: across tasks.</b> After the task, the reflector reads the whole record and writes one lesson. The library stores the lesson and the chosen harness. The next task in the domain does not start from c1: it starts again from H₀ (<code>schedule.py:617</code>). Its editors get a copy of the library and can reuse what worked (the dashed loop at the bottom, step 17).</li>
-</ul>
-<p>The frame of the active level lights up in each step, and the step card names the level.</p>
-<div class="anim" id="replay">
-<div class="sv"><svg viewBox="0 0 896 562" role="img" aria-label="Animated replay of the Project 9 run through the harness2 pipeline"></svg></div>
+<div class="anim wide" id="replay">
+<div class="sv"><svg viewBox="0 0 1256 738" role="img" aria-label="Animated replay of run t1 through the harness2 pipeline"></svg></div>
 <div class="legend"><span><i style="border-color:#fb923c"></i>active in this step</span><span><i style="border-color:#2dd4bf"></i>done earlier</span><span><i style="border-color:#334155"></i>not reached yet</span></div>
 <div class="ctrl"><button data-a="reset">⟲ Reset</button><button data-a="prev">◀ Back</button><button data-a="play">▶ Play</button><button data-a="next">Next ▶</button><span class="ct"></span></div>
 <div class="step" aria-live="polite">
-<h2 id="s-title" class="st"></h2>
-<p id="s-cap"></p>
-<pre id="s-ex"></pre>
+<h2 class="st s-title"></h2>
+<p class="s-cap"></p>
+<pre class="s-ex"></pre>
 <dl class="tags">
-<dt>Recursion</dt><dd id="s-level"></dd>
-<dt>harness2 code</dt><dd id="s-code"></dd>
-<dt>Paper stage</dt><dd id="s-stage"></dd>
-<dt>Harness files</dt><dd id="s-comp"></dd>
-<dt>Time</dt><dd id="s-time"></dd>
-<dt>Est. cost</dt><dd id="s-cost"></dd>
+<dt>Recursion</dt><dd class="s-level"></dd>
+<dt>harness2 code</dt><dd class="s-code"></dd>
+<dt>Paper stage</dt><dd class="s-stage"></dd>
+<dt>Harness files</dt><dd class="s-comp"></dd>
+<dt>Time</dt><dd class="s-time"></dd>
+<dt>Est. cost</dt><dd class="s-cost"></dd>
 </dl>
 </div>
 </div>
 
-<h2 id="values">The values at each stage, task ledger-1</h2>
-<p>This is a copy of the diagram above, with the values of each stage. The values come from a different run than the replay: the 3-task live run of 2026-10-24, task <code>ledger-1</code>. In that run the method changed the result: H₀ gave a wrong total and c1 gave the correct total. Its files are committed in <a href="https://github.com/az9713/harness2-tutorial/tree/main/project9/evidence"><code>project9/evidence/</code></a>, and <code>check.py</code> in that folder tests each value without a model.</p>
-<p><b>How to read the values.</b> Example, from the Composed run box: <code>Total: 85.15</code>, <code>$0.047 · 21.6 s</code>.</p>
-<ul>
-<li><b>Box title and second line</b> (for example "Composed run", "c1 · Haiku"): the stage, the label that harness2 gives it, and the model. Haiku does the task runs. Sonnet does the editor, composer and reflector sessions.</li>
-<li><b><code>Total: 85.15</code></b>: the line that the run wrote to <code>answer.txt</code>. The task asks for the signed sum of the ledger: 100.25 − 20.10 + 5.00 = 85.15. Green means that the line is correct. Orange means that it is wrong: <code>Total: 105.25</code> is 100.25 + 5.00, because the H₀ script drops the negative amount.</li>
-<li><b><code>$0.047</code></b>: the cost of that one call at API prices, as Claude Code reports it. For a task run it is <code>total_cost_usd</code> in the last line of <code>stream.jsonl</code>. For a session it is <code>cost_usd</code> in <code>audit/*.meta.json</code>. The Claude subscription paid for the run, so these numbers are estimates, not charges.</li>
-<li><b><code>21.6 s</code></b>: how long the call took. For a task run it is <code>duration_ms</code> in <code>stream.jsonl</code> (21,625 ms). For a session it is <code>wall_s</code> in <code>audit/*.meta.json</code>.</li>
-<li><b>"ran the c1 script"</b>: the run called <code>python3 scripts/summarize.py ledger.csv</code> with the script of its own harness. Its log shows that call.</li>
-<li><b>"byte-equal to inv1"</b>: the two editors wrote the same <code>scripts/summarize.py</code>, byte for byte, without seeing each other's work.</li>
-<li><b>"R = 4 runs, P = 3"</b>: the run count that harness2 records. R is the number of task runs (base1, inv1, dom1, c1). P is the number of editor sessions (inv1, dom1, c1). The reflector session is counted separately.</li>
-<li><b>"1 script, 299 chars"</b>: the size of the stored harness, from the library index. It has 1 script, and its <code>AGENTS.md</code> has 299 characters. Claude Code loads that file as <code>CLAUDE.md</code> in every run, so it is "always-on" text.</li>
-<li><b>"$1.21 for ledger-1"</b>: $0.137 for the 4 task runs plus $1.071 for the 4 sessions (3 editor sessions and the reflector).</li>
-<li><b>The small grey line at the bottom of each box</b> (for example <code>recursion.py:559</code>): the place in the harness2 code where the stage runs.</li>
-</ul>
-<div class="anim"><div class="sv"><svg viewBox="0 0 1256 690" role="img" aria-label="The replay diagram with the values of task ledger-1 from the live run at each stage"><defs><marker id="ah2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#64748b"/></marker></defs><rect class="pnl l1 act" x="140" y="34" width="834" height="406" rx="10"/><text class="pt1" x="148" y="26">LEVEL 1 — inside task ledger-1: Propose → Probe → Compose (k = 1, 1 round)</text><rect class="pnl l2 act" x="830" y="456" width="420" height="150" rx="10"/><text class="pt2" x="838" y="476">LEVEL 2 — across tasks: reflect, then store in the library</text><g class="vb"><rect x="10" y="36" width="128" height="104" rx="7"/><text class="t" x="74.0" y="53">run.py</text><text class="m" x="74.0" y="67">driver</text><text class="v" x="74.0" y="85">python run.py</text><text class="v" x="74.0" y="99">3 tasks, k = 1, seq</text><text class="v good" x="74.0" y="113">apiKeySource: none</text><text class="f" x="74.0" y="133">run.py:118</text></g><g class="vb"><rect x="10" y="236" width="128" height="104" rx="7"/><text class="t" x="74.0" y="253">run_task</text><text class="m" x="74.0" y="267">ledger-1</text><text class="v" x="74.0" y="285">100.25, −20.10, 5.00</text><text class="v" x="74.0" y="299">want: Total: 85.15</text><text class="v" x="74.0" y="313">domain: bookkeeping</text><text class="f" x="74.0" y="333">schedule.py:566</text></g><g class="vb"><rect x="148" y="196" width="128" height="104" rx="7"/><text class="t" x="212.0" y="213">H₀</text><text class="m" x="212.0" y="227">base harness</text><text class="v" x="212.0" y="245">AGENTS.md: run the</text><text class="v" x="212.0" y="259">script, do not compute</text><text class="v bad" x="212.0" y="273">script sums > 0 only</text><text class="f" x="212.0" y="293">project9/h0</text></g><g class="vb"><rect x="286" y="196" width="128" height="104" rx="7"/><text class="t" x="350.0" y="213">Reference</text><text class="m" x="350.0" y="227">base1 · Haiku</text><text class="v" x="350.0" y="245">ran the H₀ script</text><text class="v bad" x="350.0" y="259">Total: 105.25</text><text class="v" x="350.0" y="273">$0.041 · 15.1 s</text><text class="f" x="350.0" y="293">schedule.py:430</text></g><g class="vb"><rect x="424" y="66" width="128" height="104" rx="7"/><text class="t" x="488.0" y="83">INV editor</text><text class="m" x="488.0" y="97">inv1 · Sonnet</text><text class="v" x="488.0" y="115">rewrote summarize.py:</text><text class="v" x="488.0" y="129">signs, ( ), void rows</text><text class="v" x="488.0" y="143">$0.313 · 174 s</text><text class="f" x="488.0" y="163">recursion.py:483</text></g><g class="vb"><rect x="424" y="326" width="128" height="104" rx="7"/><text class="t" x="488.0" y="343">DOM editor</text><text class="m" x="488.0" y="357">dom1 · Sonnet</text><text class="v" x="488.0" y="375">same fix, same file</text><text class="v" x="488.0" y="389">(byte-equal to inv1)</text><text class="v" x="488.0" y="403">$0.279 · 132 s</text><text class="f" x="488.0" y="423">recursion.py:483</text></g><g class="vb"><rect x="562" y="66" width="128" height="104" rx="7"/><text class="t" x="626.0" y="83">Probe run</text><text class="m" x="626.0" y="97">inv1 · Haiku</text><text class="v" x="626.0" y="115">ran the inv1 script</text><text class="v good" x="626.0" y="129">Total: 85.15</text><text class="v" x="626.0" y="143">$0.025 · 9.0 s</text><text class="f" x="626.0" y="163">recursion.py:518</text></g><g class="vb"><rect x="562" y="326" width="128" height="104" rx="7"/><text class="t" x="626.0" y="343">Probe run</text><text class="m" x="626.0" y="357">dom1 · Haiku</text><text class="v" x="626.0" y="375">ran the dom1 script</text><text class="v good" x="626.0" y="389">Total: 85.15</text><text class="v" x="626.0" y="403">$0.024 · 8.9 s</text><text class="f" x="626.0" y="423">recursion.py:518</text></g><g class="vb"><rect x="700" y="196" width="128" height="104" rx="7"/><text class="t" x="764.0" y="213">Compose</text><text class="m" x="764.0" y="227">c1 · Sonnet</text><text class="v" x="764.0" y="245">kept the script fix</text><text class="v" x="764.0" y="259">AGENTS.md as in H₀</text><text class="v" x="764.0" y="273">$0.241 · 77 s</text><text class="f" x="764.0" y="293">recursion.py:541</text></g><g class="vb"><rect x="838" y="196" width="128" height="104" rx="7"/><text class="t" x="902.0" y="213">Composed run</text><text class="m" x="902.0" y="227">c1 · Haiku</text><text class="v" x="902.0" y="245">ran the c1 script</text><text class="v good" x="902.0" y="259">Total: 85.15</text><text class="v" x="902.0" y="273">$0.047 · 21.6 s</text><text class="f" x="902.0" y="293">recursion.py:559</text></g><g class="vb"><rect x="994" y="196" width="128" height="104" rx="7"/><text class="t" x="1058.0" y="213">Select</text><text class="m" x="1058.0" y="227">trivial, k = 1</text><text class="v" x="1058.0" y="245">pool: c1 only</text><text class="v good" x="1058.0" y="259">chose c1</text><text class="v" x="1058.0" y="273">no session, $0</text><text class="f" x="1058.0" y="293">selection.py:360</text></g><g class="vb"><rect x="1114" y="490" width="128" height="104" rx="7"/><text class="t" x="1178.0" y="507">Reflector</text><text class="m" x="1178.0" y="521">Sonnet</text><text class="v" x="1178.0" y="539">script: helped</text><text class="v" x="1178.0" y="553">AGENTS.md: no effect</text><text class="v" x="1178.0" y="567">$0.237 · 86 s</text><text class="f" x="1178.0" y="587">selection.py:454</text></g><g class="vb"><rect x="976" y="490" width="128" height="104" rx="7"/><text class="t" x="1040.0" y="507">Library</text><text class="m" x="1040.0" y="521">bookkeeping</text><text class="v good" x="1040.0" y="539">new entry: ledger-1</text><text class="v" x="1040.0" y="553">1 script, 299 chars</text><text class="v good" x="1040.0" y="567">EXPERIENCE.md</text><text class="f" x="1040.0" y="587">library.py:106</text></g><g class="vb"><rect x="562" y="490" width="128" height="104" rx="7"/><text class="t" x="626.0" y="507">summary.json</text><text class="m" x="626.0" y="521">+ scores.json</text><text class="v" x="626.0" y="539">R = 4 runs, P = 3</text><text class="v" x="626.0" y="553">base1 0 → c1 1</text><text class="v" x="626.0" y="567">$1.21 for ledger-1</text><text class="f" x="626.0" y="587">schedule.py:289</text></g><path class="ed2" d="M74.0 140 V232" marker-end="url(#ah2)"/><path class="ed2" d="M138 288.0 C142 288 142 248.0 144 248.0" marker-end="url(#ah2)"/><path class="ed2" d="M276 248.0 H282" marker-end="url(#ah2)"/><path class="ed2" d="M414 248.0 C418 248.0 410 118.0 420 118.0" marker-end="url(#ah2)"/><path class="ed2" d="M552 118.0 H558" marker-end="url(#ah2)"/><path class="ed2" d="M690 118.0 C764.0 118.0 764.0 118.0 764.0 192" marker-end="url(#ah2)"/><path class="ed2" d="M414 248.0 C418 248.0 410 378.0 420 378.0" marker-end="url(#ah2)"/><path class="ed2" d="M552 378.0 H558" marker-end="url(#ah2)"/><path class="ed2" d="M690 378.0 C764.0 378.0 764.0 378.0 764.0 304" marker-end="url(#ah2)"/><path class="ed2" d="M828 248.0 H834" marker-end="url(#ah2)"/><path class="ed2" d="M966 248.0 H990" marker-end="url(#ah2)"/><path class="ed2" d="M1058.0 300 V448 H1178.0 V486" marker-end="url(#ah2)"/><path class="ed2" d="M1114 542.0 H1108" marker-end="url(#ah2)"/><path class="ed2" d="M976 542.0 H694" marker-end="url(#ah2)"/><path class="loop" d="M902.0 196 V44 H212.0 V192" marker-end="url(#ah2)"/><text class="lbl" x="894.0" y="58" text-anchor="end">loop not taken: k = 1, so no round 2 starts from c1</text><path class="ed2 l2c" d="M1040.0 594 V622 H74.0 V344" marker-end="url(#ah2)"/><text class="lbl" x="84.0" y="616">next task ledger-2: starts again from H₀; its INV editor gets library/ledger-1 and cites its EXPERIENCE.md</text><rect class="gr" x="10" y="636" width="1232" height="40" rx="8"/><text class="lbl" x="22" y="660">Grader in run.py (after the method): want "Total: 85.15" —</text><text class="v bad" x="430" y="660" text-anchor="start">base1 "Total: 105.25" → score 0</text><text class="v good" x="640" y="660" text-anchor="start">c1 "Total: 85.15" → score 1</text></svg></div>
+<h2 id="live">Animation 2: run live, task ledger-1, a gain</h2>
+<div class="card">
+<p><b>The run.</b> <code>python run.py</code> with no options: 3 tasks (<code>ledger-1</code>, <code>ledger-2</code>, <code>ledger-3</code>), budget k = 1, sequential mode, library on, in WSL, on 2026-10-24. The first task run ended at 21:26. Claude Code with Haiku did the task runs. Sonnet did the editor, composer and reflector sessions. For task <code>ledger-1</code> the run made 8 model calls. The estimated cost at API prices was $1.21 ($0.137 for 4 runs, $1.071 for 4 sessions). All 12 task runs of the run report <code>"apiKeySource": "none"</code>, which is the Claude subscription login. The billing guard (<code>run.py:98–101</code>) was committed on 2026-10-25, after this run, so step 1 has no guard.</p>
+<p><b>The difference from animation 1.</b> In base1, Haiku obeyed <code>AGENTS.md</code>: it copied the script output <code>Total: 105.25</code> to <code>answer.txt</code> and scored 0. Both editors then changed only the script, and c1 scored 1. Step 17 is part of this run: the INV editor of <code>ledger-2</code> read the library entry of <code>ledger-1</code>.</p>
+<p><b>The sources.</b> Every value comes from <a href="https://github.com/az9713/harness2-tutorial/tree/main/project9/evidence"><code>project9/evidence/</code></a>, which is committed. <code>check.py</code> in that folder tests the files without a model. The evidence has no clock time for each step, so the step cards give durations and turns only.</p>
+</div>
+<div class="anim wide" id="replay-live">
+<div class="sv"><svg viewBox="0 0 1256 738" role="img" aria-label="Animated replay of run live, task ledger-1, through the harness2 pipeline"></svg></div>
+<div class="legend"><span><i style="border-color:#fb923c"></i>active in this step</span><span><i style="border-color:#2dd4bf"></i>done earlier</span><span><i style="border-color:#334155"></i>not reached yet</span></div>
+<div class="ctrl"><button data-a="reset">⟲ Reset</button><button data-a="prev">◀ Back</button><button data-a="play">▶ Play</button><button data-a="next">Next ▶</button><span class="ct"></span></div>
+<div class="step" aria-live="polite">
+<h2 class="st s-title"></h2>
+<p class="s-cap"></p>
+<pre class="s-ex"></pre>
+<dl class="tags">
+<dt>Recursion</dt><dd class="s-level"></dd>
+<dt>harness2 code</dt><dd class="s-code"></dd>
+<dt>Paper stage</dt><dd class="s-stage"></dd>
+<dt>Harness files</dt><dd class="s-comp"></dd>
+<dt>Time</dt><dd class="s-time"></dd>
+<dt>Est. cost</dt><dd class="s-cost"></dd>
+</dl>
+</div>
+</div>
+
+<h2 id="values">Animation 2 as one picture</h2>
+<p>This is the last step of animation 2 as one static picture, with all values at once.</p>
+<div class="anim wide"><div class="sv"><svg viewBox="0 0 1256 690" role="img" aria-label="The replay diagram with the values of task ledger-1 from the live run at each stage"><defs><marker id="ah2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#64748b"/></marker></defs><rect class="pnl l1 act" x="140" y="34" width="834" height="406" rx="10"/><text class="pt1" x="148" y="26">LEVEL 1 — inside task ledger-1: Propose → Probe → Compose (k = 1, 1 round)</text><rect class="pnl l2 act" x="830" y="456" width="420" height="150" rx="10"/><text class="pt2" x="838" y="476">LEVEL 2 — across tasks: reflect, then store in the library</text><g class="vb"><rect x="10" y="36" width="128" height="104" rx="7"/><text class="t" x="74.0" y="53">run.py</text><text class="m" x="74.0" y="67">driver</text><text class="v" x="74.0" y="85">python run.py</text><text class="v" x="74.0" y="99">3 tasks, k = 1, seq</text><text class="v good" x="74.0" y="113">apiKeySource: none</text><text class="f" x="74.0" y="133">run.py:118</text></g><g class="vb"><rect x="10" y="236" width="128" height="104" rx="7"/><text class="t" x="74.0" y="253">run_task</text><text class="m" x="74.0" y="267">ledger-1</text><text class="v" x="74.0" y="285">100.25, −20.10, 5.00</text><text class="v" x="74.0" y="299">want: Total: 85.15</text><text class="v" x="74.0" y="313">domain: bookkeeping</text><text class="f" x="74.0" y="333">schedule.py:566</text></g><g class="vb"><rect x="148" y="196" width="128" height="104" rx="7"/><text class="t" x="212.0" y="213">H₀</text><text class="m" x="212.0" y="227">base harness</text><text class="v" x="212.0" y="245">AGENTS.md: run the</text><text class="v" x="212.0" y="259">script, do not compute</text><text class="v bad" x="212.0" y="273">script sums > 0 only</text><text class="f" x="212.0" y="293">project9/h0</text></g><g class="vb"><rect x="286" y="196" width="128" height="104" rx="7"/><text class="t" x="350.0" y="213">Reference</text><text class="m" x="350.0" y="227">base1 · Haiku</text><text class="v" x="350.0" y="245">ran the H₀ script</text><text class="v bad" x="350.0" y="259">Total: 105.25</text><text class="v" x="350.0" y="273">$0.041 · 15.1 s</text><text class="f" x="350.0" y="293">schedule.py:430</text></g><g class="vb"><rect x="424" y="66" width="128" height="104" rx="7"/><text class="t" x="488.0" y="83">INV editor</text><text class="m" x="488.0" y="97">inv1 · Sonnet</text><text class="v" x="488.0" y="115">rewrote summarize.py:</text><text class="v" x="488.0" y="129">signs, ( ), void rows</text><text class="v" x="488.0" y="143">$0.313 · 174 s</text><text class="f" x="488.0" y="163">recursion.py:483</text></g><g class="vb"><rect x="424" y="326" width="128" height="104" rx="7"/><text class="t" x="488.0" y="343">DOM editor</text><text class="m" x="488.0" y="357">dom1 · Sonnet</text><text class="v" x="488.0" y="375">same fix, same file</text><text class="v" x="488.0" y="389">(byte-equal to inv1)</text><text class="v" x="488.0" y="403">$0.279 · 132 s</text><text class="f" x="488.0" y="423">recursion.py:483</text></g><g class="vb"><rect x="562" y="66" width="128" height="104" rx="7"/><text class="t" x="626.0" y="83">Probe run</text><text class="m" x="626.0" y="97">inv1 · Haiku</text><text class="v" x="626.0" y="115">ran the inv1 script</text><text class="v good" x="626.0" y="129">Total: 85.15</text><text class="v" x="626.0" y="143">$0.025 · 9.0 s</text><text class="f" x="626.0" y="163">recursion.py:518</text></g><g class="vb"><rect x="562" y="326" width="128" height="104" rx="7"/><text class="t" x="626.0" y="343">Probe run</text><text class="m" x="626.0" y="357">dom1 · Haiku</text><text class="v" x="626.0" y="375">ran the dom1 script</text><text class="v good" x="626.0" y="389">Total: 85.15</text><text class="v" x="626.0" y="403">$0.024 · 8.9 s</text><text class="f" x="626.0" y="423">recursion.py:518</text></g><g class="vb"><rect x="700" y="196" width="128" height="104" rx="7"/><text class="t" x="764.0" y="213">Compose</text><text class="m" x="764.0" y="227">c1 · Sonnet</text><text class="v" x="764.0" y="245">kept the script fix</text><text class="v" x="764.0" y="259">AGENTS.md as in H₀</text><text class="v" x="764.0" y="273">$0.241 · 77 s</text><text class="f" x="764.0" y="293">recursion.py:541</text></g><g class="vb"><rect x="838" y="196" width="128" height="104" rx="7"/><text class="t" x="902.0" y="213">Composed run</text><text class="m" x="902.0" y="227">c1 · Haiku</text><text class="v" x="902.0" y="245">ran the c1 script</text><text class="v good" x="902.0" y="259">Total: 85.15</text><text class="v" x="902.0" y="273">$0.047 · 21.6 s</text><text class="f" x="902.0" y="293">recursion.py:559</text></g><g class="vb"><rect x="994" y="196" width="128" height="104" rx="7"/><text class="t" x="1058.0" y="213">Select</text><text class="m" x="1058.0" y="227">trivial, k = 1</text><text class="v" x="1058.0" y="245">pool: c1 only</text><text class="v good" x="1058.0" y="259">chose c1</text><text class="v" x="1058.0" y="273">no session, $0</text><text class="f" x="1058.0" y="293">selection.py:360</text></g><g class="vb"><rect x="1114" y="490" width="128" height="104" rx="7"/><text class="t" x="1178.0" y="507">Reflector</text><text class="m" x="1178.0" y="521">Sonnet</text><text class="v" x="1178.0" y="539">script: helped</text><text class="v" x="1178.0" y="553">AGENTS.md: no effect</text><text class="v" x="1178.0" y="567">$0.237 · 86 s</text><text class="f" x="1178.0" y="587">selection.py:454</text></g><g class="vb"><rect x="976" y="490" width="128" height="104" rx="7"/><text class="t" x="1040.0" y="507">Library</text><text class="m" x="1040.0" y="521">bookkeeping</text><text class="v good" x="1040.0" y="539">new entry: ledger-1</text><text class="v" x="1040.0" y="553">1 script, 299 chars</text><text class="v good" x="1040.0" y="567">EXPERIENCE.md</text><text class="f" x="1040.0" y="587">library.py:106</text></g><g class="vb"><rect x="562" y="490" width="128" height="104" rx="7"/><text class="t" x="626.0" y="507">summary.json</text><text class="m" x="626.0" y="521">+ scores.json</text><text class="v" x="626.0" y="539">R = 4 runs, P = 3</text><text class="v" x="626.0" y="553">base1 0 → c1 1</text><text class="v" x="626.0" y="567">$1.21 for ledger-1</text><text class="f" x="626.0" y="587">schedule.py:289</text></g><path class="ed2" d="M74.0 140 V232" marker-end="url(#ah2)"/><path class="ed2" d="M138 288.0 C142 288 142 248.0 144 248.0" marker-end="url(#ah2)"/><path class="ed2" d="M276 248.0 H282" marker-end="url(#ah2)"/><path class="ed2" d="M414 248.0 C418 248.0 410 118.0 420 118.0" marker-end="url(#ah2)"/><path class="ed2" d="M552 118.0 H558" marker-end="url(#ah2)"/><path class="ed2" d="M690 118.0 C764.0 118.0 764.0 118.0 764.0 192" marker-end="url(#ah2)"/><path class="ed2" d="M414 248.0 C418 248.0 410 378.0 420 378.0" marker-end="url(#ah2)"/><path class="ed2" d="M552 378.0 H558" marker-end="url(#ah2)"/><path class="ed2" d="M690 378.0 C764.0 378.0 764.0 378.0 764.0 304" marker-end="url(#ah2)"/><path class="ed2" d="M828 248.0 H834" marker-end="url(#ah2)"/><path class="ed2" d="M966 248.0 H990" marker-end="url(#ah2)"/><path class="ed2" d="M1058.0 300 V448 H1178.0 V486" marker-end="url(#ah2)"/><path class="ed2" d="M1114 542.0 H1108" marker-end="url(#ah2)"/><path class="ed2" d="M976 542.0 H694" marker-end="url(#ah2)"/><path class="loop" d="M902.0 196 V44 H212.0 V192" marker-end="url(#ah2)"/><text class="lbl" x="894.0" y="58" text-anchor="end">loop not taken: k = 1, so no round 2 starts from c1</text><path class="ed2 l2c" d="M1040.0 594 V622 H74.0 V344" marker-end="url(#ah2)"/><text class="lbl" x="84.0" y="616">next task ledger-2: starts again from H₀; its INV editor gets library/ledger-1 and cites its EXPERIENCE.md</text><rect class="gr" x="10" y="636" width="1232" height="40" rx="8"/><text class="lbl" x="22" y="660">Grader in run.py (after the method): want "Total: 85.15" —</text><text class="v bad" x="430" y="660" text-anchor="start">base1 "Total: 105.25" → score 0</text><text class="v good" x="640" y="660" text-anchor="start">c1 "Total: 85.15" → score 1</text></svg></div>
 <div class="legend"><span><i style="border-color:#fb923c"></i>wrong total or bug</span><span><i style="border-color:#4ade80"></i>correct total or good result</span><span>Costs: API prices reported by the CLI, paid by the subscription</span></div></div>
 <p class="sub">Sources in <code>project9/evidence/</code>: answers in <code>executions/*/ledger-1/*/workspace/answer.txt</code>; run costs and times in the last line of each <code>stream.jsonl</code>; session costs and times in <code>audit/*.meta.json</code>; edits in <code>runs/p9-cc-seq1/ledger-1/harnesses/</code>; R, P and the selection in <code>runs/p9-cc-agg1/ledger-1/summary.json</code>; the reflector verdicts in <code>library/k1/seq/bookkeeping/harnesses/ledger-1/EXPERIENCE.md</code>. The $1.21 total is $0.137 for 4 runs and $1.071 for 4 sessions.</p>
 
-<h2 id="table">All steps in one table</h2>
-<p>The same 17 steps as the animation. Line numbers are in the installed package at commit <code>1cfe254</code> (<code>harness2/core/…</code>) and in this repository (<code>project9/…</code>).</p>
+<h2 id="table">All steps in two tables</h2>
+<p>The same 17 steps as each animation. Line numbers are in the installed package at commit <code>1cfe254</code> (<code>harness2/core/…</code>) and in this repository (<code>project9/…</code>).</p>
+<h3>Animation 1, run t1</h3>
 <div class="tw"><table id="steps"><thead><tr><th>#</th><th>Step</th><th>Level</th><th>harness2 code</th><th>Paper stage</th><th>Harness files</th><th>Time</th><th>Est. cost</th></tr></thead><tbody></tbody></table></div>
+<h3>Animation 2, run live, task ledger-1</h3>
+<div class="tw"><table id="steps-live"><thead><tr><th>#</th><th>Step</th><th>Level</th><th>harness2 code</th><th>Paper stage</th><th>Harness files</th><th>Time</th><th>Est. cost</th></tr></thead><tbody></tbody></table></div>
 
 <h2 id="limits">What the record does not show</h2>
 <ul>
 <li><b>Tool calls inside the sessions.</b> The editor, composer and reflector sessions run with <code>--output-format json</code>. The record keeps each session's mission (<code>*.mission.md</code>), reply (<code>*.response.md</code>), duration and cost, but not the tool calls inside it. The 4 task runs use <code>stream-json</code>, so their tool calls are complete.</li>
-<li><b>Exact start times.</b> The record has end times (file write times) and durations, not start times. The run start, ≈ 08:15:34, is the end time minus the 2 min 37 s total, which includes the <code>uv</code> start-up.</li>
-<li><b>Level 2 in this run.</b> With one task, the library is written but no editor reads it. Step 17 shows the read from the earlier 3-task run in <code>project9/runs/live/</code>.</li>
-<li><b>The Windows shims.</b> This run was in WSL, so the two Windows shims in <code>adapter.py</code> (<code>fcntl</code> stand-in at line 22, <code>read_tree</code> replacement at line 36) did not run. On native Windows, the <code>read_tree</code> replacement runs in steps 3 and 7, and the <code>fcntl</code> stand-in runs in step 15.</li>
-<li><b>A tie, not a gain.</b> The base run and the final both scored 1. In base1, Haiku did not obey the harness and calculated the total itself. In an earlier live run of the same task, base1 wrote <code>Total: 105.25</code> and scored 0. One run per arm cannot show that the edits made the harness better; the reflector also rated its own confidence "low".</li>
+<li><b>Exact start times.</b> In run t1, the record has end times (file write times) and durations, not start times. The run start, ≈ 08:15:34, is the end time minus the 2 min 37 s total, which includes the <code>uv</code> start-up.</li>
+<li><b>Level 2 in run t1.</b> With one task, the library is written but no editor reads it. Step 17 shows the read from the earlier 3-task run in <code>project9/runs/live/</code>.</li>
+<li><b>The Windows shims.</b> Both runs were in WSL, so the two Windows shims in <code>adapter.py</code> (<code>fcntl</code> stand-in at line 22, <code>read_tree</code> replacement at line 36) did not run. On native Windows, the <code>read_tree</code> replacement runs in steps 3 and 7, and the <code>fcntl</code> stand-in runs in step 15.</li>
+<li><b>Run t1: a tie, not a gain.</b> The base run and the final both scored 1. In base1, Haiku did not obey the harness and calculated the total itself. In run live (animation 2), base1 wrote <code>Total: 105.25</code> and scored 0. One run per arm cannot show that the edits made the harness better; the reflector also rated its own confidence "low".</li>
+<li><b>Run live: a gain on ledger-1 only, from one run per arm.</b> On <code>ledger-2</code> and <code>ledger-3</code>, base1 and c1 both scored 1, and base1 edited the script during the run. A control run with the library off gave the same 6 scores. <a href="https://github.com/az9713/harness2-tutorial/tree/main/project9/evidence"><code>project9/evidence/README.md</code></a> lists these limits.</li>
 </ul>
-<p class="sub">Data: <code>project9/runs/t1/live/</code> (git ignores it; run <code>python run.py --tasks 1 --out runs/t1</code> to make your own). Code: <a href="https://github.com/google-research/harness2/tree/1cfe254e8d25b15f37048c3730134686abe60335">google-research/harness2 at 1cfe254</a>.</p>
+<p class="sub">Data: animation 1 uses <code>project9/runs/t1/live/</code> (git ignores it; run <code>python run.py --tasks 1 --out runs/t1</code> to make your own). Animation 2 uses <code>project9/evidence/</code> (committed). Code: <a href="https://github.com/google-research/harness2/tree/1cfe254e8d25b15f37048c3730134686abe60335">google-research/harness2 at 1cfe254</a>.</p>
 </main>
 <script>
 (function(){
-function box(id,x,y,lines){
-  var w=100,h=56,s='<g class="nd" id="'+id+'"><rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" rx="7"/>';
-  lines.forEach(function(t,i){s+='<text x="'+(x+w/2)+'" y="'+(y+18+i*15)+'" text-anchor="middle"'+(i===0?' class="b"':i===2?' class="f"':'')+'>'+t+'</text>'});
-  return s+'</g>';
-}
-function edge(id,d,c){return '<path class="ed'+(c?' '+c:'')+'" id="'+id+'" d="'+d+'" marker-end="url(#ah)"/>'}
-var g='<defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#64748b"/></marker></defs>';
-g+='<rect class="pnl l1" id="p-l1" x="112" y="30" width="664" height="290" rx="10"/><text class="pt1" x="120" y="22">LEVEL 1 — task-level recursion, inside ONE task (recursion.py): Propose → Probe → Compose</text>';
-g+='<rect class="pnl l2" id="p-l2" x="450" y="330" width="436" height="106" rx="10"/><text class="pt2" x="462" y="348">LEVEL 2 — harnessing-level recursion, ACROSS tasks</text><text class="lbl" x="462" y="363">selection.py, library.py</text>';
-g+=box('n-run',10,30,['run.py','guard, adapter','run.py:98'])+box('n-task',10,150,['run_task','ledger-1','schedule.py:566']);
-g+=box('n-h0',120,150,['H₀','base harness','schedule.py:617'])+box('n-base',230,150,['Reference','base1 · Haiku','schedule.py:430']);
-g+=box('n-inv',340,60,['INV editor','inv1 · Sonnet','recursion.py:483'])+box('n-dom',340,240,['DOM editor','dom1 · Sonnet','recursion.py:483']);
-g+=box('n-pinv',450,60,['Probe run','inv1 · Haiku','recursion.py:518'])+box('n-pdom',450,240,['Probe run','dom1 · Haiku','recursion.py:518']);
-g+=box('n-comp',560,150,['Compose','c1 · Sonnet','recursion.py:541'])+box('n-rc1',670,150,['Composed run','c1 · Haiku','recursion.py:559']);
-g+=box('n-sel',780,150,['Select','trivial, k = 1','selection.py:360']);
-g+=box('n-refl',780,372,['Reflector','Sonnet','selection.py:454'])+box('n-lib',670,372,['Library','bookkeeping','library.py:106'])+box('n-sum',340,372,['summary.json','+ scores.json','schedule.py:289']);
-g+='<text class="ok-t hid" id="v-inv" x="390" y="132" text-anchor="middle">✓ validated</text><text class="ok-t hid" id="v-dom" x="390" y="312" text-anchor="middle">✓ validated</text>';
-g+=edge('e-run','M60 86 V146')+edge('e-h0','M110 178 H116')+edge('e-base','M220 178 H226');
-g+=edge('e-inv','M330 170 C334 170 332 88 336 88')+edge('e-dom','M330 186 C334 186 332 268 336 268');
-g+=edge('e-pinv','M440 88 H446')+edge('e-pdom','M440 268 H446');
-g+=edge('e-ci','M550 88 C580 88 610 104 610 146')+edge('e-cd','M550 268 C580 268 610 252 610 210');
-g+=edge('e-rc1','M660 178 H666')+edge('e-sel','M770 178 H776')+edge('e-refl','M830 206 V368');
-g+=edge('e-lib','M780 400 H774')+edge('e-sum','M670 400 H444');
-g+='<path class="loop" id="e-l1" d="M720 150 V44 H170 V146" marker-end="url(#ah)"/><text class="lbl" x="712" y="58" text-anchor="end">loop: round t + 1 starts from cₜ (k ≥ 2) — this run: k = 1, 1 round</text>';
-g+=edge('e-l2','M720 428 V452 H60 V212','l2')+'<text class="lbl" id="l2-t" x="80" y="447">loop: the next task (ledger-2) starts again from H₀, and its editors get a copy of the library</text>';
-g+='<rect class="gr" x="10" y="462" width="876" height="38" rx="8"/><text class="lbl" x="22" y="485">Grader in run.py — runs after the method; no harness2 step sees it</text>';
-g+='<text class="score hid" id="sc-b" x="470" y="486">base1: Total: 85.15 → 1</text><text class="score hid" id="sc-c" x="690" y="486">c1: Total: 85.15 → 1</text>';
-g+='<g class="ln" id="ln-exec"><rect x="10" y="512" width="432" height="40" rx="7"/><text x="22" y="536">adapter.execute() → claude -p --model haiku (task runs)</text></g>';
-g+='<g class="ln" id="ln-sess"><rect x="454" y="512" width="432" height="40" rx="7"/><text x="466" y="536">ClaudeProposer._claude_cli → claude -p, Sonnet (sessions)</text></g>';
-var R=document.getElementById('replay');R.querySelector('svg').innerHTML=g;
+// Box content per node: [title, second line, value lines, code line]. A value line that starts with ! is wrong (orange), with + is correct (green).
+var V1={
+run:['run.py','guard, adapter',['python run.py --tasks 1','1 task, k = 1, seq','+guard: none set'],'run.py:98'],
+task:['run_task','ledger-1',['100.25, −20.10, 5.00','want: Total: 85.15','domain: bookkeeping'],'schedule.py:566'],
+h0:['H₀','base harness',['AGENTS.md: run the','script, do not compute','!script sums &gt; 0 only'],'schedule.py:617'],
+base:['Reference','base1 · Haiku',['!H₀ script: 105.25','+wrote Total: 85.15','$0.0043 · 15.7 s'],'schedule.py:430'],
+inv:['INV editor','inv1 · Sonnet',['AGENTS.md: 7 → 8','script: 8 → 59','$0.0962 · 32.8 s'],'recursion.py:483'],
+dom:['DOM editor','dom1 · Sonnet',['AGENTS.md: 7 → 10','script: 8 → 18','$0.0922 · 23.0 s'],'recursion.py:483'],
+pinv:['Probe run','inv1 · Haiku',['ran the inv1 script','+Total: 85.15','$0.0038 · 10.4 s'],'recursion.py:518'],
+pdom:['Probe run','dom1 · Haiku',['ran the dom1 script','+Total: 85.15','$0.0038 · 9.3 s'],'recursion.py:518'],
+comp:['Compose','c1 · Sonnet',['AGENTS.md: 10 lines','script: 60 lines','$0.1179 · 31.4 s'],'recursion.py:541'],
+rc1:['Composed run','c1 · Haiku',['ran the c1 script','+Total: 85.15','$0.0042 · 11.3 s'],'recursion.py:559'],
+sel:['Select','trivial, k = 1',['pool: c1 only','+chose c1','no session, $0'],'selection.py:360'],
+refl:['Reflector','Sonnet',['both files: confounded','confidence: low','$0.1416 · 32.3 s'],'selection.py:454'],
+lib:['Library','bookkeeping',['+new entry ledger-1','1 script, 1,059 chars','+EXPERIENCE.md'],'library.py:106'],
+sum:['summary.json','+ scores.json',['R = 4 runs, P = 3','base1 1 → c1 1','$0.46 for ledger-1'],'schedule.py:289'],
+scb:['good','base1 "Total: 85.15" → score 1'],scc:['good','c1 "Total: 85.15" → score 1'],
+l2:'loop (not in run t1, which has 1 task): the next task starts again from H₀, and its editors get a copy of the library'};
+var V2=Object.assign({},V1,{
+run:['run.py','driver, adapter',['python run.py','3 tasks, k = 1, seq','+apiKeySource: none'],'run.py:118'],
+base:['Reference','base1 · Haiku',['ran the H₀ script','!Total: 105.25','$0.041 · 15.1 s'],'schedule.py:430'],
+inv:['INV editor','inv1 · Sonnet',['rewrote summarize.py:','signs, ( ), void rows','$0.313 · 174 s'],'recursion.py:483'],
+dom:['DOM editor','dom1 · Sonnet',['same fix, same file','(byte-equal to inv1)','$0.279 · 132 s'],'recursion.py:483'],
+pinv:['Probe run','inv1 · Haiku',['ran the inv1 script','+Total: 85.15','$0.025 · 9.0 s'],'recursion.py:518'],
+pdom:['Probe run','dom1 · Haiku',['ran the dom1 script','+Total: 85.15','$0.024 · 8.9 s'],'recursion.py:518'],
+comp:['Compose','c1 · Sonnet',['kept the script fix','AGENTS.md unchanged','$0.241 · 77 s'],'recursion.py:541'],
+rc1:['Composed run','c1 · Haiku',['ran the c1 script','+Total: 85.15','$0.047 · 21.6 s'],'recursion.py:559'],
+refl:['Reflector','Sonnet',['script: helped','AGENTS.md: no effect','$0.237 · 86 s'],'selection.py:454'],
+lib:['Library','bookkeeping',['+new entry ledger-1','1 script, 299 chars','+EXPERIENCE.md'],'library.py:106'],
+sum:['summary.json','+ scores.json',['R = 4 runs, P = 3','base1 0 → c1 1','$1.21 for ledger-1'],'schedule.py:289'],
+scb:['bad','base1 "Total: 105.25" → score 0'],
+l2:'loop: the next task, ledger-2, starts again from H₀; its INV editor gets library/ledger-1 and cites its EXPERIENCE.md'});
 
 var S=[
 {t:'Start the driver',n:['run'],
@@ -264,41 +310,115 @@ code:'<code>schedule.py:701</code> retain · <code>schedule.py:499</code> mode_l
 stage:'Level 2: editors read 𝓡₂',comp:'Library copy of ledger-1 <code>AGENTS.md</code>, <code>scripts/summarize.py</code>, <code>EXPERIENCE.md</code>',time:'Earlier run (runs/live)',cost:'In that run'}
 ];
 
+// Run live, task ledger-1: the fields that differ from run t1. Source: project9/evidence/.
+var L=[
+{cap:'You start <code>run.py</code> in WSL with no options, so it runs all 3 tasks: <code>ledger-1</code>, <code>ledger-2</code>, <code>ledger-3</code>. The billing guard was committed on 2026-10-25, after this run, so this step has no guard. All 12 task runs report <code>"apiKeySource": "none"</code>, the Claude subscription login. <code>ClaudeProposer</code> becomes the editor channel, and it keeps a record of each session in <code>audit/</code>.',
+ex:'$ python run.py\n\n3 tasks: ledger-1, ledger-2, ledger-3 · k = 1 · sequential · library on',
+code:'<code>project9/run.py:105</code> LedgerAdapter · <code>run.py:107</code> ClaudeProposer · <code>run.py:118</code> calls run_domain',time:'2026-10-24; the first task run ended at 21:26'},
+{time:'—'},
+{time:'—'},
+{cap:'<code>_roll_bases</code> calls <code>adapter.execute</code> with no harness folder, so it uses H₀. <code>_workspace</code> copies the ledger, copies <code>AGENTS.md</code> to <code>CLAUDE.md</code>, and copies <code>scripts/</code>. Claude Code (Haiku) gets the task prompt. Haiku obeyed <code>AGENTS.md</code>: it ran the script, which printed 105.25, and wrote that line to <code>answer.txt</code> without a check. Its first Read call failed because Haiku gave the tool a parameter that it does not have, so Haiku made the call again.',
+ex:'[ACTION] Bash  ls -la\n[ACTION] Read ledger.csv   (failed: unexpected parameter `description`)\n[ACTION] Read ledger.csv\n[OBSERVATION] amount,status | 100.25,posted | -20.10,posted | 5.00,posted\n[ACTION] Bash  python3 scripts/summarize.py ledger.csv\n[OBSERVATION] Total: 105.25\n[ACTION] Write answer.txt  "Total: 105.25"\n[ACTION] message: Done. The script computed the ledger total as `105.25` and I wrote\n  the result to `answer.txt`.',
+time:'15.1 s · 6 turns',cost:'$0.0414'},
+{time:'—'},
+{cap:'Two Sonnet sessions run at the same time, one for each scope. INV looks at how the agent worked. DOM looks at what a bookkeeper knows. Both found the same moment in base1: the agent obeyed <code>AGENTS.md</code> and copied the wrong script output. Both rewrote <code>scripts/summarize.py</code> and left <code>AGENTS.md</code> as in H₀. The two new scripts are byte-equal, although neither session saw the other.',
+ex:'inv1 notes: "in `context/rollouts/base1.md`, the agent follows AGENTS.md exactly — … runs\n  `python3 scripts/summarize.py ledger.csv`, gets `Total: 105.25`, and writes that\n  straight to `answer.txt` without question"\n\ndom1 notes: "the agent followed AGENTS.md exactly — ran `scripts/summarize.py ledger.csv`,\n  got `Total: 105.25`, and wrote it verbatim to `answer.txt`"\n\nAGENTS.md:            7 → 7 lines (inv1 and dom1, byte-equal to H₀)\nscripts/summarize.py: 8 → 21 lines (inv1 and dom1, byte-equal)',
+comp:'<code>scripts/summarize.py</code> (changed) · <code>AGENTS.md</code> (not changed)',time:'inv1 173.9 s; dom1 132.3 s',cost:'$0.3131 + $0.2794'},
+{time:'—'},
+{cap:'<code>_roll_many</code> writes each candidate to <code>harnesses/inv1</code> and <code>harnesses/dom1</code>, and runs each one once with Haiku on the same task. Each run called its script once and wrote the output line to <code>answer.txt</code>. Both wrote 85.15.',
+ex:'inv1  [ACTION] Bash  python3 scripts/summarize.py ledger.csv\n      [OBSERVATION] Total: 85.15\n      [ACTION] Write answer.txt  "Total: 85.15"\n\ndom1  [ACTION] Bash  python3 scripts/summarize.py ledger.csv\n      [OBSERVATION] Total: 85.15\n      [ACTION] Write answer.txt  "Total: 85.15"',
+time:'inv1 9.0 s · 3 turns; dom1 8.9 s · 3 turns',cost:'$0.0248 + $0.0244'},
+{cap:'A third Sonnet session gets the base run, both candidates (harness, diff and run) in <code>context/c1/pool/</code>, and both editors\' notes in <code>context/c1/decisions/</code>. At k = 1 its job is the aggregate prompt. The two candidates had the same script, so it adopted that script and kept <code>AGENTS.md</code> as in H₀.',
+ex:'adopted -> fix scripts/summarize.py (identical in both inv1 and dom1 candidates)\n  -> context/rollouts/base1.md: agent follows AGENTS.md\'s "Do not compute the total\n     yourself. The script is the house method." instruction exactly, runs the old\n     script, gets `Total: 105.25`, and writes it verbatim to answer.txt\nkept -> AGENTS.md\'s "run the script, don\'t hand-compute, write it verbatim" procedure\nkept -> no skill/subagent/hook added',
+comp:'<code>AGENTS.md</code>: 7 lines, as in H₀ · <code>scripts/summarize.py</code>: 21 lines, byte-equal to inv1 and dom1',time:'76.8 s',cost:'$0.2414'},
+{cap:'<code>_roll</code> runs c1 once. Haiku listed the folder, read the ledger and the script, ran the script and wrote its output. Two Read calls failed with <code>EISDIR</code>, because Haiku tried to read a folder as a file. This run is the deliverable of the task.',
+ex:'[ACTION] Read workspace             (failed: EISDIR, a folder)\n[ACTION] Bash  ls -la workspace\n[ACTION] Read ledger.csv\n[ACTION] Read scripts               (failed: EISDIR, a folder)\n[ACTION] Bash  ls -la scripts\n[ACTION] Read scripts/summarize.py\n[ACTION] Bash  python3 scripts/summarize.py ledger.csv\n[OBSERVATION] Total: 85.15\n[ACTION] Write answer.txt  "Total: 85.15"',
+time:'21.6 s · 9 turns',cost:'$0.0467'},
+{cap:'The ledger counts runs and sessions. It asserts R = 4k and P = 3k. Here k = 1, so R = 4 (base1, inv1, dom1, c1) and P = 3 (inv1, dom1, c1). The reflector session is not in this count. The ledger records <code>rollout_usd: 0.0</code>: it does not count the cost that Claude Code reports for the task runs.',
+ex:'{"R": 4, "expected_R": 4, "P": 3, "expected_P": 3,\n "rollouts": ["base1", "inv1", "dom1", "c1"],\n "sessions": ["inv1", "dom1", "c1"], "session_usd": 0.834003, "rollout_usd": 0.0}',time:'—'},
+{time:'—'},
+{cap:'<code>reflect_adoption</code> builds a new evidence folder, <code>reflection/seq1/</code>, with the chosen harness, the base harness, all four runs and the notes. A fourth Sonnet session, the Experience Reflector, gives each changed file a verdict and writes one lesson. It rated the script "helped" and <code>AGENTS.md</code> "no observed effect". Its confidence was "high", because the script was the only file that changed between the wrong run and the correct runs.',
+ex:'scripts/summarize.py   verdict: helped\nAGENTS.md              verdict: no observed effect\nplaceholder READMEs    verdict: no observed effect\n\nlesson: "before trusting an instruction that tells the agent to defer to a script,\n  read the script itself against the task\'s own stated formula line-by-line … the\n  fix belongs in the script, not in the instruction telling the agent to trust it."\nconfidence: "high — the contrast is a direct before/after on the same script and\n  same ledger input …"',
+time:'86.2 s',cost:'$0.2370'},
+{ex:'## `harnesses/ledger-1/`\n- harness: `harnesses/ledger-1/harness/` — 1 scripts; 299 always-on chars\n- why:     `harnesses/ledger-1/EXPERIENCE.md`\n- cue:     a harness instructs the agent to trust and transcribe the output of an\n           owned deterministic script …',time:'—'},
+{cap:'<code>_write_summary</code> writes <code>summary.json</code> with the stages, the ledger and the selection, under a file lock. <code>run_domain</code> prints the task status and goes on to <code>ledger-2</code>.',
+ex:'runs/p9-cc-agg1/ledger-1/summary.json   status: ok\n  [bookkeeping] 1/3 ok           ledger-1',time:'—'},
+{cap:'After all 3 tasks, <code>run.py</code> reads each <code>summary.json</code> and scores the base run and the final with <code>adapter.score</code>. This grader is in <code>project9/</code>, not in harness2, and no harness2 step saw it. base1 wrote 105.25 and scored 0. c1 wrote 85.15 and scored 1.',
+ex:'ledger-1  base1                  score 0   got Total: 105.25\nledger-1  seq final (c1)         score 1   got Total: 85.15',time:'After all 3 tasks; the last file was written at 21:46'},
+{cap:'This step is part of this run. For task 2, <code>run_domain</code> calls <code>retain(["ledger-1"])</code>, and <code>context.build</code> copies the library into each editor\'s folder as <code>context/library/</code>. The ledger-2 INV editor opened the ledger-1 lesson and used it. Task 2 starts again from H₀ (<code>schedule.py:617</code>), not from the c1 harness of ledger-1.',
+time:'Task ledger-2',cost:'In task ledger-2'}
+];
+var S2=S.map(function(s,j){return Object.assign({},s,L[j])});
+
 var LV=[0,2,1,1,1,1,1,1,1,1,1,1,2,2,0,0,2];
 var LVT=['Neither (driver or record)','<b style="color:#2dd4bf">Level 1</b>: task-level recursion, inside task ledger-1 (round 1 of k = 1)','<b style="color:#fb923c">Level 2</b>: harnessing-level recursion, across the tasks of one domain'];
 var NODES=['run','task','h0','base','inv','dom','pinv','pdom','comp','rc1','sel','refl','lib','sum'];
 var EDGES=['run','h0','base','inv','dom','pinv','pdom','ci','cd','rc1','sel','refl','lib','sum','l2'];
-function cls(id,c){var e=document.getElementById(id);e.classList.remove('on','now','hid','act');if(c)e.classList.add(c)}
-function render(i){
-  var s=S[i],seenN={},seenE={};
-  for(var j=0;j<i;j++){(S[j].n||[]).forEach(function(k){seenN[k]=1});(S[j].e||[]).forEach(function(k){seenE[k]=1})}
-  NODES.forEach(function(k){cls('n-'+k,s.n.indexOf(k)>=0?'now':seenN[k]?'on':'')});
-  EDGES.forEach(function(k){var now=(s.e||[]).indexOf(k)>=0;cls('e-'+k,now?'now':seenE[k]&&k!=='l2'?'on':'')});
-  var lv=LV[i];cls('p-l1',lv===1?'act':'');cls('p-l2',lv===2?'act':'');document.getElementById('s-level').innerHTML=LVT[lv];
-  var val=i>=6&&i<16;cls('v-inv',val?'':'hid');cls('v-dom',val?'':'hid');
-  cls('sc-b',i===15?'':'hid');cls('sc-c',i===15?'':'hid');
-  cls('ln-exec',s.lane==='exec'?'now':'');cls('ln-sess',s.lane==='sess'?'now':'');
-  document.getElementById('s-title').textContent=(i+1)+'. '+s.t;
-  document.getElementById('s-cap').innerHTML=s.cap;
-  document.getElementById('s-ex').textContent=s.ex;
-  ['code','stage','comp','time','cost'].forEach(function(k){document.getElementById('s-'+k).innerHTML=s[k]});
-}
-var i=0,tm=null,ct=R.querySelector('.ct'),pl=R.querySelector('[data-a=play]'),n=S.length;
-function go(j){i=Math.max(0,Math.min(n-1,j));render(i);ct.textContent='Step '+(i+1)+' of '+n}
-function stop(){clearInterval(tm);tm=null;pl.textContent='▶ Play'}
-R.querySelector('.ctrl').addEventListener('click',function(e){
-  var a=e.target.getAttribute('data-a');if(!a)return;
-  if(a==='play'){
-    if(tm){stop();return}
-    if(i>=n-1)go(0);
-    pl.textContent='❚❚ Pause';
-    tm=setInterval(function(){if(i>=n-1){stop();return}go(i+1)},5000);
-  }else{stop();go(a==='next'?i+1:a==='prev'?i-1:0)}
-});
-go(0);
+// Layout: 9 columns, boxes 128 x 104 (same as the static picture in #values).
+var W=128,H=104,T=66,M=196,B=326,X=[0,1,2,3,4,5,6,7,8].map(function(k){return 10+k*138}),SEL=X[7]+18;
+function replay(R,P,S,V,tb){
+  function box(k,x,y){
+    var v=V[k],cx=x+W/2,s='<g class="nd" id="'+P+'n-'+k+'"><rect x="'+x+'" y="'+y+'" width="'+W+'" height="'+H+'" rx="7"/>';
+    s+='<text class="b" x="'+cx+'" y="'+(y+17)+'">'+v[0]+'</text><text x="'+cx+'" y="'+(y+31)+'">'+v[1]+'</text>';
+    v[2].forEach(function(t,j){var m={'!':' bad','+':' good'}[t[0]]||'';if(m)t=t.slice(1);s+='<text class="v'+m+'" x="'+cx+'" y="'+(y+49+j*14)+'">'+t+'</text>'});
+    return s+'<text class="f" x="'+cx+'" y="'+(y+H-7)+'">'+v[3]+'</text></g>';
+  }
+  function edge(k,d,c){return '<path class="ed'+(c?' '+c:'')+'" id="'+P+'e-'+k+'" d="'+d+'" marker-end="url(#'+P+'ah)"/>'}
+  var g='<defs><marker id="'+P+'ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#64748b"/></marker></defs>';
+  g+='<rect class="pnl l1" id="'+P+'p-l1" x="'+(X[1]-8)+'" y="34" width="'+(X[6]+W-X[1]+16)+'" height="406" rx="10"/><text class="pt1" x="'+X[1]+'" y="26">LEVEL 1 — inside one task: Propose → Probe → Compose (k = 1, 1 round)</text>';
+  g+='<rect class="pnl l2" id="'+P+'p-l2" x="'+(X[6]-8)+'" y="456" width="'+(X[8]+W-X[6]+16)+'" height="150" rx="10"/><text class="pt2" x="'+X[6]+'" y="476">LEVEL 2 — across tasks: reflect, then store in the library</text>';
+  g+=box('run',X[0],T-30)+box('task',X[0],M+40)+box('h0',X[1],M)+box('base',X[2],M)+box('inv',X[3],T)+box('dom',X[3],B)+box('pinv',X[4],T)+box('pdom',X[4],B);
+  g+=box('comp',X[5],M)+box('rc1',X[6],M)+box('sel',SEL,M)+box('refl',X[8],490)+box('lib',X[7],490)+box('sum',X[4],490);
+  g+='<text class="ok-t hid" id="'+P+'v-inv" x="'+(X[3]+W/2)+'" y="186" text-anchor="middle">✓ validated</text><text class="ok-t hid" id="'+P+'v-dom" x="'+(X[3]+W/2)+'" y="318" text-anchor="middle">✓ validated</text>';
+  var my=M+H/2;
+  g+=edge('run','M'+(X[0]+W/2)+' '+(T-30+H)+' V'+(M+36))+edge('h0','M'+(X[0]+W)+' '+(M+92)+' C'+(X[1]-6)+' '+(M+92)+' '+(X[1]-6)+' '+my+' '+(X[1]-4)+' '+my);
+  g+=edge('base','M'+(X[1]+W)+' '+my+' H'+(X[2]-4));
+  [['inv','pinv','ci',T,M-4],['dom','pdom','cd',B,M+H+4]].forEach(function(a){var y=a[3]+H/2;
+    g+=edge(a[0],'M'+(X[2]+W)+' '+my+' C'+(X[3]-6)+' '+my+' '+(X[3]-14)+' '+y+' '+(X[3]-4)+' '+y)+edge(a[1],'M'+(X[3]+W)+' '+y+' H'+(X[4]-4));
+    g+=edge(a[2],'M'+(X[4]+W)+' '+y+' C'+(X[5]+W/2)+' '+y+' '+(X[5]+W/2)+' '+y+' '+(X[5]+W/2)+' '+a[4])});
+  g+=edge('rc1','M'+(X[5]+W)+' '+my+' H'+(X[6]-4))+edge('sel','M'+(X[6]+W)+' '+my+' H'+(SEL-4));
+  g+=edge('refl','M'+(SEL+W/2)+' '+(M+H)+' V448 H'+(X[8]+W/2)+' V486')+edge('lib','M'+X[8]+' 542 H'+(X[7]+W+4))+edge('sum','M'+X[7]+' 542 H'+(X[4]+W+4));
+  g+='<path class="loop" d="M'+(X[6]+W/2)+' '+M+' V44 H'+(X[1]+W/2)+' V'+(M-4)+'" marker-end="url(#'+P+'ah)"/><text class="lbl" x="'+(X[6]+W/2-8)+'" y="58" text-anchor="end">loop: round t + 1 starts from cₜ (k ≥ 2); with k = 1 it is not taken</text>';
+  g+=edge('l2','M'+(X[7]+W/2)+' 594 V622 H'+(X[0]+W/2)+' V'+(M+40+H+4),'l2')+'<text class="lbl" x="'+(X[0]+W/2+10)+'" y="616">'+V.l2+'</text>';
+  g+='<rect class="gr" x="10" y="636" width="'+(X[8]+W-10)+'" height="40" rx="8"/><text class="lbl" x="22" y="660">Grader in run.py — runs after the method; no harness2 step sees it</text>';
+  g+='<text class="v '+V.scb[0]+' hid" id="'+P+'sc-b" x="470" y="660">'+V.scb[1]+'</text><text class="v '+V.scc[0]+' hid" id="'+P+'sc-c" x="740" y="660">'+V.scc[1]+'</text>';
+  g+='<g class="ln" id="'+P+'ln-exec"><rect x="10" y="688" width="612" height="40" rx="7"/><text x="22" y="712">adapter.execute() → claude -p --model haiku (task runs)</text></g>';
+  g+='<g class="ln" id="'+P+'ln-sess"><rect x="634" y="688" width="612" height="40" rx="7"/><text x="646" y="712">ClaudeProposer._claude_cli → claude -p, Sonnet (sessions)</text></g>';
+  R.querySelector('svg').innerHTML=g;
 
-var tb=document.querySelector('#steps tbody');
-S.forEach(function(s,j){var tr=document.createElement('tr');tr.innerHTML='<td>'+(j+1)+'</td><td>'+s.t+'</td><td>'+['—','1','2'][LV[j]]+'</td><td>'+s.code+'</td><td>'+s.stage+'</td><td>'+s.comp+'</td><td>'+s.time+'</td><td>'+s.cost+'</td>';tb.appendChild(tr)});
+  function cls(id,c){var e=document.getElementById(P+id);e.classList.remove('on','now','hid','act');if(c)e.classList.add(c)}
+  function f(k){return R.querySelector('.s-'+k)}
+  function render(i){
+    var s=S[i],seenN={},seenE={};
+    for(var j=0;j<i;j++){(S[j].n||[]).forEach(function(k){seenN[k]=1});(S[j].e||[]).forEach(function(k){seenE[k]=1})}
+    NODES.forEach(function(k){cls('n-'+k,s.n.indexOf(k)>=0?'now':seenN[k]?'on':'')});
+    EDGES.forEach(function(k){var now=(s.e||[]).indexOf(k)>=0;cls('e-'+k,now?'now':seenE[k]&&k!=='l2'?'on':'')});
+    var lv=LV[i];cls('p-l1',lv===1?'act':'');cls('p-l2',lv===2?'act':'');f('level').innerHTML=LVT[lv];
+    var val=i>=6&&i<16;cls('v-inv',val?'':'hid');cls('v-dom',val?'':'hid');
+    cls('sc-b',i===15?'':'hid');cls('sc-c',i===15?'':'hid');
+    cls('ln-exec',s.lane==='exec'?'now':'');cls('ln-sess',s.lane==='sess'?'now':'');
+    f('title').textContent=(i+1)+'. '+s.t;
+    f('cap').innerHTML=s.cap;
+    f('ex').textContent=s.ex;
+    ['code','stage','comp','time','cost'].forEach(function(k){f(k).innerHTML=s[k]});
+  }
+  var i=0,tm=null,ct=R.querySelector('.ct'),pl=R.querySelector('[data-a=play]'),n=S.length;
+  function go(j){i=Math.max(0,Math.min(n-1,j));render(i);ct.textContent='Step '+(i+1)+' of '+n}
+  function stop(){clearInterval(tm);tm=null;pl.textContent='▶ Play'}
+  R.querySelector('.ctrl').addEventListener('click',function(e){
+    var a=e.target.getAttribute('data-a');if(!a)return;
+    if(a==='play'){
+      if(tm){stop();return}
+      if(i>=n-1)go(0);
+      pl.textContent='❚❚ Pause';
+      tm=setInterval(function(){if(i>=n-1){stop();return}go(i+1)},5000);
+    }else{stop();go(a==='next'?i+1:a==='prev'?i-1:0)}
+  });
+  go(0);
+  S.forEach(function(s,j){var tr=document.createElement('tr');tr.innerHTML='<td>'+(j+1)+'</td><td>'+s.t+'</td><td>'+['—','1','2'][LV[j]]+'</td><td>'+s.code+'</td><td>'+s.stage+'</td><td>'+s.comp+'</td><td>'+s.time+'</td><td>'+s.cost+'</td>';tb.appendChild(tr)});
+}
+replay(document.getElementById('replay'),'a-',S,V1,document.querySelector('#steps tbody'));
+replay(document.getElementById('replay-live'),'b-',S2,V2,document.querySelector('#steps-live tbody'));
 })();
 </script>
 </body>
